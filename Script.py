@@ -150,14 +150,14 @@ Tᴏᴛᴀʟ : {}
 
     SHARE_BUTTON_TEXT = """Checkout {username} for searching files"""
     
-    OWNER_INFO = """
+    MORE_BOTS = """
 <b>⍟───[ ᴍᴏʀᴇ ʙᴏᴛꜱ ]───⍟
     
-• ᴍʏ ɴᴀᴍᴇ : <a href=https://t.me/{}>{}</a>
-• ʙᴏᴛ ᴛᴡᴏ : <a href="https://t.me/Movies_Hole_Robot">Movies Hole Bot</a>
-• ʙᴏᴛ ᴛʜʀᴇᴇ : <a href='https://t.me/iPopkonBot'>iPapkornBot</a></b>
-• ʙᴏᴛ ꜰᴏᴜʀ : <a href='https://t.me/HDCinemasBot'>HDCinemasBot</a></b>
-• ʙᴏᴛ ꜰɪꜰᴛʜ : <a href='https://t.me/TrueDealsMasterBot'>TrueDealsMasterBot</a></b>"""
+• ᴍʏ ɴᴀᴍᴇ : <a href=https://t.me/PremiumMHBot?start</a>
+• ʙᴏᴛ ᴛᴡᴏ : <a href="https://t.me/Movies_Hole_Robot">Movies Hole Bot?start</a>
+• ʙᴏᴛ ᴛʜʀᴇᴇ : <a href='https://t.me/iPopkonBot'>iPapkornBot?start</a>
+• ʙᴏᴛ ꜰᴏᴜʀ : <a href='https://t.me/HDCinemasBot'>HDCinemasBot?start</a>
+• ʙᴏᴛ ꜰɪꜰᴛʜ : <a href='https://t.me/TrueDealsMasterBot'>TrueDealsMasterBot?start</a>"""
 
     SHARE_BUTTON_TEXT = """Checkout {username} for searching files"""
     
