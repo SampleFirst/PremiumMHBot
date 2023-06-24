@@ -26,7 +26,7 @@ async def start(client, message):
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
+                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
                 InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
@@ -61,7 +61,7 @@ async def start(client, message):
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
+                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
                 InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
@@ -115,7 +115,7 @@ async def start(client, message):
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
+                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
                 InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
