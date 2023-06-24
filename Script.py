@@ -153,11 +153,11 @@ Tᴏᴛᴀʟ : {}
     MORE_BOTS = """
 <b>⍟───[ ᴍᴏʀᴇ ʙᴏᴛꜱ ]───⍟
     
-• ᴍʏ ɴᴀᴍᴇ : <a href=https://t.me/PremiumMHBot?start</a>
-• ʙᴏᴛ ᴛᴡᴏ : <a href="https://t.me/Movies_Hole_Robot">Movies Hole Bot?start</a>
-• ʙᴏᴛ ᴛʜʀᴇᴇ : <a href='https://t.me/iPopkonBot'>iPapkornBot?start</a>
-• ʙᴏᴛ ꜰᴏᴜʀ : <a href='https://t.me/HDCinemasBot'>HDCinemasBot?start</a>
-• ʙᴏᴛ ꜰɪꜰᴛʜ : <a href='https://t.me/TrueDealsMasterBot'>TrueDealsMasterBot?start</a>"""
+• ᴍʏ ɴᴀᴍᴇ : <a href="https://t.me/PremiumMHBot?start">PremiumMHBot</a>
+• ʙᴏᴛ ᴛᴡᴏ : <a href="https://t.me/Movies_Hole_Robot?start">Movies Hole Bot</a>
+• ʙᴏᴛ ᴛʜʀᴇᴇ : <a href="https://t.me/iPopkonBot?start">iPapkornBot</a>
+• ʙᴏᴛ ꜰᴏᴜʀ : <a href="https://t.me/HDCinemasBot?start">HDCinemasBot</a>
+• ʙᴏᴛ ꜰɪꜰᴛʜ : <a href="https://t.me/TrueDealsMasterBot?start">TrueDealsMasterBot</a>"""
 
     SHARE_BUTTON_TEXT = """Checkout {username} for searching files"""
     
