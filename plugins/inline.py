@@ -3,6 +3,7 @@ from pyrogram import Client, emoji, filters
 from pyrogram.errors.exceptions.bad_request_400 import QueryIdInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
 from database.ia_filterdb import get_search_results
+from Script import script
 from utils import is_subscribed, get_size, temp
 from info import CACHE_TIME, AUTH_USERS, AUTH_CHANNEL, CUSTOM_FILE_CAPTION
 from database.connections_mdb import active_connection
@@ -104,14 +105,15 @@ async def answer(bot, query):
                            switch_pm_parameter="okay")
 
 
-def get_reply_markup(query):
+def get_reply_markup(username, query):
+    url = 't.me/share/url?url=' + quote(SHARE_BUTTON_TEXT.format(username=username))
     buttons = [
         [
             InlineKeyboardButton('Search again', switch_inline_query_current_chat=query)
+        ],
+        [
+            InlineKeyboardButton('Share bot', url=url)
         ]
-        ]
+    ]
     return InlineKeyboardMarkup(buttons)
-
-
-
 
