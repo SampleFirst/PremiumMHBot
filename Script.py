@@ -206,6 +206,25 @@ Tᴏᴛᴀʟ : {}
 
 </b>"""
 
+    FILE_MSG = """
+<b>👋 Hai {} </b>
+
+<b>📫 Your File is Ready</b>
+
+<b>📂 Fɪʟᴇ Nᴀᴍᴇ</b> : <code>{}</code>              
+                       
+<b>⚙️ Fɪʟᴇ Sɪᴢᴇ</b> : <b>{}</b>
+"""
+    CHANNEL_CAP = """
+<b>👋 Hai {}</b>
+
+<code>{}</code>
+
+⚠️ <b>This file will be deleted from here within 10 minute as it has copyright ... !!!</b>
+
+<b>© Powered by {}</b>
+"""
+    
     IMDB_TEMPLATE_TXT = """
 <b>Query: {query}
 IMDb Data:
