@@ -803,10 +803,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(btn)
             )
             return
-        await client.send_cached_media(
-            chat_id=query.from_user.id,
+        file_send=await client.send_cached_media(
+            chat_id=FILE_CHANNEL,
             file_id=file_id,
-            caption=f_caption,
+            caption=script.CHANNEL_CAP.format(query.from_user.mention, title, query.message.chat.title),
             protect_content=true if ident == 'checksubp' else false,
                         reply_markup=inlinekeyboardmarkup(
                             [
