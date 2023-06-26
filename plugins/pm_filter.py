@@ -807,18 +807,32 @@ async def cb_handler(client: Client, query: CallbackQuery):
             chat_id=query.from_user.id,
             file_id=file_id,
             caption=f_caption,
-            protect_content=True if ident == 'checksubp' else False,
-            reply_markup=InlineKeyboardMarkup(
-                [
-                 [
-                  InlineKeyboardButton('Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ', url=GRP_LNK),
-                  InlineKeyboardButton('Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ', url=CHNL_LNK)
-               ],[
-                  InlineKeyboardButton("Bᴏᴛ Oᴡɴᴇʀ", url="t.me/creatorbeatz")
-                 ]
-                ]
-            )
-        )
+            protect_content=true if ident == 'checksubp' else false,
+                        reply_markup=inlinekeyboardmarkup(
+                            [
+                                [
+                                    inlinekeyboardbutton("🔥 ᴄʜᴀɴɴᴇʟ 🔥", url=(main_channel))
+                                ]
+                            ]
+                        )
+                    )
+                    joel_tgx = await query.message.reply_text(
+                        script.file_msg.format(query.from_user.mention, title, size),
+                        parse_mode=enums.parsemode.html,
+                        reply_markup=inlinekeyboardmarkup(
+                            [
+                             [
+                              inlinekeyboardbutton('📥 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽 𝖫𝗂𝗇𝗄 📥 ', url = file_send.link)
+                           ],[
+                              inlinekeyboardbutton("⚠️ 𝖢𝖺𝗇'𝗍 𝖠𝖼𝖼𝖾𝗌𝗌 ❓ 𝖢𝗅𝗂𝖼𝗄 𝖧𝖾𝗋𝖾 ⚠️", url=(file_forward))
+                             ]
+                            ]
+                        )
+                    )
+                    if settings['auto_delete']:
+                        await asyncio.sleep(600)
+                        await joel_tgx.delete()
+                        await file_send.delete()
     elif query.data == "pages":
         await query.answer()
 
