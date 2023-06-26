@@ -816,23 +816,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
                             ]
                         )
                     )
-                    joel_tgx = await query.message.reply_text(
-                        script.file_msg.format(query.from_user.mention, title, size),
-                        parse_mode=enums.parsemode.html,
-                        reply_markup=inlinekeyboardmarkup(
-                            [
-                             [
-                              inlinekeyboardbutton('📥 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽 𝖫𝗂𝗇𝗄 📥 ', url = file_send.link)
-                           ],[
-                              inlinekeyboardbutton("⚠️ 𝖢𝖺𝗇'𝗍 𝖠𝖼𝖼𝖾𝗌𝗌 ❓ 𝖢𝗅𝗂𝖼𝗄 𝖧𝖾𝗋𝖾 ⚠️", url=(file_forward))
-                             ]
-                            ]
-                        )
-                    )
-                    if settings['auto_delete']:
-                        await asyncio.sleep(600)
-                        await joel_tgx.delete()
-                        await file_send.delete()
     elif query.data == "pages":
         await query.answer()
 
