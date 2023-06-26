@@ -159,7 +159,6 @@ Tᴏᴛᴀʟ : {}
 • ʙᴏᴛ ꜰᴏᴜʀ : <a href="https://t.me/HDCinemasBot?start">HDCinemasBot</a>
 • ʙᴏᴛ ꜰɪꜰᴛʜ : <a href="https://t.me/TrueDealsMasterBot?start">TrueDealsMasterBot</a>"""
 
-    SHARE_BUTTON_TEXT = """Checkout {username} for searching files"""
     
     REQINFO = """
 ⚠ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ ⚠
@@ -196,14 +195,7 @@ Tᴏᴛᴀʟ : {}
 𝗡𝗮𝗺𝗲 <b>: {}</b>
 𝗠𝗲𝘀𝘀𝗮𝗴𝗲 <b>: {}</b>"""
 
-    CAPTION = """
-<b>📂 Fɪʟᴇ ɴᴀᴍᴇ : </b> <code>{file_name}</code>
-
-<b>
-╭─────── • ◆ • ───────╮
-🔅 Dᴀʀᴋ Mᴏᴅᴇ :  <a href="https://t.me/addtheme/DQ_The_File_Donor_Theme">Tᴏᴜᴄʜ</a>
-╰─────── • ◆ • ───────╯
-
+    CAPTION = """<b>📂Fɪʟᴇɴᴀᴍᴇ : {file_name}
 </b>"""
 
     FILE_MSG = """
