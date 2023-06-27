@@ -26,7 +26,7 @@ async def start(client, message):
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
                 InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
@@ -43,14 +43,15 @@ async def start(client, message):
             photo=random.choice(PICS),
             caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+            parse_mode=enums.ParseMode.HTML,
+            quote=True
         )
-        await asyncio.sleep(2) # 😢 https://github.com/EvamariaTG/EvaMaria/blob/master/plugins/p_ttishow.py#L17 😬 wait a bit, before checking.
+        await asyncio.sleep(2)  # 😢 https://github.com/EvamariaTG/EvaMaria/blob/master/plugins/p_ttishow.py#L17 😬 wait a bit, before checking.
         if not await db.get_chat(message.chat.id):
-            total=await client.get_chat_members_count(message.chat.id)
-            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))       
+            total = await client.get_chat_members_count(message.chat.id)
+            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))
             await db.add_chat(message.chat.id, message.chat.title)
-        return 
+        return
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         total_users = await db.total_users_count()
@@ -61,7 +62,7 @@ async def start(client, message):
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
                 InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
@@ -78,7 +79,8 @@ async def start(client, message):
             photo=random.choice(PICS),
             caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+            parse_mode=enums.ParseMode.HTML,
+            quote=True
         )
         return
     if AUTH_CHANNEL and not await is_subscribed(client, message):
@@ -98,7 +100,7 @@ async def start(client, message):
         if message.command[1] != "subscribe":
             try:
                 kk, file_id = message.command[1].split("_", 1)
-                pre = 'checksubp' if kk == 'filep' else 'checksub' 
+                pre = 'checksubp' if kk == 'filep' else 'checksub'
                 btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", callback_data=f"{pre}#{file_id}")])
             except (IndexError, ValueError):
                 btn.append([InlineKeyboardButton("↻ Tʀʏ Aɢᴀɪɴ", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
@@ -106,8 +108,9 @@ async def start(client, message):
             chat_id=message.from_user.id,
             text="**Yᴏᴜ ᴀʀᴇ ɴᴏᴛ ɪɴ ᴏᴜʀ Bᴀᴄᴋ-ᴜᴘ ᴄʜᴀɴɴᴇʟ ɢɪᴠᴇɴ ʙᴇʟᴏᴡ sᴏ ʏᴏᴜ ᴅᴏɴ'ᴛ ɢᴇᴛ ᴛʜᴇ ᴍᴏᴠɪᴇ ғɪʟᴇ...\n\nIғ ʏᴏᴜ ᴡᴀɴᴛ ᴛʜᴇ ᴍᴏᴠɪᴇ ғɪʟᴇ, ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ '❆ Jᴏɪɴ Oᴜʀ Bᴀᴄᴋ-Uᴘ Cʜᴀɴɴᴇʟ ❆' ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴀɴᴅ ᴊᴏɪɴ ᴏᴜʀ ʙᴀᴄᴋ-ᴜᴘ ᴄʜᴀɴɴᴇʟ, ᴛʜᴇɴ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ '↻ Tʀʏ Aɢᴀɪɴ' ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ...\n\nTʜᴇɴ ʏᴏᴜ ᴡɪʟʟ ɢᴇᴛ ᴛʜᴇ ᴍᴏᴠɪᴇ ғɪʟᴇs...**",
             reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.MARKDOWN
-            )
+            parse_mode=enums.ParseMode.MARKDOWN,
+            quote=True
+        )
         return
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         buttons = [
@@ -115,7 +118,7 @@ async def start(client, message):
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
                 InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
@@ -132,8 +135,9 @@ async def start(client, message):
             photo=random.choice(PICS),
             caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
+            parse_mode=enums.ParseMode.HTML,
+            quote=True
+                )
         return
     data = message.command[1]
     try:
