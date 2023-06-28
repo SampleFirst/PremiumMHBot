@@ -66,9 +66,7 @@ async def start(client, message):
             ],
             [
                 InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
-                InlineKeyboardButton('🌟 Support
-
- Group', url=GRP_LNK)
+                InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
                 InlineKeyboardButton('❓ Help', callback_data='help'),
@@ -95,8 +93,7 @@ async def start(client, message):
             return
         btn = [
             [
-                InlineKeyboardButton(
-                    "❆ Jᴏɪɴ Oᴜʀ Bᴀᴄᴋ-Uᴘ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link
+                InlineKeyboardButton("❆ Jᴏɪɴ Oᴜʀ Bᴀᴄᴋ-Uᴘ Cʜᴀɴɴᴇʟ ❆", url=invite_link.invite_link
                 )
             ]
         ]
