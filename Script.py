@@ -103,14 +103,16 @@ Cᴏᴍᴍᴀɴᴅs Aɴᴅ Usᴀɢᴇ:
 ★ Fʀᴇᴇ Sᴛᴏʀᴀɢᴇ: <code>{}</code></b>"""
 
     LOG_TEXT_G = """#NewGroup
-Gʀᴏᴜᴘ = {}(<code>{}</code>)
-Tᴏᴛᴀʟ Mᴇᴍʙᴇʀs = <code>{}</code>
-Aᴅᴅᴇᴅ Bʏ - {}"""
+Group: {} (<code>{}</code>)
+Total Members: <code>{}</code>
+Added By: {}
+Timestamp: {}"""
 
     LOG_TEXT_P = """#NewUser
-ID : <code>{}</code>
-Nᴀᴍᴇ : {}
-Tᴏᴛᴀʟ : {}
+ID: <code>{}</code>
+Name: {}
+Total Users: {}
+Timestamp: {}
 @PremiumMHBot
 """
 
