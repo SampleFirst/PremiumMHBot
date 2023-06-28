@@ -15,8 +15,8 @@ import re
 import json
 import base64
 from datetime import datetime
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
 
@@ -28,7 +28,7 @@ async def start(client, message):
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
+                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
                 InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
             ],
             [
@@ -45,10 +45,9 @@ async def start(client, message):
             photo=random.choice(PICS),
             caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML,
-            quote=True
+            parse_mode=enums.ParseMode.HTML
         )
-        await asyncio.sleep(2)  # 😢 https://github.com/EvamariaTG/EvaMaria/blob/master/plugins/p_ttishow.py#L17 😬 wait a bit, before checking.
+        await asyncio.sleep(2) # 😢 https://github.com/EvamariaTG/EvaMaria/blob/master/plugins/p_ttishow.py#L17 😬 wait a bit, before checking.
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -60,14 +59,16 @@ async def start(client, message):
         total_users = await db.total_users_count()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention, total_users, timestamp))
-if len(message.command) != 2:
+    if len(message.command) != 2:
         buttons = [
             [
                 InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],
             [
-                InlineKeyboardButton('👑 Bot Owner', callback_data="owner_info"),
-                InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
+                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                InlineKeyboardButton('🌟 Support
+
+ Group', url=GRP_LNK)
             ],
             [
                 InlineKeyboardButton('❓ Help', callback_data='help'),
@@ -83,8 +84,7 @@ if len(message.command) != 2:
             photo=random.choice(PICS),
             caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML,
-            quote=True
+            parse_mode=enums.ParseMode.HTML
         )
         return
     if AUTH_CHANNEL and not await is_subscribed(client, message):
