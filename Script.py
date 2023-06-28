@@ -102,19 +102,21 @@ Cᴏᴍᴍᴀɴᴅs Aɴᴅ Usᴀɢᴇ:
 ★ Usᴇᴅ Sᴛᴏʀᴀɢᴇ: <code>{}</code>
 ★ Fʀᴇᴇ Sᴛᴏʀᴀɢᴇ: <code>{}</code></b>"""
 
-    LOG_TEXT_G = """#NewGroup
-Group: {} (<code>{}</code>)
-Total Members: <code>{}</code>
-Added By: {}
-Timestamp: {}"""
+    LOG_TEXT_G = """🆕 #NewGroup
+👥 Group: {} (<code>{}</code>)
+👥 Total Members: <code>{}</code>
+🆕 Added By: {}
+📅 Date: <code>{}</code>
+⏰ Time: <code>{}</code>
+@PremiumMHBot"""
 
-    LOG_TEXT_P = """#NewUser
-ID: <code>{}</code>
-Name: {}
-Total Users: {}
-Timestamp: {}
-@PremiumMHBot
-"""
+    LOG_TEXT_P = """🆕 #NewUser
+🆔 ID: <code>{}</code>
+👤 Name: {}
+👥 Total: {}
+📅 Date: <code>{}</code>
+⏰ Time: <code>{}</code>
+@PremiumMHBot"""
 
     ALRT_TXT = """ʜᴇʟʟᴏ {},
 ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇQᴜᴇꜱᴛ,
