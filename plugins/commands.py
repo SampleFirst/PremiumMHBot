@@ -565,7 +565,7 @@ async def settings(client, message):
                     callback_data=f'setgs#botpm#{settings["botpm"]}#{grp_id}',
                 ),
                 InlineKeyboardButton(
-                    'Bot PM' if settings["botpm"] else 'Channel',
+                    'Bot PM' if settings["botpm"] else 'Cʜᴀɴɴᴇʟ',
                     callback_data=f'setgs#botpm#{settings["botpm"]}#{grp_id}',
                 ),
             ],
