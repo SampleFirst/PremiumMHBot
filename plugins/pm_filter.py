@@ -1730,10 +1730,7 @@ async def auto_filter(client, msg, spoll=False):
                     InlineKeyboardButton('Movie', callback_data='minfo'),
                     InlineKeyboardButton('Series', callback_data='sinfo')
                 ]
-            )
-except KeyError:
-    pass
-
+            )       
     except KeyError:
         await save_group_settings(message.chat.id, 'auto_delete', True)
         btn.insert(0, 
