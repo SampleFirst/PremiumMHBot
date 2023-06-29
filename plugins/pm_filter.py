@@ -5,17 +5,17 @@ import ast
 import math
 import random
 lock = asyncio.Lock()
-
+from pyrogram import Client, filters, enums 
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from Script import script
 import pyrogram
 from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, \
     make_inactive
-from info import ADMINS, AUTH_CHANNEL, FILE_CHANNEL, AUTH_USERS, SUPPORT_CHAT_ID, CUSTOM_FILE_CAPTION, MSG_ALRT, PICS, AUTH_GROUPS, P_TTI_SHOW_OFF, GRP_LNK, CHNL_LNK, NOR_IMG, LOG_CHANNEL_PM, SPELL_IMG, MAX_B_TN, IMDB, \
+from info import ADMINS, AUTH_CHANNEL, FILE_CHANNEL, AUTH_USERS, SUPPORT_CHAT_ID, CUSTOM_FILE_CAPTION, MSG_ALRT, PICS, AUTH_GROUPS, P_TTI_SHOW_OFF, GRP_LNK, CHNL_LNK, NOR_IMG, LOG_CHANNEL_PM, SPELL_IMG, MAX_B_TN, IMDB, FORCE_SUB_1, FORCE_SUB_2, \
     SINGLE_BUTTON, SPELL_CHECK_REPLY, FILE_FORWARD, IMDB_TEMPLATE, NO_RESULTS_MSG, IS_VERIFY, HOW_TO_VERIFY
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
-from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
+from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid, UserNotParticipant
 from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, get_shortlink, send_all, check_verification, get_token
 from database.users_chats_db import db
 from database.ia_filterdb import Media, get_file_details, get_search_results, get_bad_files
@@ -36,6 +36,75 @@ logger.setLevel(logging.ERROR)
 
 BUTTONS = {}
 SPELL_CHECK = {}
+
+
+async def not_subscribed(_, client, message):
+    await db.add_user(client, message)
+    if not FORCE_SUB_1 and not FORCE_SUB_2:
+        return False
+    try:
+        user = await client.get_chat_member(FORCE_SUB_1, message.from_user.id)
+        if user.status == enums.ChatMemberStatus.BANNED:
+            return True
+        else:
+            return False
+    except UserNotParticipant:
+        pass
+
+    try:
+        user = await client.get_chat_member(FORCE_SUB_2, message.from_user.id)
+        if user.status == enums.ChatMemberStatus.BANNED:
+            return True
+        else:
+            return False
+    except UserNotParticipant:
+        pass
+
+    return True
+
+
+@Client.on_message(filters.private & filters.create(not_subscribed))
+async def forces_sub(client, message):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text="📢 Join Update Channel 1 📢",
+                url=f"https://t.me/{FORCE_SUB_1}",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="📢 Join Update Channel 2 📢",
+                url=f"https://t.me/{FORCE_SUB_2}",
+            )
+        ],
+    ]
+    text = "**Sorry, you're not joined my channel 😐. Please join our update channels to continue**"
+    try:
+        user = await client.get_chat_member(FORCE_SUB_1, message.from_user.id)
+        if user.status == enums.ChatMemberStatus.BANNED:
+            return await client.send_message(
+                message.from_user.id, text="Sorry, you're banned to use me"
+            )
+    except UserNotParticipant:
+        return await message.reply_text(
+            text=text, reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
+    try:
+        user = await client.get_chat_member(FORCE_SUB_2, message.from_user.id)
+        if user.status == enums.ChatMemberStatus.BANNED:
+            return await client.send_message(
+                message.from_user.id, text="Sorry, you're banned to use me"
+            )
+    except UserNotParticipant:
+        return await message.reply_text(
+            text=text, reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
+    return await message.reply_text(
+        text=text, reply_markup=InlineKeyboardMarkup(buttons)
+
 
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
