@@ -39,6 +39,8 @@ AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_chan
 AUTH_GROUPS = [int(ch) for ch in auth_grp.split()] if auth_grp else None
 reqst_channel = environ.get('REQST_CHANNEL_ID')
 REQST_CHANNEL = int(reqst_channel) if reqst_channel and id_pattern.search(reqst_channel) else None
+FORCE_SUB_1 = environ.get("FORCE_SUB_1", "iPepkornBots")
+FORCE_SUB_2 = environ.get("FORCE_SUB_2", "PremiumMHUpdate") 
 SUPPORT_CHAT_ID = environ.get('SUPPORT_CHAT', '')
 NO_RESULTS_MSG = is_enabled((environ.get("NO_RESULTS_MSG", 'False')), False)
 
