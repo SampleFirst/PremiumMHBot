@@ -203,7 +203,7 @@ async def start(client, message):
                             ]
                         ]
                     )
-            except FloodWait as e:
+                except Exception as e:
                 await asyncio.sleep(e.x)
                 logger.warning(f"Floodwait of {e.x} sec.")
                 await client.send_cached_media(
@@ -222,7 +222,7 @@ async def start(client, message):
                             ]
                         ]
                     )
-            except Exception as e:
+                except Exception as e:
                 logger.warning(e, exc_info=True)
                 continue
             await asyncio.sleep(1) 
