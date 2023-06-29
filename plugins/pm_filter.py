@@ -290,7 +290,7 @@ async def next_page(bot, query):
         InlineKeyboardButton("! Lᴀɴɢᴜᴀɢᴇs !", callback_data=f"select_lang#{req}")
     ])
     btn.insert(0, [
-        InlineKeyboardButton("⚡ Cʜᴇᴄᴋ Bᴏᴛ PM ⚡", url=FILE_FORWARD)
+        InlineKeyboardButton("⚡ Cʜᴇᴄᴋ Bᴏᴛ PM ⚡", url=https://t.me/How_To_Verify_PMH/2)
     ])
     try:
         await query.edit_message_reply_markup(
@@ -403,7 +403,7 @@ async def language_check(bot, query):
         ])
 
         btn.insert(0, [
-            InlineKeyboardButton("⚡ Cʜᴇᴄᴋ Bᴏᴛ PM ⚡", url=FILE_FORWARD)
+        InlineKeyboardButton("⚡ Cʜᴇᴄᴋ Bᴏᴛ PM ⚡", url=https://t.me/How_To_Verify_PMH/2)
         ])
 
         if offset != "":
@@ -1687,7 +1687,7 @@ async def auto_filter(client, msg, spoll=False):
     ])
 
     btn.insert(0, [
-        InlineKeyboardButton("⚡ Cʜᴇᴄᴋ Bᴏᴛ PM ⚡", url=FILE_FORWARD)
+        InlineKeyboardButton("⚡ Cʜᴇᴄᴋ Bᴏᴛ PM ⚡", url=https://t.me/How_To_Verify_PMH/2)
     ])
 
     if offset != "":
