@@ -1,35 +1,30 @@
-7# Kanged From @TroJanZheX
 import asyncio
 import re
 import ast
 import math
 import random
+import logging
 lock = asyncio.Lock()
-from pyrogram import Client, filters, enums 
-from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
-from Script import script
+
 import pyrogram
-from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, \
-    make_inactive
-from info import ADMINS, AUTH_CHANNEL, FILE_CHANNEL, AUTH_USERS, SUPPORT_CHAT_ID, CUSTOM_FILE_CAPTION, MSG_ALRT, PICS, AUTH_GROUPS, P_TTI_SHOW_OFF, GRP_LNK, CHNL_LNK, NOR_IMG, LOG_CHANNEL_PM, SPELL_IMG, MAX_B_TN, IMDB, FORCE_SUB_1, FORCE_SUB_2, \
-    SINGLE_BUTTON, SPELL_CHECK_REPLY, FILE_FORWARD, IMDB_TEMPLATE, NO_RESULTS_MSG, IS_VERIFY, HOW_TO_VERIFY
+from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty, UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
-from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid, UserNotParticipant
-from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, get_shortlink, send_all, check_verification, get_token
+from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
+
+from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, \
+    make_inactive
 from database.users_chats_db import db
 from database.ia_filterdb import Media, get_file_details, get_search_results, get_bad_files
-from database.filters_mdb import (
-    del_all,
-    find_filter,
-    get_filters,
+from database.filters_mdb import del_all, find_filter, get_filters
+from database.gfilters_mdb import find_gfilter, get_gfilters, del_allg
+from info import (
+    ADMINS, AUTH_CHANNEL, AUTH_USERS, SUPPORT_CHAT_ID, CUSTOM_FILE_CAPTION, MSG_ALRT, PICS, AUTH_GROUPS,
+    P_TTI_SHOW_OFF, GRP_LNK, CHNL_LNK, NOR_IMG, LOG_CHANNEL, SPELL_IMG, MAX_B_TN, IMDB, SINGLE_BUTTON,
+    SPELL_CHECK_REPLY, IMDB_TEMPLATE, NO_RESULTS_MSG, FORCE_SUB_1, FORCE_SUB_2
 )
-from database.gfilters_mdb import (
-    find_gfilter,
-    get_gfilters,
-    del_allg
-)
-import logging
+from Script import script
+from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -38,114 +33,95 @@ BUTTONS = {}
 SPELL_CHECK = {}
 
 
-async def not_subscribed(_, client, message):
-    await db.add_user(client, message)
-    if not FORCE_SUB_1 and not FORCE_SUB_2:
-        return False
-    try:
-        user = await client.get_chat_member(FORCE_SUB_1, message.from_user.id)
-        if user.status == enums.ChatMemberStatus.BANNED:
-            return True
-        else:
-            return False
-    except UserNotParticipant:
-        pass
-
-    try:
-        user = await client.get_chat_member(FORCE_SUB_2, message.from_user.id)
-        if user.status == enums.ChatMemberStatus.BANNED:
-            return True
-        else:
-            return False
-    except UserNotParticipant:
-        pass
-
-    return True
-
-
-@Client.on_message(filters.private & filters.create(not_subscribed))
-async def forces_sub(client, message):
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text="📢 Join Update Channel 1 📢",
-                url=f"https://t.me/{FORCE_SUB_1}",
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text="📢 Join Update Channel 2 📢",
-                url=f"https://t.me/{FORCE_SUB_2}",
-            )
-        ],
-    ]
-    text = "**Sorry, you're not joined my channel 😐. Please join our update channels to continue**"
-    try:
-        user = await client.get_chat_member(FORCE_SUB_1, message.from_user.id)
-        if user.status == enums.ChatMemberStatus.BANNED:
-            return await client.send_message(
-                message.from_user.id, text="Sorry, you're banned to use me"
-            )
-    except UserNotParticipant:
-        return await message.reply_text(
-            text=text, reply_markup=InlineKeyboardMarkup(buttons)
-        )
-
-    try:
-        user = await client.get_chat_member(FORCE_SUB_2, message.from_user.id)
-        if user.status == enums.ChatMemberStatus.BANNED:
-            return await client.send_message(
-                message.from_user.id, text="Sorry, you're banned to use me"
-            )
-    except UserNotParticipant:
-        return await message.reply_text(
-            text=text, reply_markup=InlineKeyboardMarkup(buttons)
-        )
-
-    return await message.reply_text(
-        text=text, reply_markup=InlineKeyboardMarkup(buttons)
-    )
-
-
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
     if message.chat.id != SUPPORT_CHAT_ID:
-        glob = await global_filters(client, message)
-        if glob == False:
-            manual = await manual_filters(client, message)
-            if manual == False:
-                settings = await get_settings(message.chat.id)
-                try:
-                    if settings['auto_ffilter']:
-                        await auto_filter(client, message)
-                except KeyError:
-                    grpid = await active_connection(str(message.from_user.id))
-                    await save_group_settings(grpid, 'auto_ffilter', True)
-                    settings = await get_settings(message.chat.id)
-                    if settings['auto_ffilter']:
-                        await auto_filter(client, message)
-    else:
-        search = message.text
-        temp_files, temp_offset, total_results = await get_search_results(chat_id=message.chat.id, query=search.lower(), offset=0, filter=True)
-        if total_results == 0:
-            return
-        else:
-            return await message.reply_text(f"<b>Hᴇʏ {message.from_user.mention}, {str(total_results)} ʀᴇsᴜʟᴛs ᴀʀᴇ ғᴏᴜɴᴅ ɪɴ ᴍʏ ᴅᴀᴛᴀʙᴀsᴇ ғᴏʀ ʏᴏᴜʀ ᴏ̨ᴜᴇʀʏ {search}. Kɪɴᴅʟʏ ᴜsᴇ ɪɴʟɪɴᴇ sᴇᴀʀᴄʜ ᴏʀ ᴍᴀᴋᴇ ᴀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴀᴅᴅ ᴍᴇ ᴀs ᴀᴅᴍɪɴ ᴛᴏ ɢᴇᴛ ᴍᴏᴠɪᴇ ғɪʟᴇs. Tʜɪs ɪs ᴀ sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ sᴏ ᴛʜᴀᴛ ʏᴏᴜ ᴄᴀɴ'ᴛ ɢᴇᴛ ғɪʟᴇs ғʀᴏᴍ ʜᴇʀᴇ...\n\nFᴏʀ Mᴏᴠɪᴇs, Jᴏɪɴ @PMHSearchGroup</b>")
+        await global_filters(client, message)
+    manual = await manual_filters(client, message)
+    if not manual:
+        settings = await get_settings(message.chat.id)
+        try:
+            if settings['auto_ffilter']:
+                await auto_filter(client, message)
+        except KeyError:
+            grpid = await active_connection(str(message.from_user.id))
+            await save_group_settings(grpid, 'auto_ffilter', True)
+            settings = await get_settings(message.chat.id)
+            if settings['auto_ffilter']:
+                await auto_filter(client, message)
 
 
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
+    if not await is_participant(bot, message):
+        return
+    if not await is_subscribed(bot, message):
+        return
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
-    if content.startswith("/") or content.startswith("#"): return  # ignore commands and hashtags
-    if user_id in ADMINS: return # ignore admins
-    await message.reply_text("<b>Yᴏᴜʀ ᴍᴇssᴀɢᴇ ʜᴀs ʙᴇᴇɴ sᴇɴᴛ ᴛᴏ ᴍʏ ᴍᴏᴅᴇʀᴀᴛᴏʀs !</b>")
+    if content.startswith("/") or content.startswith("#"):
+        return  # ignore commands and hashtags
+    if user_id in ADMINS:
+        return  # ignore admins
+    await message.reply_text("<b>Your message has been sent to my moderators!</b>")
     await bot.send_message(
-        chat_id=LOG_CHANNEL_PM,
-        text=f"<b>#𝐏𝐌_𝐌𝐒𝐆\n\nNᴀᴍᴇ : {user}\n\nID : {user_id}\n\nMᴇssᴀɢᴇ : {content}</b>"
+        chat_id=LOG_CHANNEL,
+        text=f"<b>#PM_MSG\n\nName: {user}\n\nID: {user_id}\n\nMessage: {content}</b>"
     )
 
+
+async def is_participant(bot, message):
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+    try:
+        chat_member_1 = await bot.get_chat_member(chat_id, user_id)
+        chat_member_2 = await bot.get_chat_member(chat_id, FORCE_SUB_2)
+        if chat_member_1.status in ["creator", "administrator", "member"] and chat_member_2.status in ["creator", "administrator", "member"]:
+            return True
+    except UserNotParticipant:
+        pass
+    buttons = [
+        [
+            InlineKeyboardButton(text="📢 Join Update Channel 1 📢", url=f"https://t.me/{FORCE_SUB_1}"),
+            InlineKeyboardButton(text="📢 Join Update Channel 2 📢", url=f"https://t.me/{FORCE_SUB_2}")
+        ],
+        [
+            InlineKeyboardButton(text='Continue', callback_data='done')
+        ]
+    ]
+
+    text = "**Sorry, you're not participating in both of the channels. Please join both channels to continue.**"
+    await message.reply_text(text=text, reply_markup=InlineKeyboardMarkup(buttons))
+    return False
+
+
+@Client.on_callback_query(filters.regex('done'))
+async def callback_done(bot, callback_query):
+    message = callback_query.message
+    user_id = callback_query.from_user.id
+    chat_id = message.chat.id
+    user = callback_query.from_user.first_name
+    try:
+        chat_member_1 = await bot.get_chat_member(chat_id, user_id)
+        chat_member_2 = await bot.get_chat_member(chat_id, FORCE_SUB_2)
+        if chat_member_1.status in ["creator", "administrator", "member"] and chat_member_2.status in ["creator", "administrator", "member"]:
+            await message.edit_text("Thank you for joining both channels! You can continue using the bot.")
+            return
+    except UserNotParticipant:
+        pass
+    buttons = [
+        [
+            InlineKeyboardButton(text="📢 Join Update Channel 1 📢", url=f"https://t.me/{FORCE_SUB_1}"),
+            InlineKeyboardButton(text="📢 Join Update Channel 2 📢", url=f"https://t.me/{FORCE_SUB_2}")
+        ],
+        [
+            InlineKeyboardButton(text='Continue', callback_data='done')
+        ]
+    ]
+    text = f"Hey {user}, it seems you haven't joined one or both of the channels yet. Please join both channels to continue using the bot."
+    await message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(buttons))
+    
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
     ident, req, key, offset = query.data.split("_")
