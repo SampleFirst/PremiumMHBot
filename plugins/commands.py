@@ -56,7 +56,7 @@ async def start(client, message):
             today = date.today()
             now = datetime.now(tz)
             time = now.strftime("%H:%M:%S %p")
-            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, today, time))
+            await client.send_message(LOG_CHANNEL, LOG_TEXT_G.format(message.chat.title, message.chat.id, total, message.from_user.id, today, time))
             await db.add_chat(message.chat.id, message.chat.title)
         return
 
@@ -67,7 +67,7 @@ async def start(client, message):
         today = date.today()
         now = datetime.now(tz)
         time = now.strftime("%H:%M:%S %p")
-        await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention, total_users, today, time))
+        await client.send_message(LOG_CHANNEL, LOG_TEXT_P.format(message.from_user.id, message.from_user.mention, total_users, today, time))
 
     if len(message.command) != 2:
         buttons = [
