@@ -928,7 +928,29 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.message.edit_text(f"Error: {e}")
         else:
             await query.message.edit_text(f"Process completed for file deletion! Successfully deleted {str(deleted)} files from DB for your query '{keyword}'. ✅")
-    
+
+    elif query.data == "deletefiletype":
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("📥 Document", callback_data="delete_filetype_document"),
+                    InlineKeyboardButton("🎬 Video", callback_data="delete_filetype_video"),
+                ],
+                [
+                    InlineKeyboardButton("🎧 Audio", callback_data="delete_filetype_audio"),
+                    InlineKeyboardButton("📦 Zip", callback_data="delete_filetype_zip"),
+                ],
+                [
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await query.message.edit_text(
+            "🗑 Select the type of files you want to delete!\n\n🗑 This will delete related files from the database:",
+            reply_markup=keyboard,
+            quote=True,
+        )
     
     elif query.data.startswith("opnsetgrp"):
         ident, grp_id = query.data.split("#")
