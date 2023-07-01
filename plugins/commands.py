@@ -85,7 +85,7 @@ async def start(client, message):
             today = date.today()
             now = datetime.now(tz)
             time = now.strftime("%H:%M:%S %p")
-            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, today, time))
+            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, today, time, "Unknown"))
             await db.add_chat(message.chat.id, message.chat.title)
         return
 
