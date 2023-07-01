@@ -643,7 +643,6 @@ async def delete_file_type_zip_callback(bot, callback_query):
         await callback_query.edit_message_text(
             f"✅ Found {total} zip file(s) in the database.\n\nPlease select an action:",
             reply_markup=InlineKeyboardMarkup(confirm_btns),
-            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -658,7 +657,6 @@ async def delete_file_type_zip_callback(bot, callback_query):
         await callback_query.edit_message_text(
             "No zip files found in the database.",
             reply_markup=keyboard,
-            quote=True,
         )
         
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_document$"))
