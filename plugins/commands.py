@@ -618,6 +618,7 @@ async def delete_file_type_callback(client, callback_query):
             f"✅ Found {total_files} {file_type}(s) in the database.\n\n"
             "Please select an action:",
             reply_markup=keyboard,
+            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -629,7 +630,7 @@ async def delete_file_type_callback(client, callback_query):
             ]
         )
 
-        await callback_query.edit_message_text(f"No {file_type}s found in the database.", reply_markup=keyboard)
+        await callback_query.edit_message_text(f"No {file_type}s found in the database.", reply_markup=keyboard, quote=True,)
 
 
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^delete_filetype_zip"))
@@ -678,6 +679,7 @@ async def confirm_delete_document_callback(bot, callback_query):
         await callback_query.message.edit_text(
             "🗑 All document files have been successfully deleted from the database.",
             reply_markup=keyboard,
+            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -692,6 +694,7 @@ async def confirm_delete_document_callback(bot, callback_query):
         await callback_query.message.edit_text(
             "❎ No document files found in the database.",
             reply_markup=keyboard,
+            quote=True,
         )
 
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_video$"))
@@ -712,6 +715,7 @@ async def confirm_delete_video_callback(bot, callback_query):
         await callback_query.message.edit_text(
             "🗑 All video files have been successfully deleted from the database.",
             reply_markup=keyboard,
+            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -726,6 +730,7 @@ async def confirm_delete_video_callback(bot, callback_query):
         await callback_query.message.edit_text(
             "🗑 No video files found in the database.",
             reply_markup=keyboard,
+            quote=True,
         )
 
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_audio$"))
@@ -746,6 +751,7 @@ async def confirm_delete_audio_callback(bot, callback_query):
         await callback_query.message.edit_text(
             "🗑 All audio files have been successfully deleted from the database.",
             reply_markup=keyboard,
+            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -760,6 +766,7 @@ async def confirm_delete_audio_callback(bot, callback_query):
         await callback_query.message.edit_text(
             "❎ No audio files found in the database.",
             reply_markup=keyboard,
+            quote=True,
         )
 
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_zip"))
@@ -803,6 +810,7 @@ async def confirm_delete_zip_callback(bot, callback_query):
         await callback_query.message.edit_text(
             "❎ No zip files found in the database.",
             reply_markup=keyboard,
+            quote=True,
         )
             
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^dft_cancel$"))
@@ -1110,7 +1118,8 @@ async def delete_multiple_files(bot, message):
     await message.reply_text(
         text=f"Are you sure you want to delete {total} files matching the keyword '{keyword}'? 🗑️\n\nNote: This could be a destructive action!",
         reply_markup=InlineKeyboardMarkup(btn),
-        parse_mode=enums.ParseMode.HTML
+        parse_mode=enums.ParseMode.HTML,
+        quote=True,
     )
 
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
@@ -1127,7 +1136,7 @@ async def deletemultiplefiles(bot, message):
           ]]
     await message.reply_text(
         text="<b>Select the type of files you want to delete !\n\nThis will delete 100 files from the database for the selected type.</b>",
-        reply_markup=InlineKeyboardMarkup(btn)
+        reply_markup=InlineKeyboardMarkup(btn), quote=True,
     )
     
     
