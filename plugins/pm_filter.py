@@ -929,6 +929,66 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.message.edit_text(f"Process completed for file deletion! Successfully deleted {str(deleted)} files from DB for your query '{keyword}'. ✅")
 
+    elif query.data == "delete_filetype_zip":
+        files, next_offset, total = await get_bad_files('zip', offset=0)
+        if total > 0:
+            confirm_btns = [
+                [
+                    InlineKeyboardButton(f"🗑 Delete ({total} files)", callback_data="confirm_delete_zip"),
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                ]
+            ]
+            await query.edit_message_text(f"✅ Found {total} zip file(s) in the database.\n\nPlease select an action:",
+                reply_markup=InlineKeyboardMarkup(confirm_btns),
+                quote=True,
+            )
+        else:
+            keyboard = InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                        InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                    ]
+                ]
+            )
+    
+            await query.edit_message_text("No zip files found in the database.",
+                reply_markup=keyboard,
+                quote=True,
+            )
+
+    elif query.data == "confirm_delete_zip":
+        files, next_offset, total = await get_bad_files('zip', offset=0)
+        deleted = 0
+        for file in files:
+            file_ids = file.file_id
+            result = await Media.collection.delete_one({'_id': file_ids})
+            if result.deleted_count:
+                logger.info('Zip file found! Successfully deleted from the database.')
+            deleted += 1
+        deleted = str(deleted)
+        await query.message.edit_text(f"<b>Successfully deleted {deleted} zip file(s).</b>",
+            quote=True,
+        )
+
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("🏠 Home", callback_data="deletefiletype"),
+                    InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
+                ]
+            ]
+        )
+
+        await query.message.edit_text("🗑 All zip files have been successfully deleted from the database.",
+            reply_markup=keyboard,
+            quote=True,
+        )
+
+    elif query.data == "dft_cancel":
+        await query.message.edit_text("Delete file type operation canceled.", quote=True)
+        await query.answer()
+
     elif query.data == "deletefiletype":
         keyboard = InlineKeyboardMarkup(
             [
@@ -938,7 +998,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 ],
                 [
                     InlineKeyboardButton("🎧 Audio", callback_data="delete_filetype_audio"),
-                    InlineKeyboardButton("📦 Zip", callback_data="delete_filetype_zip"),
+                    InlineKeyboardButton("🗜️ Zip", callback_data="delete_filetype_zip"),
                 ],
                 [
                     InlineKeyboardButton("❎ Cancel", callback_data="dft_cancel"),
