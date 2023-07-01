@@ -105,9 +105,9 @@ Cᴏᴍᴍᴀɴᴅs Aɴᴅ Usᴀɢᴇ:
     LOG_TEXT_G = """🆕 #NewGroup
 Group: {} (<code>{}</code>)
 Total Members: <code>{}</code>
-Added By: {}
 Date: <code>{}</code>
 Time: <code>{}</code>
+Added By: {}
 @PremiumMHBot"""
 
     LOG_TEXT_P = """🆕 #NewUser
@@ -117,6 +117,13 @@ Total: {}
 Date: <code>{}</code>
 Time: <code>{}</code>
 @PremiumMHBot"""
+
+    LOG_TEXT_V = """🆕 #UserVerify
+ID: <code>{}</code>
+Name: {}
+Date: <code>{}</code>
+Time: <code>{}</code>
+"""
 
     ALRT_TXT = """ʜᴇʟʟᴏ {},
 ᴛʜɪꜱ ɪꜱ ɴᴏᴛ ʏᴏᴜʀ ᴍᴏᴠɪᴇ ʀᴇQᴜᴇꜱᴛ,
