@@ -22,7 +22,7 @@ async def save_group(bot, message):
             today = date.today()
             now = datetime.now(tz)
             time = now.strftime("%H:%M:%S %p")
-            log_text = script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, r_j, today, time)
+            log_text = script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, today, time, r_j)
             await bot.send_message(LOG_CHANNEL, log_text)
             await db.add_chat(message.chat.id, message.chat.title)
 
