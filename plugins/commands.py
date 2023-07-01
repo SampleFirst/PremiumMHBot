@@ -676,7 +676,6 @@ async def confirm_delete_document_callback(bot, callback_query):
 
         await callback_query.message.edit_text("🗑 All document files have been successfully deleted from the database.",
             reply_markup=keyboard,
-            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -690,7 +689,6 @@ async def confirm_delete_document_callback(bot, callback_query):
 
         await callback_query.message.edit_text("❎ No document files found in the database.",
             reply_markup=keyboard,
-            quote=True,
         )
 
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_video$"))
@@ -710,7 +708,6 @@ async def confirm_delete_video_callback(bot, callback_query):
 
         await callback_query.message.edit_text("🗑 All video files have been successfully deleted from the database.",
             reply_markup=keyboard,
-            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -724,7 +721,6 @@ async def confirm_delete_video_callback(bot, callback_query):
 
         await callback_query.message.edit_text("🗑 No video files found in the database.",
             reply_markup=keyboard,
-            quote=True,
         )
 
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^confirm_delete_audio$"))
@@ -744,7 +740,6 @@ async def confirm_delete_audio_callback(bot, callback_query):
 
         await callback_query.message.edit_text("🗑 All audio files have been successfully deleted from the database.",
             reply_markup=keyboard,
-            quote=True,
         )
     else:
         keyboard = InlineKeyboardMarkup(
@@ -758,7 +753,6 @@ async def confirm_delete_audio_callback(bot, callback_query):
 
         await callback_query.message.edit_text("❎ No audio files found in the database.",
             reply_markup=keyboard,
-            quote=True,
         )
 
 @Client.on_callback_query(filters.regex("confirm_delete_zip"))
@@ -774,7 +768,6 @@ async def confirm_delete_zip_callback(bot, callback_query):
     deleted = str(deleted)
     await callback_query.message.edit_text(
         f"<b>Successfully deleted {deleted} zip file(s).</b>",
-        quote=True,
     )
 
     keyboard = InlineKeyboardMarkup(
@@ -789,13 +782,12 @@ async def confirm_delete_zip_callback(bot, callback_query):
     await callback_query.message.edit_text(
         "🗑 All zip files have been successfully deleted from the database.",
         reply_markup=keyboard,
-        quote=True,
     )
     
 @Client.on_callback_query(filters.user(ADMINS) & filters.regex(r"^dft_cancel$"))
 async def delete_file_type_cancel_callback(bot, callback_query):
     """Callback handler for canceling the delete file type operation"""
-    await callback_query.message.edit_text("Delete file type operation canceled.", quote=True)
+    await callback_query.message.edit_text("Delete file type operation canceled.")
     await callback_query.answer()
     
     
