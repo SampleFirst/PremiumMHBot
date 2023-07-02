@@ -93,10 +93,10 @@ async def start(client, message):
                 c=message.chat.username,
                 d=total,
                 e=total_chat,
-                f=date,
+                i=date,
                 g=time,
                 h=daily_chats,
-                i=temp.B_LINK,
+                f=temp.B_LINK,
                 j="Unknown"
             ))
             await db.add_chat(message.chat.id, message.chat.title, message.chat.username)
@@ -116,9 +116,9 @@ async def start(client, message):
             c=message.from_user.username,
             d=total_users,
             e=date,
-            f=time,
+            h=time,
             g=daily_users,
-            h=temp.U_NAME
+            f=temp.U_NAME
         ))
         
     if len(message.command) != 2:
