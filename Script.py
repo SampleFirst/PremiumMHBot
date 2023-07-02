@@ -114,11 +114,11 @@ Group ID: (<code>{b}</code>)
 Group UN: @{c}
 Total Members: <code>{d}</code>
 Total Groups: {e}
-Date: <code>{f}</code>
+Date: <code>{i}</code>
 Time: <code>{g}</code>
 Today Groups: {h}
 Added By: {j}
-By {i}"""
+By {f}"""
 
     LOG_TEXT_P = """👤 #NewUser
 ID: <code>{a}</code>
@@ -126,9 +126,9 @@ Name: {b}
 Username: @{c}
 Total: {d}
 Date: <code>{e}</code>
-Time: <code>{f}</code>
+Time: <code>{h}</code>
 Today Users: {g}
-By @{h}"""
+By @{f}"""
 
     LOG_TEXT_V = """🆕 #UserVerify
 ID: <code>{}</code>
