@@ -15,8 +15,8 @@ from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, POR
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
-from Script import script 
-from datetime import date, datetime 
+from Script import script
+from datetime import date, datetime
 import pytz
 from aiohttp import web
 from plugins import web_server
@@ -49,9 +49,9 @@ class Bot(Client):
         logging.info(LOG_STR)
         logging.info(script.LOGO)
         tz = pytz.timezone('Asia/Kolkata')
-        today = date.today()
+        today = date.today().strftime('%d %B, %Y')
         now = datetime.now(tz)
-        time = now.strftime("%H:%M:%S %p")
+        time = now.strftime("%I:%M:%S %p")
         await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
         app = web.AppRunner(await web_server())
         await app.setup()
