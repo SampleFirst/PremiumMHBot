@@ -82,9 +82,9 @@ async def start(client, message):
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
             tz = pytz.timezone('Asia/Kolkata')
-            date = date.today().strftime('%d %B, %Y')
-            now = datetime.now(tz)
-            time = now.strftime("%I:%M:%S %p")
+            curr = datetime.now(tz)
+            date = curr.strftime('%d %B, %Y')
+            time = curr.strftime('%I:%M:%S %p')
             daily_chats = await db.daily_chats_count(date)
             await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(
                 a=message.chat.title,
@@ -105,9 +105,9 @@ async def start(client, message):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         total_users = await db.total_users_count()
         tz = pytz.timezone('Asia/Kolkata')
-        date = date.today().strftime('%d %B, %Y')
-        now = datetime.now(tz)
-        time = now.strftime("%I:%M:%S %p")
+        curr = datetime.now(tz)
+        date = curr.strftime('%d %B, %Y')
+        time = curr.strftime('%I:%M:%S %p')
         daily_users = await db.daily_users_count(date)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(
             a=message.from_user.id,
