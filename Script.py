@@ -113,6 +113,7 @@ Group: {} (<code>{}</code>)
 Total Members: <code>{}</code>
 Date: <code>{}</code>
 Time: <code>{}</code>
+daily_chats: {}
 Added By: {}
 @PremiumMHBot"""
 
@@ -122,6 +123,7 @@ Name: {}
 Total: {}
 Date: <code>{}</code>
 Time: <code>{}</code>
+daily_users: {}
 @PremiumMHBot"""
 
     LOG_TEXT_V = """🆕 #UserVerify
