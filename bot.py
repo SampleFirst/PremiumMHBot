@@ -52,7 +52,7 @@ class Bot(Client):
         curr = datetime.now(tz)
         date = curr.strftime('%d %B, %Y')
         time = curr.strftime('%I:%M:%S %p')
-        await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
+        await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(date, time))
         app = web.AppRunner(await web_server())
         await app.setup()
         bind_address = "0.0.0.0"
