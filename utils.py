@@ -605,9 +605,9 @@ async def get_token(bot, userid, link, fileid):
     time_var = status["time"]
     hour, minute, second = time_var.split(":")
     year, month, day = date_var.split("-")
-    last_date, last_time = str((datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute), second=int(second)))-timedelta(hours=12)).split(" ")
+    last_date, last_time = (datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute), second=int(second))-timedelta(hours=12)).strftime("%Y-%m-%d %H:%M:%S").split(" ")
     tz = pytz.timezone('Asia/Kolkata')
-    curr_date, curr_time = str(datetime.now(tz)).split(" ")
+    curr_date, curr_time = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S").split(" ")
     if last_date == curr_date:
         vr_num = 2
     else:
@@ -729,7 +729,7 @@ async def verify_user(bot, userid, token):
     tz = pytz.timezone('Asia/Kolkata')
     date_var = datetime.now(tz) + timedelta(hours=12)
     temp_time = date_var.strftime("%H:%M:%S")
-    date_var, time_var = str(date_var).split(" ")
+    date_var, time_var = date_var.strftime("%Y-%m-%d"), date_var.strftime("%I:%M:%S %p")
     await update_verify_status(user.id, date_var, temp_time)
 
 
