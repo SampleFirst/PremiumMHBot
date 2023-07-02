@@ -81,6 +81,7 @@ async def start(client, message):
         await asyncio.sleep(2)
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
+            total_chat = await db.total_chat_count()
             tz = pytz.timezone('Asia/Kolkata')
             curr = datetime.now(tz)
             date = curr.strftime('%d %B, %Y')
