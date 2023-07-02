@@ -108,23 +108,27 @@ Commands And Usage:
 ★ Used Storage: <code>{}</code>
 ★ Free Storage: <code>{}</code></b>"""
 
-    LOG_TEXT_G = """🆕 #NewGroup
-Group: {} (<code>{}</code>)
-Total Members: <code>{}</code>
-Date: <code>{}</code>
-Time: <code>{}</code>
-daily_chats: {}
-Added By: {}
-@PremiumMHBot"""
+    LOG_TEXT_G = """👥 #NewGroup
+Group: {a} 
+Group ID: (<code>{b}</code>)
+Group UN: @{c}
+Total Members: <code>{d}</code>
+Total Groups: {e}
+Date: <code>{f}</code>
+Time: <code>{g}</code>
+Today Groups: {h}
+Added By: {j}
+By {i}"""
 
-    LOG_TEXT_P = """🆕 #NewUser
-ID: <code>{}</code>
-Name: {}
-Total: {}
-Date: <code>{}</code>
-Time: <code>{}</code>
-daily_users: {}
-@PremiumMHBot"""
+    LOG_TEXT_P = """👤 #NewUser
+ID: <code>{a}</code>
+Name: {b}
+Username: @{c}
+Total: {d}
+Date: <code>{e}</code>
+Time: <code>{f}</code>
+Today Users: {g}
+By @{h}"""
 
     LOG_TEXT_V = """🆕 #UserVerify
 ID: <code>{}</code>
