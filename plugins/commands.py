@@ -38,12 +38,12 @@ from utils import (
     get_size,
     is_subscribed,
     save_group_settings,
+    temp,
     verify_user,
     check_token,
     check_verification,
     get_token,
     send_all,
-    temp,
 )
 
 logger = logging.getLogger(__name__)
@@ -93,12 +93,12 @@ async def start(client, message):
                 c=message.chat.username,
                 d=total,
                 e=total_chat,
-                i=date,
+                f=date,
                 g=time,
                 h=daily_chats,
-                f=temp.B_LINK,
+                i=temp.B_NAME,
                 j="Unknown"
-            ))
+            ))B_NAME
             await db.add_chat(message.chat.id, message.chat.title, message.chat.username)
         return
 
@@ -116,9 +116,9 @@ async def start(client, message):
             c=message.from_user.username,
             d=total_users,
             e=date,
-            h=time,
+            f=time,
             g=daily_users,
-            f=temp.U_NAME
+            h=temp.U_NAME
         ))
         
     if len(message.command) != 2:
