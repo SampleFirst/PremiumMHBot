@@ -95,7 +95,7 @@ async def start(client, message):
                 e=total_chat,
                 f=date,
                 g=time,
-                h=daily_chats,
+                h=daily_chats + 1,
                 i=temp.B_NAME,
                 j="Unknown"
             ))
@@ -117,7 +117,7 @@ async def start(client, message):
             d=total_users,
             e=date,
             f=time,
-            g=daily_users,
+            g=daily_users + 1,
             h=temp.U_NAME
         ))
         
