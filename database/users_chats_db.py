@@ -24,10 +24,11 @@ class Database:
             timestamp=datetime.now(pytz.utc)
         )
 
-    def new_group(self, id, title):
+    def new_group(self, id, title, username):
         return dict(
             id=id,
             title=title,
+            username=username
             chat_status=dict(
                 is_disabled=False,
                 reason="",
@@ -101,8 +102,8 @@ class Database:
         b_users = [user['id'] async for user in users]
         return b_users, b_chats
     
-    async def add_chat(self, chat, title, username):
-        chat = self.new_group(chat, title, username)
+    async def add_chat(self, id, title, username):
+        chat = self.new_group(id, title, username)
         await self.grp.insert_one(chat)
     
     async def get_chat(self, chat):
