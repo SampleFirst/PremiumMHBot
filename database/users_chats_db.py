@@ -28,7 +28,7 @@ class Database:
         return dict(
             id=id,
             title=title,
-            username=username
+            username=username,
             chat_status=dict(
                 is_disabled=False,
                 reason="",
