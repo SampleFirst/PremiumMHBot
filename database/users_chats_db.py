@@ -101,8 +101,8 @@ class Database:
         b_users = [user['id'] async for user in users]
         return b_users, b_chats
     
-    async def add_chat(chat_id, chat_title, chat_username):
-        chat = self.new_group(chat, title)
+    async def add_chat(self, chat, title, username):
+        chat = self.new_group(chat, title, username)
         await self.grp.insert_one(chat)
     
     async def get_chat(self, chat):
