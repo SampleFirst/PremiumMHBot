@@ -63,7 +63,7 @@ async def start(client, message):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply(script.GRP_TXT.format(message.from_user.mention if message.from_user else message.chat.title, temp.U_NAME), reply_markup=reply_markup)
+        await message.reply(GRP_TXT.format(message.from_user.mention if message.from_user else message.chat.title, temp.U_NAME, temp.U_NAME), reply_markup=reply_markup)
         await asyncio.sleep(2)
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
