@@ -52,24 +52,35 @@ BATCH_FILES = {}
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        buttons = [
-            [
-                InlineKeyboardButton('Support Group', url=GRP_LNK),
-                InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
-            ],
-            [
-                InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
+    try:
+        if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+            buttons = [
+                [
+                    InlineKeyboardButton('Support Group', url=GRP_LNK),
+                    InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
+                ],
+                [
+                    InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
+                ]
             ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_photo(
-            photo=random.choice(PICS),
-            caption=script.GRP_TXT.format(message.from_user.mention, temp.U_NAME, message.chat.title),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML,
-            quote=True
-        )
+            reply_markup = InlineKeyboardMarkup(buttons)
+            
+            mention = message.from_user.mention if message.from_user else ""
+            user_name = temp.U_NAME if temp.U_NAME else ""
+            chat_title = message.chat.title if message.chat.title else ""
+            
+            caption = script.GRP_TXT.format(mention, user_name, chat_title)
+            
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=caption,
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML,
+                quote=True
+            )
+    except Exception as e:
+        logger.exception("Error in start command: {}".format(e))
+        
         await asyncio.sleep(2)
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
