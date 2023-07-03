@@ -55,25 +55,17 @@ async def start(client, message):
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
             [
-                InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                InlineKeyboardButton('Support Group', url=GRP_LNK),
+                InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
             ],
             [
-                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
-                InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
-            ],
-            [
-                InlineKeyboardButton('❓ Help', callback_data='help'),
-                InlineKeyboardButton('ℹ️ About', callback_data='about'),
-                InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
-            ],
-            [
-                InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
             photo=random.choice(PICS),
-            caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
+            text=f"<b>Thank you for adding me to {message.chat.title}!\n\nIf you have any questions or doubts about using me, please check the '⚡ How to Download ⚡' button.</b>",
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML,
             quote=True
