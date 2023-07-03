@@ -169,7 +169,10 @@ Please check the spelling on Google or IMDb..."""
     TOP_ALRT_MSG = """🔍 Checking for Movie in Database..."""
     
     MELCOW_ENG = """<b>Hello {}, and Welcome to {} Group </b> 🌟"""
-    
+
+    GRP_TXT="""<b>Hello 👋 {}, 
+Thank you for adding me to {message.chat.title}!\n\nIf you have any questions or doubts about using me, please check the\n\n'⚡ How to Download ⚡' button.</b>"""
+        
     MORE_BOTS = """
 <b>⍟───[ More Bots ]───⍟
     
