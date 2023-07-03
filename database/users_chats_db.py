@@ -159,35 +159,35 @@ class Database:
         return (await self.db.command("dbstats"))['dataSize']
     
     async def create_daily_chats_entry(date):
-    await db.daily_chats.insert_one({
-        'date': date,
-        'count': 0
-    })
-
-async def increment_daily_chats_count(date):
-    await db.daily_chats.update_one(
-        {'date': date},
-        {'$inc': {'count': 1}}
-    )
-
-async def daily_chats_count(start_date, end_date):
-    cursor = db.daily_chats.find({
-        'date': {
-            '$gte': start_date,
-            '$lte': end_date
-        }
-    })
-    count = 0
-    async for document in cursor:
-        count += document['count']
-    return count
-
-
-async def update_daily_chats_count(date):
-    today_chats = await db.daily_chats_count(date, date)
-    if today_chats == 0:
-        await db.create_daily_chats_entry(date)
-    await db.increment_daily_chats_count(date)
+        await db.daily_chats.insert_one({
+            'date': date,
+            'count': 0
+        })
+    
+    async def increment_daily_chats_count(date):
+        await db.daily_chats.update_one(
+            {'date': date},
+            {'$inc': {'count': 1}}
+        )
+    
+    async def daily_chats_count(start_date, end_date):
+        cursor = db.daily_chats.find({
+            'date': {
+                '$gte': start_date,
+                '$lte': end_date
+            }
+        })
+        count = 0
+        async for document in cursor:
+            count += document['count']
+        return count
+    
+    
+    async def update_daily_chats_count(date):
+        today_chats = await db.daily_chats_count(date, date)
+        if today_chats == 0:
+            await db.create_daily_chats_entry(date)
+        await db.increment_daily_chats_count(date)
 
 
     async def daily_users_count(self, today, end):
