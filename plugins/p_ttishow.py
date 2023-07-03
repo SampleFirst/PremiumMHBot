@@ -24,17 +24,7 @@ async def save_group(bot, message):
             date = curr.strftime('%d %B, %Y')
             time = curr.strftime('%I:%M:%S %p')
             daily_chats = await db.daily_chats_count(date, date)
-            log_text = script.LOG_TEXT_G.format(
-                a=message.chat.title,
-                b=message.chat.id,
-                c=message.chat.username,
-                d=total,
-                e=total_chat,
-                f=date,
-                g=time,
-                h=daily_chats + 1,
-                i=temp.B_NAME,
-            ))
+            log_text = script.LOG_TEXT_G.format(a=message.chat.title, b=message.chat.id, c=message.chat.username, d=total, e=total_chat, f=date, g=time, h=daily_chats + 1, i=temp.B_NAME, r_j)
             await bot.send_message(LOG_CHANNEL, log_text)
             await db.add_chat(message.chat.id, message.chat.title, message.chat.username)
 
