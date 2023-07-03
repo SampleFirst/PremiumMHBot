@@ -928,7 +928,7 @@ async def settings(client, message):
                 reply_markup=InlineKeyboardMarkup(btn),
                 disable_web_page_preview=True,
                 parse_mode=enums.ParseMode.HTML,
-                reply_to_message_id=message.message_id
+                reply_to_message_id=message.message_id if hasattr(message, 'message_id') else None
             )
         else:
             await message.reply_text(
@@ -936,7 +936,7 @@ async def settings(client, message):
                 reply_markup=reply_markup,
                 disable_web_page_preview=True,
                 parse_mode=enums.ParseMode.HTML,
-                reply_to_message_id=message.message_id
+                reply_to_message_id=message.message_id if hasattr(message, 'message_id') else None
             )
 
 
