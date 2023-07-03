@@ -171,7 +171,7 @@ Please check the spelling on Google or IMDb..."""
     MELCOW_ENG = """<b>Hello {}, and Welcome to {} Group </b> 🌟"""
 
     GRP_TXT="""<b>Hello 👋 {}, 
-Thank you for adding me to {message.chat.title}!\n\nIf you have any questions or doubts about using me, please check the\n\n'⚡ How to Download ⚡' button.</b>"""
+Thank you for adding me to <a href=https://t.me/{}>{}</a>,!\n\nIf you have any questions or doubts about using me, please check the\n\n'⚡ How to Download ⚡' button.</b>"""
         
     MORE_BOTS = """
 <b>⍟───[ More Bots ]───⍟
