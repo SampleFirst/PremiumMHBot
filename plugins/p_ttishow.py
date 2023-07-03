@@ -17,14 +17,27 @@ async def save_group(bot, message):
     if temp.ME in r_j_check:
         if not await bot.get_chat_members_count(message.chat.id):
             total = await bot.get_chat_members_count(message.chat.id)
+            total_chat = await db.total_chat_count()
             r_j = message.from_user.mention if message.from_user else "Anonymous"
             tz = pytz.timezone('Asia/Kolkata')
-            today = date.today()
-            now = datetime.now(tz)
-            time = now.strftime("%H:%M:%S %p")
-            log_text = script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, today, time, r_j)
+            curr = datetime.now(tz)
+            date = curr.strftime('%d %B, %Y')
+            time = curr.strftime('%I:%M:%S %p')
+            daily_chats = await db.daily_chats_count(date, date)
+            log_text = script.LOG_TEXT_G.format(
+                a=message.chat.title,
+                b=message.chat.id,
+                c=message.chat.username,
+                d=total,
+                e=total_chat,
+                f=date,
+                g=time,
+                h=daily_chats + 1,
+                i=temp.B_NAME,
+            ))
             await bot.send_message(LOG_CHANNEL, log_text)
-            await db.add_chat(message.chat.id, message.chat.title)
+            await db.add_chat(message.chat.id, message.chat.title, message.chat.username)
+
 
         if message.chat.id in temp.BANNED_CHATS:
             buttons = [
