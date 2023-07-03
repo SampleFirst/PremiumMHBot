@@ -65,7 +65,7 @@ async def start(client, message):
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
             photo=random.choice(PICS),
-            text=f"<b>Thank you for adding me to {message.chat.title}!\n\nIf you have any questions or doubts about using me, please check the '⚡ How to Download ⚡' button.</b>",
+            caption=script.GRP_TXT.format(message.from_user.mention, temp.U_NAME, message.chat.title),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML,
             quote=True
