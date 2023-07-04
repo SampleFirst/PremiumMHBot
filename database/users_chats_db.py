@@ -161,22 +161,21 @@ class Database:
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
     
-    async def daily_users_count(self, today):
-        today_date = datetime.strptime(today, '%d %B, %Y').date()
-        start = datetime.combine(today_date, datetime.min.time())
-        end = datetime.combine(today_date, datetime.max.time())
-        count = await self.col.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
-        
-    async def daily_chats_count(self, today):
-        today_date = datetime.strptime(today, '%d %B, %Y').date()
-        start = datetime.combine(today_date, datetime.min.time())
-        end = datetime.combine(today_date, datetime.max.time())
-        count = await self.grp.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
+async def daily_users_count(self, today):
+    start = datetime.combine(today, datetime.min.time())
+    end = datetime.combine(today, datetime.max.time())
+    count = await self.col.count_documents({
+        'timestamp': {'$gte': start, '$lt': end}
+    })
+    return count
+
+
+async def daily_chats_count(self, today):
+    start = datetime.combine(today, datetime.min.time())
+    end = datetime.combine(today, datetime.max.time())
+    count = await self.grp.count_documents({
+        'timestamp': {'$gte': start, '$lt': end}
+    })
+    return count
 
 db = Database(DATABASE_URI, DATABASE_NAME)
