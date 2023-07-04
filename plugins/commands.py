@@ -16,6 +16,7 @@ from Script import script
 from database.connections_mdb import active_connection
 from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_bad_files
 from database.users_chats_db import db
+from database.users_chats_db import update_daily_chats_count
 from info import (
     CHANNELS,
     ADMINS,
