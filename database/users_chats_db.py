@@ -173,15 +173,12 @@ class Database:
         )
     
     async def daily_chats_count(self, start_date, end_date):
-        cursor = self.daily_chats.find({
+        count = await self.grp.count_documents({
             'date': {
                 '$gte': start_date,
                 '$lte': end_date
             }
         })
-        count = 0
-        async for document in cursor:
-            count += document['count']
         return count
     
     async def update_daily_chats_count(self, date):
@@ -203,16 +200,13 @@ class Database:
         )
     
     async def daily_users_count(self, start_date, end_date):
-        cursor = self.daily_users.find({
+        count = await self.col.count_documents({
             'date': {
                 '$gte': start_date,
                 '$lte': end_date
             }
         })
-        count = 0
-        async for document in cursor:
-            count += document['count']
-        return count
+        return count   
     
     async def update_daily_users_count(self, date):
         today_users = await self.daily_users_count(date, date)
