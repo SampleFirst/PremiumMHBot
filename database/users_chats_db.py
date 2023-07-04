@@ -11,7 +11,6 @@ class Database:
         self.db = self._client[database_name]
         self.col = self.db.users
         self.grp = self.db.groups
-        self.daily_users = self.db.daily_users
 
 
     def new_user(self, id, name):
@@ -159,35 +158,22 @@ class Database:
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
     
-    async def daily_total_chat_count(self, date):
-        count = await self.grp.count_documents({'date': date})
-        return count
-    
-    async def create_daily_users_entry(self, date):
-        await self.daily_users.insert_one({
-            'date': date,
-            'count': 0
-        })
-    
-    async def increment_daily_users_count(self, date):
-        await self.daily_users.update_one(
-            {'date': date},
-            {'$inc': {'count': 1}}
-        )
-    
-    async def daily_users_count(self, start_date, end_date):
+    async def daily_users_count(self, today):
+        today_date = datetime.strptime(today, '%d %B, %Y').date()
+        start = datetime.combine(today_date, datetime.min.time())
+        end = datetime.combine(today_date, datetime.max.time())
         count = await self.col.count_documents({
-            'date': {
-                '$gte': start_date,
-                '$lte': end_date
-            }
+            'timestamp': {'$gte': start, '$lt': end}
         })
-        return count   
-    
-    async def update_daily_users_count(self, date):
-        today_users = await self.daily_users_count(date, date)
-        if today_users == 0:
-            await self.create_daily_users_entry(date)
-        await self.increment_daily_users_count(date)
+        return count
+        
+    async def daily_chats_count(self, today):
+        today_date = datetime.strptime(today, '%d %B, %Y').date()
+        start = datetime.combine(today_date, datetime.min.time())
+        end = datetime.combine(today_date, datetime.max.time())
+        count = await self.grp.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
 
 db = Database(DATABASE_URI, DATABASE_NAME)
