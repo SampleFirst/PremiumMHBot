@@ -159,7 +159,7 @@ class Database:
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
     
-    async def get_daily_chat_count(self, date):
+    async def daily_total_chat_count(self, date):
         count = await self.grp.count_documents({'date': date})
         return count
     
