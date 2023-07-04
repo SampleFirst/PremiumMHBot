@@ -11,7 +11,6 @@ class Database:
         self.db = self._client[database_name]
         self.col = self.db.users
         self.grp = self.db.groups
-        self.daily_chats = self.db.daily_chats
         self.daily_users = self.db.daily_users
 
 
@@ -161,7 +160,7 @@ class Database:
         return (await self.db.command("dbstats"))['dataSize']
     
     async def count_chats_on_date(self, date):
-        start_time = datetime.strptime(f"{date} 00:00:00", "%d %B, %Y %H:%M:%S")
+        start_time = datetime.strptime(f"{date} 00:00:00", "%d %m %Y %H:%M:%S")
         end_time = datetime.strptime(f"{date} 23:59:59", "%d %B, %Y %H:%M:%S")
         count = await self.grp.count_documents({
             'chat_status.is_disabled': False,
