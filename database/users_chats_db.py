@@ -35,7 +35,24 @@ class Database:
             ),
             timestamp=datetime.now(pytz.utc)
         )
+
+    async def daily_users_count(self, today):
+        start = datetime.combine(today, datetime.min.time())
+        end = datetime.combine(today, datetime.max.time())
+        count = await self.col.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
     
+    
+    async def daily_chats_count(self, today):
+        start = datetime.combine(today, datetime.min.time())
+        end = datetime.combine(today, datetime.max.time())
+        count = await self.grp.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+        
     async def update_verification(self, id, date, time):
         status = {
             'date': str(date),
@@ -159,23 +176,6 @@ class Database:
         await self.grp.delete_many({'id': int(chat_id)})
     
     async def get_db_size(self):
-        return (await self.db.command("dbstats"))['dataSize']
-    
-    async def daily_users_count(self, today):
-        start = datetime.combine(today, datetime.min.time())
-        end = datetime.combine(today, datetime.max.time())
-        count = await self.col.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
-    
-    
-    async def daily_chats_count(self, today):
-        start = datetime.combine(today, datetime.min.time())
-        end = datetime.combine(today, datetime.max.time())
-        count = await self.grp.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
+        return (await self.db.command("dbstats"))['dataSize']    
 
 db = Database(DATABASE_URI, DATABASE_NAME)
