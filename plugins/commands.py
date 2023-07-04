@@ -16,7 +16,6 @@ from Script import script
 from database.connections_mdb import active_connection
 from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_bad_files
 from database.users_chats_db import db
-from database.users_chats_db import update_daily_chats_count
 from info import (
     CHANNELS,
     ADMINS,
@@ -73,9 +72,6 @@ async def start(client, message):
             curr = datetime.now(tz)
             date = curr.strftime('%d %B, %Y')
             time = curr.strftime('%I:%M:%S %p')
-
-            await update_daily_chats_count(date)  # Update daily chats count
-
             daily_chats = await db.daily_chats_count(date, date)
             await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(
                 a=message.chat.title,
