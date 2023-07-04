@@ -327,12 +327,12 @@ async def get_report(client, message):
     end_date = today
 
     report = "Report:\n\n"
-    
+
     for i in range(past_days):
         current_date = start_date + timedelta(days=i)
-        total_users = await db.daily_users_count(current_date)
-        total_chats = await db.daily_chats_count(current_date)
+        current_date_str = current_date.strftime('%d %B, %Y')  # Convert current_date to string
+        total_users = await db.daily_users_count(current_date_str)
+        total_chats = await db.daily_chats_count(current_date_str)
         report += f"{current_date.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
     await message.reply(report)
-    
