@@ -31,16 +31,17 @@ async def broadcast(bot, message):
     deleted = 0
     failed = 0
     async for user in users:
-        pti, sh = await broadcast_messages(int(user['id']), b_msg)
-        if pti:
+        try:
+            await broadcast_messages(int(user['id']), b_msg)
             done += 1
-        elif pti is False:
-            if sh == "Blocked":
-                blocked += 1
-            elif sh == "Deleted":
-                deleted += 1
-            elif sh == "Error":
-                failed += 1
+        except PeerIdInvalid:
+            await db.delete_user(int(user['id']))
+            logging.info(f"{user['id']} - PeerIdInvalid")
+            failed += 1
+        except Exception as e:
+            logging.error(f"{user['id']} - {str(e)}")
+            failed += 1
+
         time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
         await sts.edit(
             f"Broadcast in progress:\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {done - blocked - deleted - failed}\nBlocked: {blocked}\nDeleted: {deleted}\nFailed: {failed}\n\nTime Elapsed: {time_taken}"
@@ -64,15 +65,17 @@ async def remove_junkuser__db(bot, message):
     failed = 0
     done = 0
     async for user in users:
-        pti, sh = await clear_junk(int(user['id']), b_msg)
-        if pti is False:
-            if sh == "Blocked":
-                blocked += 1
-            elif sh == "Deleted":
-                deleted += 1
-            elif sh == "Error":
-                failed += 1
-        done += 1
+        try:
+            await clear_junk(int(user['id']), b_msg)
+            done += 1
+        except PeerIdInvalid:
+            await db.delete_user(int(user['id']))
+            logging.info(f"{user['id']} - PeerIdInvalid")
+            failed += 1
+        except Exception as e:
+            logging.error(f"{user['id']} - {str(e)}")
+            failed += 1
+
         time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
         await sts.edit(
             f"In progress:\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nBlocked: {blocked}\nDeleted: {deleted}\nFailed: {failed}\n\nTime Elapsed: {time_taken}"
@@ -96,29 +99,25 @@ async def broadcast_group(bot, message):
     success = 0
     deleted = 0
     async for group in groups:
-        pti, sh, ex = await broadcast_messages_group(int(group['id']), b_msg)
-        if pti:
-            if sh == "Success":
-                success += 1
-        elif pti is False:
-            if sh == "Deleted":
-                deleted += 1
-                failed += ex
-                try:
-                    await bot.leave_chat(int(group['id']))
-                except Exception as e:
-                    print(f"{e} > {group['id']}")
-        done += 1
+        try:
+            await broadcast_messages_group(int(group['id']), b_msg)
+            done += 1
+            success += 1
+        except PeerIdInvalid:
+            await db.delete_chat(int(group['id']))
+            logging.info(f"{group['id']} - PeerIdInvalid")
+            deleted += 1
+            failed += f"Group ID: {group['id']}\n"
+        except Exception as e:
+            logging.error(f"{group['id']} - {str(e)}")
+            failed += f"Group ID: {group['id']}\n{str(e)}\n"
+
         time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
         await sts.edit(
             f"Broadcast in progress:\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}\n\nFailed Reason: {failed}\n\nTime Elapsed: {time_taken}"
         )
     await sts.delete()
-    try:
-        await message.reply_text(
-            f"Broadcast Completed:\nCompleted in {time_taken}.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}\n\nFailed Reason: {failed}",
-        )
-    except MessageTooLong:
+    if failed:
         with open('reason.txt', 'w+') as outfile:
             outfile.write(failed)
         await message.reply_document(
@@ -126,6 +125,10 @@ async def broadcast_group(bot, message):
             caption=f"Completed:\nCompleted in {time_taken}.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}",
         )
         os.remove("reason.txt")
+    else:
+        await message.reply_text(
+            f"Broadcast Completed:\nCompleted in {time_taken}.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}\n\nFailed Reason: {failed}",
+        )
 
 
 @Client.on_message(filters.command(["junk_group", "clear_junk_group"]) & filters.user(ADMINS))
@@ -139,27 +142,24 @@ async def junk_clear_group(bot, message):
     failed = ""
     deleted = 0
     async for group in groups:
-        pti, sh, ex = await junk_group(int(group['id']), b_msg)
-        if pti is False:
-            if sh == "Deleted":
-                deleted += 1
-                failed += ex
-                try:
-                    await bot.leave_chat(int(group['id']))
-                except Exception as e:
-                    print(f"{e} > {group['id']}")
-        done += 1
+        try:
+            await junk_group(int(group['id']), b_msg)
+            done += 1
+        except PeerIdInvalid:
+            await db.delete_chat(int(group['id']))
+            logging.info(f"{group['id']} - PeerIdInvalid")
+            deleted += 1
+            failed += f"Group ID: {group['id']}\n"
+        except Exception as e:
+            logging.error(f"{group['id']} - {str(e)}")
+            failed += f"Group ID: {group['id']}\n{str(e)}\n"
+
         time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
         await sts.edit(
             f"In progress:\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nDeleted: {deleted}\n\nFailed Reason: {failed}\n\nTime Elapsed: {time_taken}"
         )
     await sts.delete()
-    try:
-        await bot.send_message(
-            message.chat.id,
-            f"Completed:\nCompleted in {time_taken}.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nDeleted: {deleted}\n\nFailed Reason: {failed}",
-        )
-    except MessageTooLong:
+    if failed:
         with open('junk.txt', 'w+') as outfile:
             outfile.write(failed)
         await message.reply_document(
@@ -167,75 +167,58 @@ async def junk_clear_group(bot, message):
             caption=f"Completed:\nCompleted in {time_taken}.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nDeleted: {deleted}",
         )
         os.remove("junk.txt")
+    else:
+        await bot.send_message(
+            message.chat.id,
+            f"Completed:\nCompleted in {time_taken}.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nDeleted: {deleted}\n\nFailed Reason: {failed}",
+        )
 
 
 async def broadcast_messages_group(chat_id, message):
     try:
         await message.copy(chat_id=chat_id)
-        return True, "Success", ''
-    except FloodWait as e:
-        await asyncio.sleep(e.x)
-        return await broadcast_messages_group(chat_id, message)
+    except PeerIdInvalid:
+        raise PeerIdInvalid
     except Exception as e:
-        await db.delete_chat(int(chat_id))
-        logging.info(f"{chat_id} - PeerIdInvalid")
-        return False, "Deleted", f'{e}\n\n'
+        raise Exception(str(e))
 
 
 async def junk_group(chat_id, message):
     try:
         kk = await message.copy(chat_id=chat_id)
         await kk.delete(True)
-        return True, "Success", ''
-    except FloodWait as e:
-        await asyncio.sleep(e.x)
-        return await junk_group(chat_id, message)
+    except PeerIdInvalid:
+        raise PeerIdInvalid
     except Exception as e:
-        await db.delete_chat(int(chat_id))
-        logging.info(f"{chat_id} - PeerIdInvalid")
-        return False, "Deleted", f'{e}\n\n'
+        raise Exception(str(e))
 
 
 async def clear_junk(user_id, message):
     try:
         key = await message.copy(chat_id=user_id)
         await key.delete(True)
-        return True, "Success"
-    except FloodWait as e:
-        await asyncio.sleep(e.x)
-        return await clear_junk(user_id, message)
     except InputUserDeactivated:
         await db.delete_user(int(user_id))
         logging.info(f"{user_id} - Removed from Database, since the account is deleted.")
-        return False, "Deleted"
     except UserIsBlocked:
         logging.info(f"{user_id} - Blocked the bot.")
-        return False, "Blocked"
     except PeerIdInvalid:
         await db.delete_user(int(user_id))
         logging.info(f"{user_id} - PeerIdInvalid")
-        return False, "Error"
     except Exception as e:
-        return False, "Error"
+        raise Exception(str(e))
 
 
 async def broadcast_messages(user_id, message):
     try:
         await message.copy(chat_id=user_id)
-        return True, "Success"
-    except FloodWait as e:
-        await asyncio.sleep(e.x)
-        return await broadcast_messages(user_id, message)
     except InputUserDeactivated:
         await db.delete_user(int(user_id))
         logging.info(f"{user_id} - Removed from Database, since the account is deleted.")
-        return False, "Deleted"
     except UserIsBlocked:
         logging.info(f"{user_id} - Blocked the bot.")
-        return False, "Blocked"
     except PeerIdInvalid:
         await db.delete_user(int(user_id))
         logging.info(f"{user_id} - PeerIdInvalid")
-        return False, "Error"
     except Exception as e:
-        return False, "Error"
+        raise Exception(str(e))
