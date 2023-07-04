@@ -79,7 +79,7 @@ async def start(client, message):
                 c=message.chat.username,
                 d=total,
                 e=total_chat,
-                f=today,
+                f=str(today),
                 g=time,
                 h=daily_chats,
                 i=temp.B_NAME,
@@ -101,7 +101,7 @@ async def start(client, message):
             b=message.from_user.mention,
             c=message.from_user.username,
             d=total_users,
-            e=today,
+            e=str(today),
             f=time,
             g=daily_users,
             h=temp.U_NAME
