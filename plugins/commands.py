@@ -72,7 +72,11 @@ async def start(client, message):
             curr = datetime.now(tz)
             date = curr.strftime('%d %B, %Y')
             time = curr.strftime('%I:%M:%S %p')
-            daily_chats = await db.update_daily_chats_count(date)
+            
+            # Count current date total chats
+            current_date = date.split(' ')[0]
+            daily_chats = await db.count_chats_on_date(current_date)
+            
             await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(
                 a=message.chat.title,
                 b=message.chat.id,
