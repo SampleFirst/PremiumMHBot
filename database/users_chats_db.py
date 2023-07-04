@@ -160,32 +160,14 @@ class Database:
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
     
-    async def create_daily_chats_entry(self, date):
-        await self.daily_chats.insert_one({
-            'date': date,
-            'count': 0
-        })
-    
-    async def increment_daily_chats_count(self, date):
-        await self.daily_chats.update_one(
-            {'date': date},
-            {'$inc': {'count': 1}}
-        )
-    
-    async def daily_chats_count(self, start_date, end_date):
+    async def count_chats_on_date(self, date):
+        start_time = datetime.strptime(f"{date} 00:00:00", "%d %B, %Y %H:%M:%S")
+        end_time = datetime.strptime(f"{date} 23:59:59", "%d %B, %Y %H:%M:%S")
         count = await self.grp.count_documents({
-            'date': {
-                '$gte': start_date,
-                '$lte': end_date
-            }
+            'chat_status.is_disabled': False,
+            'chat_status.created_at': {'$gte': start_time, '$lte': end_time}
         })
         return count
-    
-    async def update_daily_chats_count(self, date):
-        today_chats = await self.daily_chats_count(date, date)
-        if today_chats == 0:
-            await self.create_daily_chats_entry(date)
-        await self.increment_daily_chats_count(date)
     
     async def create_daily_users_entry(self, date):
         await self.daily_users.insert_one({
