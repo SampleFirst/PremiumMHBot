@@ -318,3 +318,21 @@ async def list_chats(bot, message):
             outfile.write(out)
         await message.reply_document('chats.txt', caption="List of Chats")
         
+@Client.on_message(filters.command("report") & filters.user(ADMINS))
+async def get_report(client, message):
+    # Calculate the start and end dates for the past 7 days
+    today = date.today()
+    past_days = 7  # You can adjust the number of past days as per your requirement
+    start_date = today - timedelta(days=past_days-1)
+    end_date = today
+
+    report = "Report:\n\n"
+    
+    for i in range(past_days):
+        current_date = start_date + timedelta(days=i)
+        total_users = await db.daily_users_count(current_date)
+        total_chats = await db.daily_chats_count(current_date)
+        report += f"{current_date.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+    await message.reply(report)
+    
