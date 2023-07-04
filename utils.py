@@ -12,14 +12,7 @@ import random
 import string
 from bs4 import BeautifulSoup
 from pyrogram import enums
-from pyrogram.errors import (
-    ChatAdminRequired,
-    FloodWait,
-    InputUserDeactivated,
-    PeerIdInvalid,
-    UserIsBlocked,
-    UserNotParticipant,
-)
+from pyrogram.errors import UserNotParticipant
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from database.users_chats_db import db
@@ -167,27 +160,6 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'url': f'https://www.imdb.com/title/tt{movieid}'
     }
     
-async def broadcast_messages(user_id, message):
-    try:
-        await message.copy(chat_id=user_id)
-        return True, "Success"
-    except FloodWait as e:
-        await asyncio.sleep(e.x)
-        return await broadcast_messages(user_id, message)
-    except InputUserDeactivated:
-        await db.delete_user(int(user_id))
-        logging.info(f"{user_id} - Removed from the database, since the account is deleted.")
-        return False, "Deleted"
-    except UserIsBlocked:
-        logging.info(f"{user_id} - Blocked the bot.")
-        return False, "Blocked"
-    except PeerIdInvalid:
-        await db.delete_user(int(user_id))
-        logging.info(f"{user_id} - PeerIdInvalid")
-        return False, "Error"
-    except Exception as e:
-        return False, "Error"
-
 
 async def search_gagala(text):
     user_agent = {
