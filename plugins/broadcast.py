@@ -18,7 +18,7 @@ async def broadcast_command(_, message):
     deleted = 0
     failed = 0
     success = 0
-    for user in users:
+    async for user in users:
         result, status = await broadcast_message(int(user['id']), b_msg)
         if result:
             success += 1
