@@ -158,20 +158,20 @@ class Database:
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
     
-    async def create_daily_chats_entry(date):
-        await db.daily_chats.insert_one({
+    async def create_daily_chats_entry(self, date):
+        await self.daily_chats.insert_one({
             'date': date,
             'count': 0
         })
     
-    async def increment_daily_chats_count(date):
-        await db.daily_chats.update_one(
+    async def increment_daily_chats_count(self, date):
+        await self.daily_chats.update_one(
             {'date': date},
             {'$inc': {'count': 1}}
         )
     
-    async def daily_chats_count(start_date, end_date):
-        cursor = db.daily_chats.find({
+    async def daily_chats_count(self, start_date, end_date):
+        cursor = self.daily_chats.find({
             'date': {
                 '$gte': start_date,
                 '$lte': end_date
@@ -182,21 +182,40 @@ class Database:
             count += document['count']
         return count
     
-    
-    async def update_daily_chats_count(date):
-        today_chats = await db.daily_chats_count(date, date)
+    async def update_daily_chats_count(self, date):
+        today_chats = await self.daily_chats_count(date, date)
         if today_chats == 0:
-            await db.create_daily_chats_entry(date)
-        await db.increment_daily_chats_count(date)
-
-
-    async def daily_users_count(self, today, end):
-        today_date = datetime.strptime(today, '%d %B, %Y').date()
-        start = datetime.combine(today_date, datetime.min.time())
-        end = datetime.combine(today_date, datetime.max.time())
-        count = await self.col.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
+            await self.create_daily_chats_entry(date)
+        await self.increment_daily_chats_count(date)
+    
+    async def create_daily_users_entry(self, date):
+        await self.daily_users.insert_one({
+            'date': date,
+            'count': 0
         })
+    
+    async def increment_daily_users_count(self, date):
+        await self.daily_users.update_one(
+            {'date': date},
+            {'$inc': {'count': 1}}
+        )
+    
+    async def daily_users_count(self, start_date, end_date):
+        cursor = self.daily_users.find({
+            'date': {
+                '$gte': start_date,
+                '$lte': end_date
+            }
+        })
+        count = 0
+        async for document in cursor:
+            count += document['count']
         return count
+    
+    async def update_daily_users_count(self, date):
+        today_users = await self.daily_users_count(date, date)
+        if today_users == 0:
+            await self.create_daily_users_entry(date)
+        await self.increment_daily_users_count(date)
 
 db = Database(DATABASE_URI, DATABASE_NAME)
