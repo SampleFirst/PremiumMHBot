@@ -1,6 +1,6 @@
 class script(object):
-    START_TXT = """<b>Hello 👋 {},
-My Name Is <a href=https://t.me/{}>{}</a>, I Can Provide Movies, Just Add Me To Your Group And Enjoy</b>"""
+    START_TXT = """<b>Hello 👋 {user},
+My Name Is {bot}, I Can Provide Movies, Just Add Me To Your Group And Enjoy</b>"""
 
     HELP_TXT = """<b>Hey {}
 Here Is The Help For My Commands.</b>"""
@@ -109,15 +109,15 @@ Commands And Usage:
 ★ Free Storage: <code>{}</code></b>"""
 
     LOG_TEXT_G = """👥 #NewGroup
-Group: {a} 
-Group ID: (<code>{b}</code>)
-Group UN: @{c}
-Total Members: <code>{d}</code>
-Total Groups: {e}
-Date: <code>{f}</code>
-Time: <code>{g}</code>
-Today Groups: {h}
-Added By: {j}
+<b>᚛› Group: {a}</b>
+<b>᚛› Group ID: <code>{b}</code></b>
+<b>᚛› Group UN: @{c}</b>
+<b>᚛› Total Members: <code>{d}</code></b>
+<b>᚛› Total Groups: <code>{e}</code></b>
+<b>᚛› Today Groups: <code>{h}</code></b>
+<b>᚛› Date: <code>{f}</code></b>
+<b>᚛› Time: <code>{g}</code></b>
+<b>᚛› Added By: {j}</b>
 By {i}"""
 
     LOG_TEXT_P = """👤 #NewUser
