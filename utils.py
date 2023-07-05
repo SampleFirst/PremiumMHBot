@@ -61,6 +61,7 @@ class temp(object):
     MELCOW = {}
     U_NAME = None
     B_NAME = None
+    B_LINK = None
     SETTINGS = {}
     VERIFY = {}
     SEND_ALL_TEMP = {}
