@@ -63,7 +63,7 @@ async def start(client, message):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply(script.START_TXT.format(message.from_user.mention if message.from_user else message.chat.title, temp.U_NAME, temp.B_NAME), reply_markup=reply_markup)
+        await message.reply(script.START_TXT.format(user=message.from_user.mention if message.from_user else message.chat.title, bot=temp.B_LINK), reply_markup=reply_markup)
         await asyncio.sleep(2)
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
@@ -81,8 +81,8 @@ async def start(client, message):
                 e=total_chat,
                 f=str(today),
                 g=time,
-                h=daily_chats + 1,
-                i=temp.B_NAME,
+                h=daily_chats,
+                i=temp.B_LINK,
                 j="Unknown"
             ))
             await db.add_chat(message.chat.id, message.chat.title, message.chat.username)
@@ -104,7 +104,7 @@ async def start(client, message):
             e=str(today),
             f=time,
             g=daily_users + 1,
-            h=temp.U_NAME
+            h=temp.B_LINK
         ))
         
     if len(message.command) != 2:
@@ -128,7 +128,7 @@ async def start(client, message):
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
             photo=random.choice(PICS),
-            caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
+            caption=script.START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML,
             quote=True
@@ -187,7 +187,7 @@ async def start(client, message):
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
             photo=random.choice(PICS),
-            caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
+            caption=script.START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML,
             quote=True
