@@ -21,7 +21,7 @@ class Database:
                 is_banned=False,
                 ban_reason="",
             ),
-            timestamp=datetime.now(pytz.utc)
+            timestamp=datetime.now(tz)
         )
 
     def new_group(self, id, title, username):
@@ -33,7 +33,7 @@ class Database:
                 is_disabled=False,
                 reason="",
             ),
-            timestamp=datetime.now(pytz.utc)
+            timestamp=datetime.now(tz)
         )
 
     async def daily_users_count(self, today):
