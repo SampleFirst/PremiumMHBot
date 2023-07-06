@@ -6,7 +6,8 @@ import math
 import random
 import logging
 lock = asyncio.Lock()
-
+import datetime
+from datetime import date, timedelta
 import pyrogram
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty, UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
@@ -929,6 +930,114 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.message.edit_text(f"Process completed for file deletion! Successfully deleted {str(deleted)} files from DB for your query '{keyword}'. ✅")
 
+    elif callback_data == "report_yesterday":
+        # Calculate the start and end dates for yesterday
+        yesterday = date.today() - timedelta(days=1)
+        start_date = yesterday
+        end_date = yesterday
+
+        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
+
+        report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        report += f"Users: {total_users}, Chats: {total_chats}\n"
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+
+    elif callback_data == "report_last_7_days":
+        today = date.today()
+        past_days = 7
+        start_date = today - timedelta(days=6)
+        end_date = today
+
+        report = "Last 7 Days' Report:\n\n"
+
+        for i in range(7):
+            current_date = start_date + timedelta(days=i)
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            current_date_str = current_datetime.strftime('%d %B, %Y')
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+
+    elif callback_data == "report_last_30_days":
+        today = date.today()
+        past_days = 30
+        start_date = today - timedelta(days=past_days-1)
+        end_date =today
+
+        report = "Last 30 Days' Report:\n\n"
+
+        for i in range(past_days):
+            current_date = start_date + timedelta(days=i)
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            current_date_str = current_datetime.strftime('%d %B, %Y')
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+
+    elif callback_data == "report_this_year":
+        # Calculate the start and end dates for this year
+        today = date.today()
+        start_date = date(today.year, 1, 1)
+        end_date = today
+
+        report = "This Year's Report:\n\n"
+
+        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
+        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+
+    elif callback_data == "report_every_7_days_total_count":
+        today = date.today()
+        start_date = today - timedelta(days=365)
+        end_date = today
+
+        report = "Every 7 Days Total Count (Last 12 Months):\n\n"
+        current_date = start_date
+        while current_date <= end_date:
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+            current_date += timedelta(days=7)
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+
+    elif callback_data == "report_every_30_days_total_count":
+        today = date.today()
+        start_date = today - timedelta(days=365)
+        end_date = today
+
+        report = "Every 30 Days Total Count (Last 12 Months):\n\n"
+        current_date = start_date
+        while current_date <= end_date:
+            current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+            report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+            current_date += timedelta(days=30)
+
+        # Send the report as a reply
+        await callback_query.answer(report)
+
+    elif callback_data == "cancel_report":
+        # Handle cancel button action
+        await callback_query.answer("Report canceled.")
+        
     
     elif query.data == "deletefiletype":
         keyboard = InlineKeyboardMarkup(
