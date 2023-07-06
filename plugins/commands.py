@@ -67,12 +67,12 @@ async def start(client, message):
         await asyncio.sleep(2)
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
-            total_chat = await db.total_chat_count()
+            total_chat = await db.total_chat_count() + 1  # Increment total_chat by 1
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
             time = now.strftime('%I:%M:%S %p')
             today = now.date()  # Get the current date in the defined time zone
-            daily_chats = await db.daily_chats_count(today)
+            daily_chats = await db.daily_chats_count(today) + 1  # Increment daily_chats by 1
             await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(
                 a=message.chat.title,
                 b=message.chat.id,
@@ -90,12 +90,12 @@ async def start(client, message):
 
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
-        total_users = await db.total_users_count()
+        total_users = await db.total_users_count() + 1  # Increment total_users by 1
         tz = pytz.timezone('Asia/Kolkata')
         now = datetime.now(tz)
         time = now.strftime('%I:%M:%S %p')
         today = now.date()  # Get the current date in the defined time zone
-        daily_chats = await db.daily_chats_count(today)
+        daily_chats = await db.daily_chats_count(today) + 1  # Increment daily_chats by 1
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(
             a=message.from_user.id,
             b=message.from_user.mention,
@@ -103,7 +103,7 @@ async def start(client, message):
             d=total_users,
             e=str(today),
             f=time,
-            g=daily_users + 1,
+            g=daily_users,
             h=temp.B_LINK
         ))
         
