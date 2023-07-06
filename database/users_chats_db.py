@@ -1,4 +1,3 @@
-# https://github.com/odysseusmax/animated-lamp/blob/master/bot/database/database.py
 import motor.motor_asyncio
 from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT, AUTO_DELETE, MAX_BTN, AUTO_FFILTER, SHORTLINK_API, SHORTLINK_URL, IS_SHORTLINK
 import pytz
@@ -14,6 +13,7 @@ class Database:
 
 
     def new_user(self, id, name):
+        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
         return dict(
             id=id,
             name=name,
@@ -25,6 +25,7 @@ class Database:
         )
 
     def new_group(self, id, title, username):
+        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
         return dict(
             id=id,
             title=title,
@@ -40,7 +41,7 @@ class Database:
         tz = pytz.timezone('Asia/Kolkata')
         start = tz.localize(datetime.combine(today, datetime.min.time()))
         end = tz.localize(datetime.combine(today, datetime.max.time()))
-        count = await self.grp.count_documents({
+        count = await self.col.count_documents({
             'timestamp': {'$gte': start, '$lt': end}
         })
         return count
