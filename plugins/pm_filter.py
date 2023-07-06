@@ -930,7 +930,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.message.edit_text(f"Process completed for file deletion! Successfully deleted {str(deleted)} files from DB for your query '{keyword}'. ✅")
 
-    elif callback_data == "report_yesterday":
+    elif query.data == "report_yesterday":
         # Calculate the start and end dates for yesterday
         yesterday = date.today() - timedelta(days=1)
         start_date = yesterday
@@ -946,7 +946,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Send the report as a reply
         await callback_query.answer(report)
 
-    elif callback_data == "report_last_7_days":
+    elif query.data == "report_last_7_days":
         today = date.today()
         past_days = 7
         start_date = today - timedelta(days=6)
@@ -965,7 +965,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Send the report as a reply
         await callback_query.answer(report)
 
-    elif callback_data == "report_last_30_days":
+    elif query.data == "report_last_30_days":
         today = date.today()
         past_days = 30
         start_date = today - timedelta(days=past_days-1)
@@ -984,7 +984,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Send the report as a reply
         await callback_query.answer(report)
 
-    elif callback_data == "report_this_year":
+    elif query.data == "report_this_year":
         # Calculate the start and end dates for this year
         today = date.today()
         start_date = date(today.year, 1, 1)
@@ -1000,7 +1000,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Send the report as a reply
         await callback_query.answer(report)
 
-    elif callback_data == "report_every_7_days_total_count":
+    elif query.data == "report_every_7_days_total_count":
         today = date.today()
         start_date = today - timedelta(days=365)
         end_date = today
@@ -1017,7 +1017,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Send the report as a reply
         await callback_query.answer(report)
 
-    elif callback_data == "report_every_30_days_total_count":
+    elif query.data == "report_every_30_days_total_count":
         today = date.today()
         start_date = today - timedelta(days=365)
         end_date = today
@@ -1034,7 +1034,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         # Send the report as a reply
         await callback_query.answer(report)
 
-    elif callback_data == "cancel_report":
+    elif query.data == "cancel_report":
         # Handle cancel button action
         await callback_query.answer("Report canceled.")
         
