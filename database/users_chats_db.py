@@ -37,17 +37,19 @@ class Database:
         )
 
     async def daily_users_count(self, today):
-        start = datetime.combine(today, datetime.min.time())
-        end = datetime.combine(today, datetime.max.time())
-        count = await self.col.count_documents({
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.grp.count_documents({
             'timestamp': {'$gte': start, '$lt': end}
         })
         return count
     
     
     async def daily_chats_count(self, today):
-        start = datetime.combine(today, datetime.min.time())
-        end = datetime.combine(today, datetime.max.time())
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
         count = await self.grp.count_documents({
             'timestamp': {'$gte': start, '$lt': end}
         })
@@ -120,8 +122,9 @@ class Database:
         return b_users, b_chats
     
     async def add_chat(self, chat, title, username):
-        chat = self.new_group(chat, title, username)
-        await self.grp.insert_one(chat)
+        new_group_data = self.new_group(chat, title, username)
+        await self.grp.insert_one(new_group_data)
+
     
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id': int(chat)})
