@@ -349,11 +349,12 @@ async def get_report(client, message):
     total_chats = await db.daily_chats_count(today)
     report += f"{today.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    await message.reply_text(report, reply_markup=reply_markup)
+    await message.edit_text(report, reply_markup=reply_markup)
 
 
 @Client.on_callback_query(filters.regex("yesterday"))
 async def report_yesterday(client, callback_query):
+    # Calculate the start and end dates for yesterday
     yesterday = date.today() - timedelta(days=1)
     start_date = yesterday
     end_date = yesterday
@@ -377,9 +378,7 @@ async def report_yesterday(client, callback_query):
         ]
     )
 
-    await client.edit_message_text(
-        chat_id=callback_query.from_user.id,
-        message_id=callback_query.message.message_id,
+    await callback_query.message.edit_text(
         text=report,
         reply_markup=reply_markup
     )
