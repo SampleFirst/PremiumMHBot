@@ -426,7 +426,12 @@ async def report_last_30_days(client, callback_query):
 
     report = "Last 30 Days' Report:\n\n"
 
-    page = int(callback_query.data.split("_")[-1])
+    page_str = callback_query.data.split("_")[-1]  # Get the page number as a string
+    if page_str.isdigit():  # Check if the page number is a valid integer
+        page = int(page_str)
+    else:
+        page = 1  # Set the default page to 1
+
     results_per_page = 7
     start_index = (page - 1) * results_per_page
     end_index = start_index + results_per_page
@@ -467,6 +472,7 @@ async def report_last_30_days(client, callback_query):
         text=report,
         reply_markup=keyboard
     )
+
 
     
 @Client.on_callback_query(filters.regex("this_year"))
