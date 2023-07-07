@@ -368,7 +368,6 @@ async def report_yesterday(client, callback_query):
     keyboard = InlineKeyboardMarkup(
         [
             InlineKeyboardButton("Home", callback_data="report"),
-            InlineKeyboardButton("Cancel", callback_data="report_cancel")
         ],
         [
             InlineKeyboardButton("Download", callback_data="download_yesterday")
