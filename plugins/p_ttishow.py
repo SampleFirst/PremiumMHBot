@@ -319,33 +319,3 @@ async def list_chats(bot, message):
             outfile.write(out)
         await message.reply_document('chats.txt', caption="List of Chats")
         
-@Client.on_message(filters.command("report") & filters.user(ADMINS))
-async def get_report(client, message):
-    keyboard = [
-        [
-            InlineKeyboardButton("Yesterday", callback_data="report_yesterday"),
-            InlineKeyboardButton("Last 7 Days", callback_data="report_last_7_days"),
-        ],
-        [
-            InlineKeyboardButton("Last 30 Days", callback_data="report_last_30_days"),
-            InlineKeyboardButton("This Year", callback_data="report_this_year"),
-        ],
-        [
-            InlineKeyboardButton("Weekly", callback_data="report_every_7_days_total_count"),
-            InlineKeyboardButton("Monthly", callback_data="report_every_30_days_total_count"),
-        ],
-        [
-            InlineKeyboardButton("Cancel", callback_data="cancel_report")
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    today = date.today()
-    report_date = today.strftime('%d %B, %Y')
-    report = f"Report for {report_date}:\n\n"
-
-    total_users = await db.daily_users_count(today)
-    total_chats = await db.daily_chats_count(today)
-    report += f"{today.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-    await message.reply_text(report, reply_markup=reply_markup)
