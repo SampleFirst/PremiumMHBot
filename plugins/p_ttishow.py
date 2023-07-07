@@ -354,7 +354,6 @@ async def get_report(client, message):
 
 @Client.on_callback_query(filters.regex("yesterday"))
 async def report_yesterday(client, callback_query):
-    # Calculate the start and end dates for yesterday
     yesterday = date.today() - timedelta(days=1)
     start_date = yesterday
     end_date = yesterday
@@ -363,8 +362,8 @@ async def report_yesterday(client, callback_query):
     total_users = await db.daily_users_count(current_datetime)
     total_chats = await db.daily_chats_count(current_datetime)
 
-    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    report += f"Users: {total_users}, Chats: {total_chats}\n"
+    report = f"Yesterday's Report:\n\n"
+    report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
     reply_markup = InlineKeyboardMarkup(
         [
@@ -378,12 +377,12 @@ async def report_yesterday(client, callback_query):
         ]
     )
 
-    await client.send_message(
+    await client.edit_message_text(
         chat_id=callback_query.from_user.id,
+        message_id=callback_query.message.message_id,
         text=report,
         reply_markup=reply_markup
     )
-
 
         
 @Client.on_callback_query(filters.regex("last_7_days"))
