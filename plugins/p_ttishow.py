@@ -1,7 +1,7 @@
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 import datetime
-from datetime import timedelta, date
+from datetime import date, datetime, timedelta
 import pytz
 
 from info import ADMINS, LOG_CHANNEL, SUPPORT_CHAT, MELCOW_NEW_USERS, MELCOW_IMG, CHNL_LNK, GRP_LNK
@@ -349,7 +349,7 @@ async def get_report(client, message):
     total_chats = await db.daily_chats_count(today)
     report += f"{today.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    await message.reply_text(report, reply_markup=reply_markup, quote=True)
+    await message.reply_text(report, reply_markup=reply_markup)
 
 
 @Client.on_callback_query(filters.regex("yesterday"))
@@ -375,7 +375,7 @@ async def report_yesterday(client, callback_query):
         ]
     )
 
-    await callback_query.edit_message_text(report, reply_markup=keyboard, quote=True)
+    await callback_query.edit_message_text(report, reply_markup=keyboard)
         
 @Client.on_callback_query(filters.regex("last_7_days"))
 async def report_last_7_days(client, callback_query):
@@ -404,7 +404,7 @@ async def report_last_7_days(client, callback_query):
         ]
     )
 
-    await callback_query.edit_message_text(report, reply_markup=keyboard, quote=True)
+    await callback_query.edit_message_text(report, reply_markup=keyboard)
 
 
 @Client.on_callback_query(filters.regex("last_30_days"))
@@ -453,7 +453,7 @@ async def report_last_30_days(client, callback_query):
 
     keyboard = InlineKeyboardMarkup(keyboard_buttons)
 
-    await callback_query.edit_message_text(report, reply_markup=keyboard, quote=True)
+    await callback_query.edit_message_text(report, reply_markup=keyboard)
 
 @Client.on_callback_query(filters.regex("this_year"))
 async def report_this_year(client, callback_query):
@@ -503,7 +503,7 @@ async def report_this_year(client, callback_query):
 
     keyboard = InlineKeyboardMarkup(keyboard_buttons)
 
-    await callback_query.edit_message_text(report, reply_markup=keyboard, quote=True)
+    await callback_query.edit_message_text(report, reply_markup=keyboard)
 
 @Client.on_callback_query(filters.regex("every_7_days_total_count"))
 async def report_every_7_days_total_count(client, callback_query):
@@ -550,7 +550,7 @@ async def report_every_7_days_total_count(client, callback_query):
 
     keyboard = InlineKeyboardMarkup(keyboard_buttons)
 
-    await callback_query.edit_message_text(report, reply_markup=keyboard, quote=True)
+    await callback_query.edit_message_text(report, reply_markup=keyboard)
 
 
 @Client.on_callback_query(filters.regex("every_30_days_total_count"))
@@ -598,12 +598,12 @@ async def report_every_30_days_total_count(client, callback_query):
 
     keyboard = InlineKeyboardMarkup(keyboard_buttons)
 
-    await callback_query.edit_message_text(report, reply_markup=keyboard, quote=True)
+    await callback_query.edit_message_text(report, reply_markup=keyboard)
 
 @Client.on_callback_query(filters.regex("cancel"))
 async def cancel_report(client, callback_query):
     # Handle cancel button action
-    await callback_query.edit_message_text("Report canceled.", quote=True)
+    await callback_query.edit_message_text("Report canceled.")
 
 
 @Client.on_callback_query(filters.regex("download_yesterday"))
