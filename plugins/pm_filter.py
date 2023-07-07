@@ -39,27 +39,30 @@ SPELL_CHECK = {}
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
     if message.chat.id != SUPPORT_CHAT_ID:
-        await global_filters(client, message)
-    manual = await manual_filters(client, message)
-    if not manual:
-        settings = await get_settings(message.chat.id)
-        try:
-            if settings['auto_ffilter']:
-                await auto_filter(client, message)
-        except KeyError:
-            grpid = await active_connection(str(message.from_user.id))
-            await save_group_settings(grpid, 'auto_ffilter', True)
-            settings = await get_settings(message.chat.id)
-            if settings['auto_ffilter']:
-                await auto_filter(client, message)
-
+        glob = await global_filters(client, message)
+        if glob == False:
+            manual = await manual_filters(client, message)
+            if manual == False:
+                settings = await get_settings(message.chat.id)
+                try:
+                    if settings['auto_ffilter']:
+                        await auto_filter(client, message)
+                except KeyError:
+                    grpid = await active_connection(str(message.from_user.id))
+                    await save_group_settings(grpid, 'auto_ffilter', True)
+                    settings = await get_settings(message.chat.id)
+                    if settings['auto_ffilter']:
+                        await auto_filter(client, message)
+    else: #a better logic to avoid repeated lines of code in auto_filter function
+        search = message.text
+        temp_files, temp_offset, total_results = await get_search_results(chat_id=message.chat.id, query=search.lower(), offset=0, filter=True)
+        if total_results == 0:
+            return
+        else:
+            return await message.reply_text(f"<b>Hᴇʏ {message.from_user.mention}, {str(total_results)} ʀᴇsᴜʟᴛs ᴀʀᴇ ғᴏᴜɴᴅ ɪɴ ᴍʏ ᴅᴀᴛᴀʙᴀsᴇ ғᴏʀ ʏᴏᴜʀ ᴏ̨ᴜᴇʀʏ {search}. Kɪɴᴅʟʏ ᴜsᴇ ɪɴʟɪɴᴇ sᴇᴀʀᴄʜ ᴏʀ ᴍᴀᴋᴇ ᴀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴀᴅᴅ ᴍᴇ ᴀs ᴀᴅᴍɪɴ ᴛᴏ ɢᴇᴛ ᴍᴏᴠɪᴇ ғɪʟᴇs. Tʜɪs ɪs ᴀ sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ sᴏ ᴛʜᴀᴛ ʏᴏᴜ ᴄᴀɴ'ᴛ ɢᴇᴛ ғɪʟᴇs ғʀᴏᴍ ʜᴇʀᴇ...\n\nFᴏʀ Mᴏᴠɪᴇs, Jᴏɪɴ @free_movies_all_languages</b>")
 
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_text(bot, message):
-    if not await is_participant(bot, message):
-        return
-    if not await is_subscribed(bot, message):
-        return
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
@@ -67,64 +70,31 @@ async def pm_text(bot, message):
         return  # ignore commands and hashtags
     if user_id in ADMINS:
         return  # ignore admins
+    
     await message.reply_text("<b>Your message has been sent to my moderators!</b>")
+
+    # Create buttons for the Telegram channel
+    buttons = [
+        [
+        InlineKeyboardButton("Movies Search", url="https://t.me/+_FmlDFAh13FlNTVl")
+        ],
+        [
+        InlineKeyboardButton("PremiumMH Update", url="https://t.me/PremiumMHUpdate")
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(buttons)
+
+    # Set quote to True
+    quote = True
+
     await bot.send_message(
         chat_id=LOG_CHANNEL,
-        text=f"<b>#PM_MSG\n\nName: {user}\n\nID: {user_id}\n\nMessage: {content}</b>"
+        text=f"<b>#PM_MSG\n\nName: {user}\n\nID: {user_id}\n\nMessage: {content}</b>",
+        reply_markup=keyboard,
+        quote=quote
     )
 
 
-async def is_participant(bot, message):
-    chat_id = message.chat.id
-    user_id = message.from_user.id
-    try:
-        chat_member_1 = await bot.get_chat_member(chat_id, user_id)
-        chat_member_2 = await bot.get_chat_member(chat_id, FORCE_SUB_2)
-        if chat_member_1.status in ["creator", "administrator", "member"] and chat_member_2.status in ["creator", "administrator", "member"]:
-            return True
-    except UserNotParticipant:
-        pass
-    buttons = [
-        [
-            InlineKeyboardButton(text="📢 Join Update Channel 1 📢", url=f"https://t.me/{FORCE_SUB_1}"),
-            InlineKeyboardButton(text="📢 Join Update Channel 2 📢", url=f"https://t.me/{FORCE_SUB_2}")
-        ],
-        [
-            InlineKeyboardButton(text='Continue', callback_data='done')
-        ]
-    ]
-
-    text = "**Sorry, you're not participating in both of the channels. Please join both channels to continue.**"
-    await message.reply_text(text=text, reply_markup=InlineKeyboardMarkup(buttons))
-    return False
-
-
-@Client.on_callback_query(filters.regex('done'))
-async def callback_done(bot, callback_query):
-    message = callback_query.message
-    user_id = callback_query.from_user.id
-    chat_id = message.chat.id
-    user = callback_query.from_user.first_name
-    try:
-        chat_member_1 = await bot.get_chat_member(chat_id, user_id)
-        chat_member_2 = await bot.get_chat_member(chat_id, FORCE_SUB_2)
-        if chat_member_1.status in ["creator", "administrator", "member"] and chat_member_2.status in ["creator", "administrator", "member"]:
-            await message.edit_text("Thank you for joining both channels! You can continue using the bot.")
-            return
-    except UserNotParticipant:
-        pass
-    buttons = [
-        [
-            InlineKeyboardButton(text="📢 Join Update Channel 1 📢", url=f"https://t.me/{FORCE_SUB_1}"),
-            InlineKeyboardButton(text="📢 Join Update Channel 2 📢", url=f"https://t.me/{FORCE_SUB_2}")
-        ],
-        [
-            InlineKeyboardButton(text='Continue', callback_data='done')
-        ]
-    ]
-    text = f"Hey {user}, it seems you haven't joined one or both of the channels yet. Please join both channels to continue using the bot."
-    await message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(buttons))
-    
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
     ident, req, key, offset = query.data.split("_")
