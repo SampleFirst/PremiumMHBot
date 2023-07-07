@@ -368,13 +368,12 @@ async def report_yesterday(client, callback_query):
     keyboard = InlineKeyboardMarkup(
         [
             InlineKeyboardButton("Home", callback_data="report"),
-        ],
-        [
-            InlineKeyboardButton("Download", callback_data="download_yesterday")
+            InlineKeyboardButton("Cancel", callback_data="report_cancel")
         ]
     )
 
     await callback_query.edit_message_text(report, reply_markup=keyboard)
+
         
 @Client.on_callback_query(filters.regex("last_7_days"))
 async def report_last_7_days(client, callback_query):
