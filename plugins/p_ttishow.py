@@ -365,14 +365,25 @@ async def report_yesterday(client, callback_query):
 
     report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     report += f"Users: {total_users}, Chats: {total_chats}\n"
-    keyboard = InlineKeyboardMarkup(
+
+    reply_markup = InlineKeyboardMarkup(
         [
-            InlineKeyboardButton("Home", callback_data="report"),
-            InlineKeyboardButton("Cancel", callback_data="report_cancel")
+            [
+                InlineKeyboardButton("Home", callback_data="report"),
+                InlineKeyboardButton("Cancel", callback_data="report_cancel")
+            ],
+            [
+                InlineKeyboardButton("Download", callback_data="download_yesterday")
+            ]
         ]
     )
 
-    await callback_query.edit_message_text(report, reply_markup=keyboard)
+    await client.send_message(
+        chat_id=callback_query.from_user.id,
+        text=report,
+        reply_markup=reply_markup
+    )
+
 
         
 @Client.on_callback_query(filters.regex("last_7_days"))
