@@ -355,8 +355,7 @@ async def get_report(client, message):
 
 @Client.on_callback_query(filters.regex("yesterday"))
 async def report_yesterday(client, callback_query):
-    # Calculate the start and end dates for yesterday
-    yesterday = date.today() - timedelta(days=1)
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
     end_date = yesterday
 
@@ -366,12 +365,14 @@ async def report_yesterday(client, callback_query):
 
     yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     yesterday_report += f"Users: {total_users}, Chats: {total_chats}\n"
-    
-    # Create a temporary .txt file with yesterday's report
-    with open("yesterday_report.txt", "w") as file:
+
+    file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
+    with open(file_name, "w") as file:
         file.write(yesterday_report)
 
-    # Prepare the inline keyboard with buttons
+    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
+    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
+
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -379,56 +380,35 @@ async def report_yesterday(client, callback_query):
                 InlineKeyboardButton("Cancel", callback_data="report_cancel")
             ],
             [
-                InlineKeyboardButton("Download", callback_data="download_yesterday_report")
+                InlineKeyboardButton("Download", callback_data="download_report")
             ]
         ]
     )
 
-    await callback_query.edit_message_text(
+    await callback_query.message.edit_text(
         text=yesterday_report,
         reply_markup=reply_markup
     )
 
+    os.remove(file_name)
 
-@Client.on_callback_query(filters.regex("download_yesterday_report"))
-async def download_yesterday_report(client, callback_query):
-    # Delete the previous report file if it exists
-    if os.path.exists("yesterday_report.txt"):
-        os.remove("yesterday_report.txt")
 
+
+@Client.on_callback_query(filters.regex("download_report"))
+async def download_report(client, callback_query):
     # Calculate the start and end dates for yesterday
-    yesterday = date.today() - timedelta(days=1)
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
-    end_date = yesterday
 
-    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-    total_users = await db.daily_users_count(current_datetime)
-    total_chats = await db.daily_chats_count(current_datetime)
+    file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
 
-    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    yesterday_report += f"Users: {total_users}, Chats: {total_chats}\n"
+    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
+    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
 
-    # Create a temporary .txt file with yesterday's report
-    with open("yesterday_report.txt", "w") as file:
-        file.write(yesterday_report)
+    await callback_query.answer("Report downloaded")
 
-    # Send the report file to the specified log channel
-    await client.send_document(LOG_CHANNEL, document="yesterday_report.txt")
-
-    # Prepare the inline keyboard with buttons
-    reply_markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("Home", callback_data="report"),
-                InlineKeyboardButton("Cancel", callback_data="report_cancel")
-            ]
-        ]
-    )
-
-    await callback_query.edit_message_text(
-        text="Report file sent successfully.",
-        reply_markup=reply_markup
-    )
+    # Clean up the temporary file
+    os.remove(file_name)
 
         
 @Client.on_callback_query(filters.regex("last_7_days"))
