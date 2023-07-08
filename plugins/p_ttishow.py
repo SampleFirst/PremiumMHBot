@@ -367,7 +367,9 @@ async def report_yesterday(bot, callback_query):
     yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     yesterday_report += f"Users: {total_users}, Chats: {total_chats}\n"
 
-    file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
+    current_time = int(time.time())  # Get current timestamp
+    file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
+
     with open(file_name, "w") as file:
         file.write(yesterday_report)
 
@@ -390,32 +392,24 @@ async def report_yesterday(bot, callback_query):
 
     os.remove(file_name)
 
+
 @Client.on_callback_query(filters.regex("download_report"))
 async def download_report(bot, callback_query):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
 
-    base_file_name = f"report_{start_date.strftime('%Y-%m-%d')}"
-    file_number = 1
-    file_name = f"{base_file_name}_{file_number}.txt"
+    current_time = int(time.time())  # Get current timestamp
+    file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
 
-    # Find the next available file name
-    while os.path.isfile(file_name):
-        file_number += 1
-        file_name = f"{base_file_name}_{file_number}.txt"
-
-    # Write the report to the file
     with open(file_name, "w") as file:
         file.write(yesterday_report)
 
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
 
-    # Send the document using the correct file_name
-    await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
+    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
 
     await callback_query.answer("Report sent to log channel")
 
-    # Clean up the temporary file
     os.remove(file_name)
 
         
