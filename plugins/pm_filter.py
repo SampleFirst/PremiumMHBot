@@ -917,11 +917,39 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 ]
             ]
         )
-
+    
         await query.message.edit_text(
             "🗑 Select the type of files you want to delete!\n\n🗑 This will delete related files from the database:",
             reply_markup=keyboard,
         )
+    
+    elif query.data == "download_yesterday":
+        async def download_yesterday(client, callback_query):
+            # Calculate the start and end dates for yesterday
+            yesterday = date.today() - timedelta(days=1)
+            start_date = yesterday
+            end_date = yesterday
+    
+            current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+            total_users = await db.daily_users_count(current_datetime)
+            total_chats = await db.daily_chats_count(current_datetime)
+    
+            report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    
+            if total_users == 0 and total_chats == 0:
+                report += "No data available for yesterday."
+            else:
+                report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+    
+            with open('Yesterday.txt', 'w+') as outfile:
+                outfile.write(report)
+    
+            await client.send_document(callback_query.from_user.id, document='Yesterday.txt', caption=f"Completed:\n\nTotal Groups: {total_chats}\nTotal Users: {total_users}")
+    
+            os.remove("Yesterday.txt")
+    
+            # Edit the message to remove the inline keyboard after sending the file
+            await callback_query.edit_message_reply_markup(reply_markup=None)
     
     elif query.data.startswith("opnsetgrp"):
         ident, grp_id = query.data.split("#")
