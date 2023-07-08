@@ -12,6 +12,7 @@ from Script import script
 from pyrogram.errors import ChatAdminRequired
 import asyncio
 import logging
+import os
 
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
@@ -370,9 +371,6 @@ async def report_yesterday(bot, callback_query):
     with open(file_name, "w") as file:
         file.write(yesterday_report)
 
-    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
-    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
-
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -392,8 +390,6 @@ async def report_yesterday(bot, callback_query):
 
     os.remove(file_name)
 
-
-
 @Client.on_callback_query(filters.regex("download_report"))
 async def download_report(bot, callback_query):
     # Calculate the start and end dates for yesterday
@@ -405,11 +401,10 @@ async def download_report(bot, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
     await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
 
-    await callback_query.answer("Report downloaded")
+    await callback_query.answer("Report Send in Log Channel")
 
     # Clean up the temporary file
     os.remove(file_name)
-
         
 @Client.on_callback_query(filters.regex("last_7_days"))
 async def report_last_7_days(client, callback_query):
