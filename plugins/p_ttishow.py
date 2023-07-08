@@ -384,23 +384,50 @@ async def report_yesterday(client, callback_query):
         ]
     )
 
-    # Edit the message with the updated content
     await callback_query.edit_message_text(
-        text="Yesterday's report is ready.",
+        text=yesterday_report,
         reply_markup=reply_markup
     )
 
 
 @Client.on_callback_query(filters.regex("download_yesterday_report"))
 async def download_yesterday_report(client, callback_query):
-    # Read the contents of the temporary .txt file
-    with open("yesterday_report.txt", "r") as file:
-        report_content = file.read()
+    # Delete the previous report file if it exists
+    if os.path.exists("yesterday_report.txt"):
+        os.remove("yesterday_report.txt")
 
-    # Send the .txt file as a document
-    await callback_query.message.reply_document(
-        document=report_content,
-        filename="yesterday_report.txt"
+    # Calculate the start and end dates for yesterday
+    yesterday = date.today() - timedelta(days=1)
+    start_date = yesterday
+    end_date = yesterday
+
+    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+    total_users = await db.daily_users_count(current_datetime)
+    total_chats = await db.daily_chats_count(current_datetime)
+
+    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    yesterday_report += f"Users: {total_users}, Chats: {total_chats}\n"
+
+    # Create a temporary .txt file with yesterday's report
+    with open("yesterday_report.txt", "w") as file:
+        file.write(yesterday_report)
+
+    # Send the report file to the specified log channel
+    await client.send_document(LOG_CHANNEL, document="yesterday_report.txt")
+
+    # Prepare the inline keyboard with buttons
+    reply_markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Home", callback_data="report"),
+                InlineKeyboardButton("Cancel", callback_data="report_cancel")
+            ]
+        ]
+    )
+
+    await callback_query.edit_message_text(
+        text="Report file sent successfully.",
+        reply_markup=reply_markup
     )
 
         
