@@ -364,8 +364,14 @@ async def report_yesterday(client, callback_query):
     total_users = await db.daily_users_count(current_datetime)
     total_chats = await db.daily_chats_count(current_datetime)
 
-    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    report += f"Users: {total_users}, Chats: {total_chats}\n"
+    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    yesterday_report += f"Users: {total_users}, Chats: {total_chats}\n"
+    
+    # Create a temporary .txt file with yesterday's report
+    with open("yesterday_report.txt", "w") as file:
+        file.write(yesterday_report)
+
+    # Prepare the inline keyboard with buttons
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -373,14 +379,27 @@ async def report_yesterday(client, callback_query):
                 InlineKeyboardButton("Cancel", callback_data="report_cancel")
             ],
             [
-                InlineKeyboardButton("Download", callback_data="download_yesterday")
+                InlineKeyboardButton("Download", callback_data="download_yesterday_report")
             ]
         ]
     )
 
     await callback_query.edit_message_text(
-        text=report,
+        text=yesterday_report,
         reply_markup=reply_markup
+    )
+
+
+@Client.on_callback_query(filters.regex("download_yesterday_report"))
+async def download_yesterday_report(client, callback_query):
+    # Read the contents of the temporary .txt file
+    with open("yesterday_report.txt", "r") as file:
+        report_content = file.read()
+
+    # Send the .txt file as a document
+    await callback_query.message.reply_document(
+        document=report_content,
+        filename="yesterday_report.txt"
     )
 
         
