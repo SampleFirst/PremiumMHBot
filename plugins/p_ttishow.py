@@ -384,8 +384,9 @@ async def report_yesterday(client, callback_query):
         ]
     )
 
+    # Edit the message with the updated content
     await callback_query.edit_message_text(
-        text=yesterday_report,
+        text="Yesterday's report is ready.",
         reply_markup=reply_markup
     )
 
