@@ -949,7 +949,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             os.remove("Yesterday.txt")
         
             # Remove the inline keyboard by editing the message
-            await callback_query.edit_message_text(text=report, reply_markup=None)
+            await callback_query.edit_message_text(
+                text=report + ' ',  # Append a space character to trigger the update
+                reply_markup=None  # Remove the inline keyboard by setting reply_markup to None
+            )
     
     elif query.data.startswith("opnsetgrp"):
         ident, grp_id = query.data.split("#")
