@@ -405,19 +405,19 @@ async def download_report(bot, callback_query):
         file_name = f"{base_file_name}_{file_number}.txt"
 
     # Write the report to the file
-    yesterday_report = generate_yesterday_report(start_date)  # Create a separate function to generate the report content
     with open(file_name, "w") as file:
         file.write(yesterday_report)
 
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
 
-    # Send the document using the correct file_id
-    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
+    # Send the document using the correct file_name
+    await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
 
     await callback_query.answer("Report sent to log channel")
 
     # Clean up the temporary file
     os.remove(file_name)
+
         
 @Client.on_callback_query(filters.regex("last_7_days"))
 async def report_last_7_days(client, callback_query):
