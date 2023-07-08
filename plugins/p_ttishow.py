@@ -366,10 +366,6 @@ async def report_yesterday(client, callback_query):
 
     report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     report += f"Users: {total_users}, Chats: {total_chats}\n"
-
-    # Append a timestamp to the report to make it slightly different
-    report += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -644,42 +640,28 @@ async def cancel_report(client, callback_query):
 
 @Client.on_callback_query(filters.regex("download_yesterday"))
 async def download_yesterday(client, callback_query):
-    try:
-        # Calculate the start and end dates for yesterday
-        yesterday = date.today() - timedelta(days=1)
-        start_date = yesterday
-        end_date = yesterday
+    # Calculate the start and end dates for yesterday
+    yesterday = date.today() - timedelta(days=1)
+    start_date = yesterday
+    end_date = yesterday
 
-        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
+    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+    total_users = await db.daily_users_count(current_datetime)
+    total_chats = await db.daily_chats_count(current_datetime)
 
-        report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        report += f"Users: {total_users}, Chats: {total_chats}"
+    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-        # Generate a unique filename for the report
-        filename = f"report_{start_date.strftime('%Y%m%d')}.txt"
+    with open('Yesterday.txt', 'w+') as outfile:
+        outfile.write(report)
 
-        # Save the report to a file
-        with open(filename, "w") as file:
-            file.write(report)
+    await client.send_document(callback_query.from_user.id, document='Yesterday.txt', caption=f"Completed:\n\nTotal Groups: {total_chats}\nTotal Users: {total_users}")
 
-        # Send the report file using Pyrogram
-        await client.send_document(
-            chat_id=callback_query.message.chat.id,
-            document=filename,
-            caption="Yesterday's Report"
-        )
+    os.remove("Yesterday.txt")
 
-        # Clean up the temporary file
-        os.remove(filename)
+    # Edit the message to remove the inline keyboard after sending the file
+    await callback_query.edit_message_reply_markup(reply_markup=None)
 
-        # Edit the message to remove the inline keyboard after sending the file
-        await callback_query.edit_message_reply_markup(reply_markup=None)
-
-    except Exception as e:
-        logging.exception("Error occurred while sending the file:")
-        await callback_query.answer("An error occurred while sending the file. Please try again later.")
 
 
 @Client.on_callback_query(filters.regex("download_last_7_days"))
