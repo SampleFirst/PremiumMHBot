@@ -354,7 +354,7 @@ async def get_report(client, message):
 
 
 @Client.on_callback_query(filters.regex("yesterday"))
-async def report_yesterday(client, callback_query):
+async def report_yesterday(bot, callback_query):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
     end_date = yesterday
@@ -395,7 +395,7 @@ async def report_yesterday(client, callback_query):
 
 
 @Client.on_callback_query(filters.regex("download_report"))
-async def download_report(client, callback_query):
+async def download_report(bot, callback_query):
     # Calculate the start and end dates for yesterday
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
