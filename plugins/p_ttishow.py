@@ -11,6 +11,7 @@ from utils import get_size, temp, get_settings
 from Script import script
 from pyrogram.errors import ChatAdminRequired
 import asyncio
+import logging
 
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
@@ -643,37 +644,43 @@ async def cancel_report(client, callback_query):
 
 @Client.on_callback_query(filters.regex("download_yesterday"))
 async def download_yesterday(client, callback_query):
-    # Calculate the start and end dates for yesterday
-    yesterday = date.today() - timedelta(days=1)
-    start_date = yesterday
-    end_date = yesterday
+    try:
+        # Calculate the start and end dates for yesterday
+        yesterday = date.today() - timedelta(days=1)
+        start_date = yesterday
+        end_date = yesterday
 
-    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-    total_users = await db.daily_users_count(current_datetime)
-    total_chats = await db.daily_chats_count(current_datetime)
+        current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
 
-    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    report += f"Users: {total_users}, Chats: {total_chats}"
+        report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        report += f"Users: {total_users}, Chats: {total_chats}"
 
-    # Generate a unique filename for the report
-    filename = f"report_{start_date.strftime('%Y%m%d')}.txt"
+        # Generate a unique filename for the report
+        filename = f"report_{start_date.strftime('%Y%m%d')}.txt"
 
-    # Save the report to a file
-    with open(filename, "w") as file:
-        file.write(report)
+        # Save the report to a file
+        with open(filename, "w") as file:
+            file.write(report)
 
-    # Send the report file using Pyrogram
-    await client.send_document(
-        chat_id=callback_query.message.chat.id,
-        document=filename,
-        caption="Yesterday's Report"
-    )
+        # Send the report file using Pyrogram
+        await client.send_document(
+            chat_id=callback_query.message.chat.id,
+            document=filename,
+            caption="Yesterday's Report"
+        )
 
-    # Clean up the temporary file
-    os.remove(filename)
+        # Clean up the temporary file
+        os.remove(filename)
 
-    # Edit the message to remove the inline keyboard after sending the file
-    await callback_query.edit_message_reply_markup(reply_markup=None)
+        # Edit the message to remove the inline keyboard after sending the file
+        await callback_query.edit_message_reply_markup(reply_markup=None)
+
+    except Exception as e:
+        logging.exception("Error occurred while sending the file:")
+        await callback_query.answer("An error occurred while sending the file. Please try again later.")
+
 
 @Client.on_callback_query(filters.regex("download_last_7_days"))
 async def download_report_last_7_days(client, callback_query):
