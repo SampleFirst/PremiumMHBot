@@ -366,6 +366,18 @@ async def report_yesterday(client, callback_query):
 
     report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     report += f"Users: {total_users}, Chats: {total_chats}\n"
+
+    # Prepare the report file
+    report_file_name = "Yesterday.txt"
+    report_file_content = report.encode("utf-8")
+
+    # Send the report file without creating a new callback query
+    await callback_query.message.reply_document(
+        document=report_file_content,
+        file_name=report_file_name
+    )
+
+    # Edit the existing message to include the report text and buttons
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -638,29 +650,7 @@ async def cancel_report(client, callback_query):
 
         
 
-@Client.on_callback_query(filters.regex("download_yesterday"))
-async def download_yesterday(client, callback_query):
-    # Calculate the start and end dates for yesterday
-    yesterday = date.today() - timedelta(days=1)
-    start_date = yesterday
-    end_date = yesterday
 
-    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-    total_users = await db.daily_users_count(current_datetime)
-    total_chats = await db.daily_chats_count(current_datetime)
-
-    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-    with open('Yesterday.txt', 'w+') as outfile:
-        outfile.write(report)
-
-    await client.send_document(callback_query.from_user.id, document='Yesterday.txt', caption=f"Completed:\n\nTotal Groups: {total_chats}\nTotal Users: {total_users}")
-
-    os.remove("Yesterday.txt")
-
-    # Edit the message to remove the inline keyboard after sending the file
-    await callback_query.edit_message_reply_markup(reply_markup=None)
 
 
 
