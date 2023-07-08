@@ -365,6 +365,10 @@ async def report_yesterday(client, callback_query):
 
     report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     report += f"Users: {total_users}, Chats: {total_chats}\n"
+
+    # Append a timestamp to the report to make it slightly different
+    report += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -381,6 +385,7 @@ async def report_yesterday(client, callback_query):
         text=report,
         reply_markup=reply_markup
     )
+
         
 @Client.on_callback_query(filters.regex("last_7_days"))
 async def report_last_7_days(client, callback_query):
