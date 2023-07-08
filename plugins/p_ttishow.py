@@ -392,16 +392,22 @@ async def report_yesterday(bot, callback_query):
 
 @Client.on_callback_query(filters.regex("download_report"))
 async def download_report(bot, callback_query):
-    # Calculate the start and end dates for yesterday
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
 
     file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
 
+    # Ensure the file exists before sending it
+    if not os.path.isfile(file_name):
+        await callback_query.answer("Report file does not exist")
+        return
+
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
+
+    # Send the document using the correct file_id
     await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
 
-    await callback_query.answer("Report Send in Log Channel")
+    await callback_query.answer("Report Send in log channel")
 
     # Clean up the temporary file
     os.remove(file_name)
