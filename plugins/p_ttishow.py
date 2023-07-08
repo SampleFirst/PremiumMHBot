@@ -365,14 +365,14 @@ async def report_yesterday(bot, callback_query):
     total_users = await db.daily_users_count(current_datetime)
     total_chats = await db.daily_chats_count(current_datetime)
 
-    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    yesterday_report += f"Users: {total_users}, Chats: {total_chats}\n"
+    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    report += f"Users: {total_users}, Chats: {total_chats}\n"
 
     current_time = int(time.time())  # Get current timestamp
     file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
 
     with open(file_name, "w") as file:
-        file.write(yesterday_report)
+        file.write(report)
 
     reply_markup = InlineKeyboardMarkup(
         [
@@ -387,7 +387,7 @@ async def report_yesterday(bot, callback_query):
     )
 
     await callback_query.message.edit_text(
-        text=yesterday_report,
+        text=report,
         reply_markup=reply_markup
     )
 
@@ -403,8 +403,7 @@ async def download_report(bot, callback_query):
     file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
 
     with open(file_name, "w") as file:
-        file.write(yesterday_report)
-
+        file.write(report)
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
 
     await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
