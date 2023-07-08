@@ -366,18 +366,6 @@ async def report_yesterday(client, callback_query):
 
     report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     report += f"Users: {total_users}, Chats: {total_chats}\n"
-
-    # Prepare the report file
-    report_file_name = "Yesterday.txt"
-    report_file_content = report.encode("utf-8")
-
-    # Send the report file without creating a new callback query
-    await callback_query.message.reply_document(
-        document=report_file_content,
-        file_name=report_file_name
-    )
-
-    # Edit the existing message to include the report text and buttons
     reply_markup = InlineKeyboardMarkup(
         [
             [
