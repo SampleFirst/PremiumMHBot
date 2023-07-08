@@ -395,19 +395,26 @@ async def download_report(bot, callback_query):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
 
-    file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
+    base_file_name = f"report_{start_date.strftime('%Y-%m-%d')}"
+    file_number = 1
+    file_name = f"{base_file_name}_{file_number}.txt"
 
-    # Ensure the file exists before sending it
-    if not os.path.isfile(file_name):
-        await callback_query.answer("Report file does not exist")
-        return
+    # Find the next available file name
+    while os.path.isfile(file_name):
+        file_number += 1
+        file_name = f"{base_file_name}_{file_number}.txt"
+
+    # Write the report to the file
+    yesterday_report = generate_yesterday_report(start_date)  # Create a separate function to generate the report content
+    with open(file_name, "w") as file:
+        file.write(yesterday_report)
 
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
 
     # Send the document using the correct file_id
     await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
 
-    await callback_query.answer("Report Send in log channel")
+    await callback_query.answer("Report sent to log channel")
 
     # Clean up the temporary file
     os.remove(file_name)
