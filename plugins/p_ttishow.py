@@ -380,9 +380,11 @@ async def report_yesterday(bot, callback_query):
         [
             [
                 InlineKeyboardButton("Home", callback_data="report"),
-                download_button,  # Add the 'Download' button to the markup
                 InlineKeyboardButton("Cancel", callback_data="report_cancel")
             ],
+            [
+                download_button
+            ]
         ]
     )
 
