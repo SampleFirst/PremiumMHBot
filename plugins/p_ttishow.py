@@ -405,7 +405,7 @@ async def download_report(bot, callback_query):
     total_chats = await db.daily_chats_count(current_datetime)
 
     yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
-    yesterday_report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+    yesterday_report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n\nReport File Send In Log Channel"
 
     file_name = f"report.txt"
     with open(file_name, "w") as file:
