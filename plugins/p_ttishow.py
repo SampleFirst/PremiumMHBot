@@ -396,16 +396,14 @@ async def report_yesterday(bot, callback_query):
 
 @Client.on_callback_query(filters.regex("download_report"))
 async def download_report(bot, callback_query):
+    # Calculate the start and end dates for yesterday
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
 
     current_time = int(time.time())  # Get current timestamp
     file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
 
-    with open(file_name, "w") as file:
-        file.write(yesterday_report)
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
-
     await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
 
     await callback_query.answer("Report sent to log channel")
