@@ -372,7 +372,7 @@ async def report_yesterday(bot, callback_query):
     file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
 
     with open(file_name, "w") as file:
-        file.write(report)
+        file.write(yesterday_report)
 
     reply_markup = InlineKeyboardMarkup(
         [
@@ -403,7 +403,7 @@ async def download_report(bot, callback_query):
     file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
 
     with open(file_name, "w") as file:
-        file.write(report)
+        file.write(yesterday_report)
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
 
     await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
