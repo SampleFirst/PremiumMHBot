@@ -322,7 +322,95 @@ async def list_chats(bot, message):
             outfile.write(out)
         await message.reply_document('chats.txt', caption="List of Chats")
 
+@Client.on_message(filters.command("report") & filters.user(ADMINS))
+async def get_report(client, message):
+    keyboard = [
+        [
+            InlineKeyboardButton("Yesterday", callback_data="yesterday"),
+            InlineKeyboardButton("Last 7 Days", callback_data="last_7_days"),
+        ],
+        [
+            InlineKeyboardButton("Last 30 Days", callback_data="last_30_days"),
+            InlineKeyboardButton("This Year", callback_data="this_year"),
+        ],
+        [
+            InlineKeyboardButton("Weekly", callback_data="every_7_days_total_count"),
+            InlineKeyboardButton("Monthly", callback_data="every_30_days_total_count"),
+        ],
+        [
+            InlineKeyboardButton("Cancel", callback_data="report_cancel")
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
+    today = date.today()
+    report_date = today.strftime('%d %B, %Y')
+    report = f"Report for {report_date}:\n\n"
+
+    total_users = await db.daily_users_count(today)
+    total_chats = await db.daily_chats_count(today)
+    report += f"{today.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+    await message.reply_text(report, reply_markup=reply_markup)
+
+
+@Client.on_callback_query(filters.regex("yesterday"))
+async def report_yesterday(bot, callback_query):
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    start_date = yesterday
+    end_date = yesterday
+
+    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+    total_users = await db.daily_users_count(current_datetime)
+    total_chats = await db.daily_chats_count(current_datetime)
+
+    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    yesterday_report += f"Users: {total_users}, Chats: {total_chats}\n"
+
+    file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
+    with open(file_name, "w") as file:
+        file.write(yesterday_report)
+
+    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
+    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
+
+    reply_markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Home", callback_data="report"),
+                InlineKeyboardButton("Cancel", callback_data="report_cancel")
+            ],
+            [
+                InlineKeyboardButton("Download", callback_data="download_report")
+            ]
+        ]
+    )
+
+    await callback_query.message.edit_text(
+        text=yesterday_report,
+        reply_markup=reply_markup
+    )
+
+    os.remove(file_name)
+
+
+
+@Client.on_callback_query(filters.regex("download_report"))
+async def download_report(bot, callback_query):
+    # Calculate the start and end dates for yesterday
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    start_date = yesterday
+
+    file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
+
+    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
+    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
+
+    await callback_query.answer("Report downloaded")
+
+    # Clean up the temporary file
+    os.remove(file_name)
+    
 @Client.on_callback_query(filters.regex("last_7_days"))
 async def report_last_7_days(client, callback_query):
     today = date.today()
