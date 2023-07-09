@@ -482,29 +482,17 @@ async def channel_info(bot, message):
         if chat.username:
             text += '\n👉 @' + chat.username
         else:
-            text += '\n👉 ' + (chat.title or chat.first_name)
+            text += '\n👉 ' + chat.title or chat.first_name
 
     text += f'\n\n**Total:** {len(CHANNELS)}'
 
     if len(text) < 4096:
-        await message.reply(
-            text,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton("Download", callback_data="download")]]
-            )
-        )
+        await message.reply(text)
     else:
         file = 'Indexed channels.txt'
         with open(file, 'w') as f:
             f.write(text)
-        await message.reply_document(file, caption="Indexed channels", reply_markup=None)
-        os.remove(file)
-
-@Client.on_callback_query()
-async def handle_callback(bot, callback_query):
-    if callback_query.data == "download":
-        file = 'Indexed channels.txt'
-        await bot.send_document(callback_query.from_user.id, file, caption="Indexed channels")
+        await message.reply_document(file)
         os.remove(file)
 
 
@@ -526,93 +514,6 @@ async def total(bot, message):
         logger.exception('Failed to check total files')
         await msg.edit(f'Error: {e}')
         
-@Client.on_message(filters.command("report") & filters.user(ADMINS))
-async def get_report(client, message):
-    keyboard = [
-        [
-            InlineKeyboardButton("Yesterday", callback_data="yesterday"),
-            InlineKeyboardButton("Last 7 Days", callback_data="last_7_days"),
-        ],
-        [
-            InlineKeyboardButton("Last 30 Days", callback_data="last_30_days"),
-            InlineKeyboardButton("This Year", callback_data="this_year"),
-        ],
-        [
-            InlineKeyboardButton("Weekly", callback_data="every_7_days_total_count"),
-            InlineKeyboardButton("Monthly", callback_data="every_30_days_total_count"),
-        ],
-        [
-            InlineKeyboardButton("Cancel", callback_data="report_cancel")
-        ],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    today = date.today()
-    report_date = today.strftime('%d %B, %Y')
-    report = f"Report for {report_date}:\n\n"
-
-    total_users = await db.daily_users_count(today)
-    total_chats = await db.daily_chats_count(today)
-    report += f"{today.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-    await message.reply_text(report, reply_markup=reply_markup)
-
-
-@Client.on_callback_query(filters.regex("yesterday"))
-async def report_yesterday(bot, callback_query):
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    start_date = yesterday
-    end_date = yesterday
-
-    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
-    total_users = await db.daily_users_count(current_datetime)
-    total_chats = await db.daily_chats_count(current_datetime)
-
-    text = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-    text += f"Users: {total_users}, Chats: {total_chats}\n"
-
-    file = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
-    with open(file, "w") as f:
-        f.write(text)
-
-    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
-    await bot.send_document(LOG_CHANNEL, document=file, caption=caption)
-
-    reply_markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("Home", callback_data="report"),
-                InlineKeyboardButton("Cancel", callback_data="report_cancel")
-            ],
-            [
-                InlineKeyboardButton("Download", callback_data="download_report")
-            ]
-        ]
-    )
-
-    await callback_query.message.edit_text(
-        text=text,
-        reply_markup=reply_markup
-    )
-
-    os.remove(file)
-
-
-@Client.on_callback_query(filters.regex("download_report"))
-async def download_report(bot, callback_query):
-    # Calculate the start and end dates for yesterday
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    start_date = yesterday
-
-    file = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
-
-    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
-    await bot.send_document(LOG_CHANNEL, document=file, caption=caption)
-
-    await callback_query.answer("Report downloaded")
-
-    # Clean up the temporary file
-    os.remove(file)
     
 @Client.on_message(filters.command('delete') & filters.user(ADMINS))
 async def delete(bot, message):
