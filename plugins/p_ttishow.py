@@ -409,10 +409,10 @@ async def download_report(bot, callback_query):
     yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
     yesterday_report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    file_name = f"Report.txt"
+    file_name = f"Yesterday Report.txt"
     with open(file_name, "w") as file:
         file.write(yesterday_report)
-
+        
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
     await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
 
@@ -437,7 +437,7 @@ async def report_last_7_days(client, callback_query):
         total_chats = await db.daily_chats_count(current_datetime)
         report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    file_name = "Report.txt"
+    file_name = "Last 7 Days Report.txt"
     with open(file_name, "w") as file:
         file.write(report)
 
