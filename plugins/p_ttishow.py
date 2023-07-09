@@ -444,7 +444,7 @@ async def report_last_7_days(client, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
 
     # Create the 'Download' button
-    download_button = InlineKeyboardButton("Download", callback_data="download_last_7_days")
+    download_this_week_button = InlineKeyboardButton("Download This Week", callback_data="download_last_7_days")
 
     reply_markup = InlineKeyboardMarkup(
         [
@@ -453,7 +453,7 @@ async def report_last_7_days(client, callback_query):
                 InlineKeyboardButton("Cancel", callback_data="report_cancel")
             ],
             [
-                download_button
+                download_this_week_button
             ]
         ]
     )
@@ -483,7 +483,7 @@ async def download_report(bot, callback_query):
         total_chats = await db.daily_chats_count(current_datetime)
         report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    file_name = "Report.txt"
+    file_name = "Last 7 Days Report.txt"
     with open(file_name, "w") as file:
         file.write(report)
 
