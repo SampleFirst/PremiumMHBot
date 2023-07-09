@@ -406,9 +406,20 @@ async def download_report(bot, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
     await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
 
-    await callback_query.answer("Report downloaded")
+    reply_markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Back", callback_data="report"),
+                InlineKeyboardButton("Cancel", callback_data="report_cancel")
+            ]
+        ]
+    )
 
-    # Clean up the temporary file
+    await callback_query.message.edit_text(
+        text="Report downloaded.",
+        reply_markup=reply_markup
+    )
+
     os.remove(file_name)
     
 @Client.on_callback_query(filters.regex("last_7_days"))
