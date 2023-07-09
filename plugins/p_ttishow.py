@@ -381,7 +381,7 @@ async def report_yesterday(bot, callback_query):
                 InlineKeyboardButton("Cancel", callback_data="report_cancel")
             ],
             [
-                InlineKeyboardButton("Download", callback_data="download_report")
+                InlineKeyboardButton("Download", callback_data="send_report")
             ]
         ]
     )
@@ -395,8 +395,8 @@ async def report_yesterday(bot, callback_query):
 
 
 
-@Client.on_callback_query(filters.regex("download_report"))
-async def download_report(bot, callback_query):
+@Client.on_callback_query(filters.regex("send_report"))
+async def send_report(bot, callback_query):
     # Calculate the start and end dates for yesterday
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
