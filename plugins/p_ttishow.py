@@ -416,8 +416,8 @@ async def download_report(bot, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
     await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
 
-    await callback_query.answer("❤ Report File Send In Log Channe ❤")
-    
+    await callback_query.answer("❤ yesterday Report File Sent in Log Channel ❤")
+
     os.remove(file_name)
     
 @Client.on_callback_query(filters.regex("last_7_days"))
@@ -490,7 +490,7 @@ async def download_report(bot, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
     await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
 
-    await callback_query.answer("❤ Report File Sent in Log Channel ❤")
+    await callback_query.answer("❤ Last 7 days Report File Sent in Log Channel ❤")
 
     os.remove(file_name)
 
