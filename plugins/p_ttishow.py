@@ -371,9 +371,6 @@ async def report_yesterday(bot, callback_query):
     current_time = int(time.time())  # Get current timestamp
     file_name = f"report_{current_time}.txt"  # Use timestamp in the file name
 
-    with open(file_name, "w") as file:
-        file.write(yesterday_report)
-
     reply_markup = InlineKeyboardMarkup(
         [
             [
