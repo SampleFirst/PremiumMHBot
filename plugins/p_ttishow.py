@@ -436,7 +436,16 @@ async def report_last_7_days(client, callback_query):
         total_users = await db.daily_users_count(current_datetime)
         total_chats = await db.daily_chats_count(current_datetime)
         report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-    
+
+    file_name = "Report.txt"
+    with open(file_name, "w") as file:
+        file.write(report)
+
+    caption = f"Report for {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
+
+    # Create the 'Download' button
+    download_button = InlineKeyboardButton("Download", callback_data="download_last_7_days")
+
     reply_markup = InlineKeyboardMarkup(
         [
             [
@@ -444,7 +453,7 @@ async def report_last_7_days(client, callback_query):
                 InlineKeyboardButton("Cancel", callback_data="report_cancel")
             ],
             [
-                InlineKeyboardButton("Download", callback_data="download_yesterday")
+                download_button
             ]
         ]
     )
@@ -453,6 +462,37 @@ async def report_last_7_days(client, callback_query):
         text=report,
         reply_markup=reply_markup
     )
+
+    os.remove(file_name)
+
+
+@Client.on_callback_query(filters.regex("download_last_7_days"))
+async def download_report(bot, callback_query):
+    today = date.today()
+    past_days = 7
+    start_date = today - timedelta(days=6)
+    end_date = today
+
+    report = "Last 7 Days' Report:\n\n"
+
+    for i in range(7):
+        current_date = start_date + timedelta(days=i)
+        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+        current_date_str = current_datetime.strftime('%d %B, %Y')
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
+        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+
+    file_name = "Report.txt"
+    with open(file_name, "w") as file:
+        file.write(report)
+
+    caption = f"Report for {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
+    await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
+
+    await callback_query.answer("❤ Report File Sent in Log Channel ❤")
+
+    os.remove(file_name)
 
 
 @Client.on_callback_query(filters.regex("last_30_days"))
@@ -678,27 +718,6 @@ async def cancel_report(client, callback_query):
 
 
 
-@Client.on_callback_query(filters.regex("download_last_7_days"))
-async def download_report_last_7_days(client, callback_query):
-    today = date.today()
-    past_days = 7
-    start_date = today - timedelta(days=6)
-    end_date = today
-
-    report = "Last 7 Days' Report:\n\n"
-
-    for i in range(7):
-        current_date = start_date + timedelta(days=i)
-        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-        current_date_str = current_datetime.strftime('%d %B, %Y')
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
-        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-
-    file_name = "report_last_7_days.txt"
-    file_content = report.encode("utf-8")
-
-    await client.send_document(callback_query.from_user.id, file_content, caption=file_name)
 
 @Client.on_callback_query(filters.regex("download_last_30_days"))
 async def download_report_last_30_days(client, callback_query):
