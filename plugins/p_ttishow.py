@@ -374,7 +374,7 @@ async def report_yesterday(bot, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
 
     # Create the 'Download' button
-    download_button = InlineKeyboardButton("Download", callback_data="download_report")
+    download_button = InlineKeyboardButton("Download", callback_data="download_yesterday_report")
 
     reply_markup = InlineKeyboardMarkup(
         [
@@ -396,7 +396,7 @@ async def report_yesterday(bot, callback_query):
     os.remove(file_name)
 
 
-@Client.on_callback_query(filters.regex("download_report"))
+@Client.on_callback_query(filters.regex("download_yesterday_report"))
 async def download_report(bot, callback_query):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
@@ -416,7 +416,7 @@ async def download_report(bot, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
     await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
 
-    await callback_query.answer("❤Report File Send In Log Channe❤l")
+    await callback_query.answer("❤ Report File Send In Log Channe ❤")
     
     os.remove(file_name)
     
