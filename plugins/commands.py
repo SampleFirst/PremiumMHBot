@@ -482,17 +482,29 @@ async def channel_info(bot, message):
         if chat.username:
             text += '\n👉 @' + chat.username
         else:
-            text += '\n👉 ' + chat.title or chat.first_name
+            text += '\n👉 ' + (chat.title or chat.first_name)
 
     text += f'\n\n**Total:** {len(CHANNELS)}'
 
     if len(text) < 4096:
-        await message.reply(text)
+        await message.reply(
+            text,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Download", callback_data="download")]]
+            )
+        )
     else:
         file = 'Indexed channels.txt'
         with open(file, 'w') as f:
             f.write(text)
-        await message.reply_document(file)
+        await message.reply_document(file, caption="Indexed channels", reply_markup=None)
+        os.remove(file)
+
+@Client.on_callback_query()
+async def handle_callback(bot, callback_query):
+    if callback_query.data == "download":
+        file = 'Indexed channels.txt'
+        await bot.send_document(callback_query.from_user.id, file, caption="Indexed channels")
         os.remove(file)
 
 
