@@ -414,6 +414,8 @@ async def download_report(bot, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
     await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
 
+    await callback_query.answer("Report File Send In Log Channel")
+    
     os.remove(file_name)
     
 @Client.on_callback_query(filters.regex("last_7_days"))
