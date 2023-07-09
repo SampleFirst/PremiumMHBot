@@ -364,7 +364,7 @@ async def report_yesterday(bot, callback_query):
     total_users = await db.daily_users_count(current_datetime)
     total_chats = await db.daily_chats_count(current_datetime)
 
-    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
     yesterday_report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
     file_name = f"report.txt"
@@ -372,12 +372,15 @@ async def report_yesterday(bot, callback_query):
         file.write(yesterday_report)
 
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
-    await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
+
+    # Create the 'Download' button
+    download_button = InlineKeyboardButton("Download", callback_data="download_report")
 
     reply_markup = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton("Home", callback_data="report"),
+                download_button,  # Add the 'Download' button to the markup
                 InlineKeyboardButton("Cancel", callback_data="report_cancel")
             ],
         ]
@@ -391,30 +394,25 @@ async def report_yesterday(bot, callback_query):
     os.remove(file_name)
 
 
-@Client.on_callback_query(filters.regex("send_report"))
-async def send_report(bot, callback_query):
-    # Calculate the start and end dates for yesterday
+@Client.on_callback_query(filters.regex("download_report"))
+async def download_report(bot, callback_query):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
+    end_date = yesterday
 
-    file_name = f"report_{start_date.strftime('%Y-%m-%d')}.txt"
+    current_datetime = datetime.datetime.combine(start_date, datetime.time.min)
+    total_users = await db.daily_users_count(current_datetime)
+    total_chats = await db.daily_chats_count(current_datetime)
 
-    caption = f"Report for {start_date.strftime('%Y-%m-%d %H:%M:%S')}"
-    await bot.send_document(LOG_CHANNEL, document=file_name, caption=caption)
+    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
+    yesterday_report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    reply_markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("Back", callback_data="report"),
-                InlineKeyboardButton("Cancel", callback_data="report_cancel")
-            ]
-        ]
-    )
+    file_name = f"report.txt"
+    with open(file_name, "w") as file:
+        file.write(yesterday_report)
 
-    await callback_query.message.edit_text(
-        text="Report downloaded.",
-        reply_markup=reply_markup
-    )
+    caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
+    await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
 
     os.remove(file_name)
     
