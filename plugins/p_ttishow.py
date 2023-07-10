@@ -615,14 +615,13 @@ async def report_every_7_days_total_count(client, callback_query):
     start_date = today - timedelta(days=365)
     end_date = today
 
-    report = "Weekly Report (Last 12 Months):\n\n"
-
     page = int(callback_query.data.split("_")[-1])
     results_per_page = 7
     start_index = (page - 1) * results_per_page
     end_index = start_index + results_per_page
 
     current_date = start_date + timedelta(days=start_index * 7)
+    report = "Weekly Report (Last 12 Months):\n\n"
     for i in range(start_index, end_index):
         if current_date > end_date:
             break
@@ -652,11 +651,20 @@ async def report_every_7_days_total_count(client, callback_query):
             InlineKeyboardButton("<< Prev", callback_data="every_7_days_total_count_{}".format(page - 1))
         ])
 
+    # Add page number buttons
+    page_buttons_row = []
+    for i in range(1, int((end_date - start_date).days / 7) + 2):
+        if i == page:
+            page_buttons_row.append(InlineKeyboardButton(f"Page {i}", callback_data="empty"))
+        else:
+            page_buttons_row.append(InlineKeyboardButton(f"Page {i}", callback_data="every_7_days_total_count_{}".format(i)))
+    keyboard_buttons.append(page_buttons_row)
+
     keyboard = InlineKeyboardMarkup(keyboard_buttons)
 
     await callback_query.edit_message_text(
         text=report,
-        reply_markup=reply_markup
+        reply_markup=keyboard
     )
 
 
@@ -722,103 +730,8 @@ async def cancel_report(client, callback_query):
 
 
 
-@Client.on_callback_query(filters.regex("download_last_30_days"))
-async def download_report_last_30_days(client, callback_query):
-    today = date.today()
-    past_days = 30
-    start_date = today - timedelta(days=past_days - 1)
-    end_date = today
 
-    report = "Last 30 Days' Report:\n\n"
 
-    for i in range(past_days):
-        current_date = start_date + timedelta(days=i)
-        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-        current_date_str = current_datetime.strftime('%d %B, %Y')
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
-        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
-    file_name = "report_last_30_days.txt"
-    file_content = report.encode("utf-8")
-
-    await client.send_document(callback_query.from_user.id, file_content, caption=file_name)
-
-@Client.on_callback_query(filters.regex("download_this_year"))
-async def download_report_this_year(client, callback_query):
-    today = date.today()
-    start_date = date(today.year, 1, 1)
-    end_date = today
-
-    report = "This Year's Report:\n\n"
-
-    current_date = start_date
-    while current_date <= end_date:
-        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
-        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-        current_date += timedelta(days=1)
-
-    file_name = "report_this_year.txt"
-    file_content = report.encode("utf-8")
-
-    await client.send_document(callback_query.from_user.id, file_content, caption=file_name)
-
-@Client.on_callback_query(filters.regex("download_every_7_days_total_count"))
-async def download_report_every_7_days_total_count(client, callback_query):
-    today = date.today()
-    start_date = today - timedelta(days=365)
-    end_date = today
-
-    report = "Weekly Report (Last 12 Months):\n\n"
-
-    page = int(callback_query.data.split("_")[-1])
-    results_per_page = 7
-    start_index = (page - 1) * results_per_page
-    end_index = start_index + results_per_page
-
-    current_date = start_date + timedelta(days=start_index * 7)
-    for i in range(start_index, end_index):
-        if current_date > end_date:
-            break
-        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
-        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-        current_date += timedelta(days=7)
-
-    file_name = "weekly_report.txt"
-    file_content = report.encode("utf-8")
-
-    await client.send_document(callback_query.from_user.id, file_content, caption=file_name)
-
-@Client.on_callback_query(filters.regex("download_every_30_days_total_count"))
-async def download_report_every_30_days_total_count(client, callback_query):
-    today = date.today()
-    start_date = today - timedelta(days=365)
-    end_date = today
-
-    report = "Monthly Report (Last 12 Months):\n\n"
-
-    page = int(callback_query.data.split("_")[-1])
-    results_per_page = 7
-    start_index = (page - 1) * results_per_page
-    end_index = start_index + results_per_page
-
-    current_date = start_date + timedelta(days=start_index * 30)
-    for i in range(start_index, end_index):
-        if current_date > end_date:
-            break
-        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
-        total_users = await db.daily_users_count(current_datetime)
-        total_chats = await db.daily_chats_count(current_datetime)
-        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
-        current_date += timedelta(days=30)
-
-    file_name = "monthly_report.txt"
-    file_content = report.encode("utf-8")
-
-    await client.send_document(callback_query.from_user.id, file_content, caption=file_name)
     
 
