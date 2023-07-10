@@ -611,29 +611,21 @@ async def report_this_year(client, callback_query):
 
 @Client.on_callback_query(filters.regex("every_7_days_total_count"))
 async def report_every_7_days_total_count(client, callback_query):
-    today = date.today()
+    today = datetime.today()
     start_date = today - timedelta(days=365)
     end_date = today
-
-    page = 1  # Set a default value for the page number
-    split_data = callback_query.data.split("_")
-    if len(split_data) > 1:  # Check if there is a page number in the callback data
-        try:
-            page = int(split_data[-1])  # Attempt to convert the last element to an integer
-        except ValueError:
-            # Handle the case where the last element is not a valid integer
-            # You can choose to set a default value or return an error message
-            # For simplicity, we'll set the default page number to 1
-            page = 1
-
+    
+    page = int(callback_query.data.split("_")[-1])
     results_per_page = 7
     start_index = (page - 1) * results_per_page
     end_index = start_index + results_per_page
 
-    current_date = start_date + timedelta(days=start_index * 7)
+    current_date = start_date + timedelta(weeks=i)
     report = "Weekly Report (Last 12 Months):\n\n"
-    for i in range(start_index, end_index):
-        if current_date > end_date:
+    
+    for i in range(int((end_date - start_date).days / 7), -1, -1):
+    current_date = end_date - timedelta(weeks=i)
+    # Rest of the loop code remains the same
             break
         current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
         total_users = await db.daily_users_count(current_datetime)
@@ -663,7 +655,7 @@ async def report_every_7_days_total_count(client, callback_query):
 
     # Add page number buttons
     page_buttons_row = []
-    for i in range(1, int((end_date - start_date).days / 7) + 2):
+    for i in range(int((end_date - start_date).days / 7), -1, -1):
         if i == page:
             page_buttons_row.append(InlineKeyboardButton(f"Page {i}", callback_data="empty"))
         else:
