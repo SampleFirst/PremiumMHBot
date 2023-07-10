@@ -615,7 +615,17 @@ async def report_every_7_days_total_count(client, callback_query):
     start_date = today - timedelta(days=365)
     end_date = today
 
-    page = int(callback_query.data.split("_")[-1])
+    page = 1  # Set a default value for the page number
+    split_data = callback_query.data.split("_")
+    if len(split_data) > 1:  # Check if there is a page number in the callback data
+        try:
+            page = int(split_data[-1])  # Attempt to convert the last element to an integer
+        except ValueError:
+            # Handle the case where the last element is not a valid integer
+            # You can choose to set a default value or return an error message
+            # For simplicity, we'll set the default page number to 1
+            page = 1
+
     results_per_page = 7
     start_index = (page - 1) * results_per_page
     end_index = start_index + results_per_page
