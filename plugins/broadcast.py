@@ -32,11 +32,10 @@ async def broadcast(bot, message):
     failed = 0
     async for user in users:
         try:
-            await broadcast_messages(int(user['id']), b_msg)
-            done += 1
             user_info = await bot.get_chat(int(user['id']))
             user_name = user_info.username if user_info.username else user_info.first_name
-            await bot.send_message(int(user['id']), f"Hi {user_name}, {b_msg.text}")
+            await broadcast_messages(int(user['id']), f"Hi {user_name}, {b_msg.text}")
+            done += 1
         except PeerIdInvalid:
             await db.delete_user(int(user['id']))
             logging.info(f"{user['id']} - PeerIdInvalid")
