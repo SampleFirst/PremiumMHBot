@@ -613,14 +613,14 @@ async def report_every_7_days_total_count(client, callback_query):
     today = datetime.today()
     start_date = today - timedelta(days=365)
     end_date = today
-    
+
     page = int(callback_query.data.split("_")[-1])
     results_per_page = 7
     start_index = (page - 1) * results_per_page
     end_index = start_index + results_per_page
 
     report = "Weekly Report (Last 12 Months):\n\n"
-    
+
     for i in range(int((end_date - start_date).days / 7), -1, -1):
         current_date = end_date - timedelta(weeks=i)
         current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
@@ -629,6 +629,9 @@ async def report_every_7_days_total_count(client, callback_query):
         report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
         current_date += timedelta(days=7)
 
+    total_pages = int((end_date - start_date).days / 7) + 1
+    page_info = f"Page {page}/{total_pages}"
+
     keyboard_buttons = [
         [
             InlineKeyboardButton("Home", callback_data="report"),
@@ -636,27 +639,13 @@ async def report_every_7_days_total_count(client, callback_query):
         ],
         [
             InlineKeyboardButton("Download", callback_data="download_every_7_days_total_count")
+        ],
+        [
+            InlineKeyboardButton("<< Prev", callback_data=f"every_7_days_total_count_{page - 1}") if page > 1 else None,
+            InlineKeyboardButton(page_info, callback_data="page_info"),
+            InlineKeyboardButton("Next >>", callback_data=f"every_7_days_total_count_{page + 1}") if current_date <= end_date else None
         ]
     ]
-
-    if current_date <= end_date:  # If there is a next page
-        keyboard_buttons.append([
-            InlineKeyboardButton("Next >>", callback_data="every_7_days_total_count_{}".format(page + 1))
-        ])
-
-    if page > 1:  # If it's not the first page
-        keyboard_buttons.append([
-            InlineKeyboardButton("<< Prev", callback_data="every_7_days_total_count_{}".format(page - 1))
-        ])
-
-    # Add page number buttons
-    page_buttons_row = []
-    for i in range(int((end_date - start_date).days / 7), -1, -1):
-        if i == page:
-            page_buttons_row.append(InlineKeyboardButton(f"Page {i}", callback_data="empty"))
-        else:
-            page_buttons_row.append(InlineKeyboardButton(f"Page {i}", callback_data="every_7_days_total_count_{}".format(i)))
-    keyboard_buttons.append(page_buttons_row)
 
     keyboard = InlineKeyboardMarkup(keyboard_buttons)
 
