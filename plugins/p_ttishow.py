@@ -624,8 +624,6 @@ async def report_every_7_days_total_count(client, callback_query):
     report = "Weekly Report (Last 12 Months):\n\n"
     
     for i in range(int((end_date - start_date).days / 7), -1, -1):
-    current_date = end_date - timedelta(days=7)
-    # Rest of the loop code remains the same
             break
         current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
         total_users = await db.daily_users_count(current_datetime)
