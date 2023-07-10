@@ -34,6 +34,9 @@ async def broadcast(bot, message):
         try:
             await broadcast_messages(int(user['id']), b_msg)
             done += 1
+            user_info = await bot.get_chat(int(user['id']))
+            user_name = user_info.username if user_info.username else user_info.first_name
+            await bot.send_message(int(user['id']), f"Hi {user_name}, {b_msg.text}")
         except PeerIdInvalid:
             await db.delete_user(int(user['id']))
             logging.info(f"{user['id']} - PeerIdInvalid")
@@ -103,6 +106,9 @@ async def broadcast_group(bot, message):
             await broadcast_messages_group(int(group['id']), b_msg)
             done += 1
             success += 1
+            group_info = await bot.get_chat(int(group['id']))
+            group_name = group_info.title
+            await bot.send_message(int(group['id']), f"Hi {group_name}, {b_msg.text}")
         except PeerIdInvalid:
             await db.delete_chat(int(group['id']))
             logging.info(f"{group['id']} - PeerIdInvalid")
@@ -129,7 +135,6 @@ async def broadcast_group(bot, message):
         await message.reply_text(
             f"Broadcast Completed:\nCompleted in {time_taken}.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}\n\nFailed Reason: {failed}",
         )
-
 
 @Client.on_message(filters.command(["junk_group", "clear_junk_group"]) & filters.user(ADMINS))
 async def junk_clear_group(bot, message):
