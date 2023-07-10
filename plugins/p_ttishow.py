@@ -467,7 +467,7 @@ async def report_last_7_days(client, callback_query):
     os.remove(file_name)
 
 
-@Client.on_callback_query(filters.regex("download_last_7_days))
+@Client.on_callback_query(filters.regex("download_last_7_days"))
 async def download_report_last_7_days(bot, callback_query):
     today = date.today()
     past_days = 7
