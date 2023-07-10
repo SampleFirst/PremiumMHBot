@@ -614,7 +614,7 @@ async def report_every_7_days_total_count(client, callback_query):
     start_date = today - timedelta(days=365)
     end_date = today
 
-    page = int(callback_query.data.split("_")[-1])
+    page = int(callback_query.data.split("_")[-1])  # Extract the page number correctly
     results_per_page = 7
     start_index = (page - 1) * results_per_page
     end_index = start_index + results_per_page
@@ -623,7 +623,7 @@ async def report_every_7_days_total_count(client, callback_query):
 
     for i in range(int((end_date - start_date).days / 7), -1, -1):
         current_date = end_date - timedelta(weeks=i)
-        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+        current_datetime = datetime.combine(current_date, time.min)
         total_users = await db.daily_users_count(current_datetime)
         total_chats = await db.daily_chats_count(current_datetime)
         report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
@@ -643,7 +643,7 @@ async def report_every_7_days_total_count(client, callback_query):
         [
             InlineKeyboardButton("<< Prev", callback_data=f"every_7_days_total_count_{page - 1}") if page > 1 else None,
             InlineKeyboardButton(page_info, callback_data="page_info"),
-            InlineKeyboardButton("Next >>", callback_data=f"every_7_days_total_count_{page + 1}") if current_date <= end_date else None
+            InlineKeyboardButton("Next >>", callback_data=f"every_7_days_total_count_{page + 1}") if page < total_pages else None  # Update the condition for "Next" button
         ]
     ]
 
@@ -653,6 +653,7 @@ async def report_every_7_days_total_count(client, callback_query):
         text=report,
         reply_markup=keyboard
     )
+
 
 
 @Client.on_callback_query(filters.regex("every_30_days_total_count"))
