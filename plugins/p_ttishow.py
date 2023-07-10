@@ -1,7 +1,6 @@
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
-import datetime
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 import time
 import pytz
 
