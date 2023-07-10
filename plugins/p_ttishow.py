@@ -724,7 +724,35 @@ async def cancel_report(client, callback_query):
     await callback_query.edit_message_text("Report canceled.")
 
         
+@Client.on_callback_query(filters.regex("download_every_7_days_total_count"))
+async def download_report_every_7_days_total_count(client, callback_query):
+    today = date.today()
+    start_date = today - timedelta(days=365)
+    end_date = today
 
+    current_date = start_date
+    report = "Weekly Report (Last 12 Months):\n\n"
+    for i in range(53):
+        if current_date > end_date:
+            break
+        current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
+        total_users = await db.daily_users_count(current_datetime)
+        total_chats = await db.daily_chats_count(current_datetime)
+        report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+        current_date += timedelta(days=7)
+
+    file_name = "report.txt"
+    with open(file_name, "w") as file:
+        file.write(report)
+
+    # Send the report file to the LOG_CHANNEL
+    log_channel_id = "your_log_channel_id"  # Replace with the actual log channel ID
+    with open(file_name, "rb") as file:
+        await client.send_document(chat_id=log_channel_id, document=file)
+
+    os.remove(file_name)  # Remove the temporary report file
+
+    await callback_query.answer("Report downloaded and sent to the log channel.")
 
 
 
