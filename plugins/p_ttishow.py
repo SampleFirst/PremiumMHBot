@@ -364,23 +364,23 @@ async def report_yesterday(bot, callback_query):
     total_users = await db.daily_users_count(current_datetime)
     total_chats = await db.daily_chats_count(current_datetime)
 
-    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
-    yesterday_report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
+    report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
     file_name = f"Yesterday Report.txt"
     with open(file_name, "w") as file:
-        file.write(yesterday_report)
+        file.write(report)
 
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
 
     # Create the 'Download' button
-    yesterday_download_button = InlineKeyboardButton("Download", callback_data="download_report")
+    yesterday_download_button = InlineKeyboardButton("📥 Download 📥", callback_data="download_yesterday")
 
     reply_markup = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("Home", callback_data="report"),
-                InlineKeyboardButton("Cancel", callback_data="report_cancel")
+                InlineKeyboardButton("🏠 Home", callback_data="report"),
+                InlineKeyboardButton("❎ Cancel", callback_data="report_cancel")
             ],
             [
                 yesterday_download_button
@@ -389,15 +389,15 @@ async def report_yesterday(bot, callback_query):
     )
 
     await callback_query.message.edit_text(
-        text=yesterday_report,
+        text=report,
         reply_markup=reply_markup
     )
 
     os.remove(file_name)
 
 
-@Client.on_callback_query(filters.regex("download_report"))
-async def download_report(bot, callback_query):
+@Client.on_callback_query(filters.regex("download_yesterday"))
+async def download_report_yesterday(bot, callback_query):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     start_date = yesterday
     end_date = yesterday
@@ -406,12 +406,12 @@ async def download_report(bot, callback_query):
     total_users = await db.daily_users_count(current_datetime)
     total_chats = await db.daily_chats_count(current_datetime)
 
-    yesterday_report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
-    yesterday_report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
+    report = f"Yesterday's Report:\n{current_datetime.strftime('%Y-%m-%d')}\n\n"
+    report += f"{current_datetime.strftime('%Y-%m-%d')}: Users: {total_users}, Chats: {total_chats}\n"
 
     file_name = f"Yesterday Report.txt"
     with open(file_name, "w") as file:
-        file.write(yesterday_report)
+        file.write(report)
         
     caption = f"Report for {start_date.strftime('%Y-%m-%d')}"
     await bot.send_document(LOG_CHANNEL, document=open(file_name, "rb"), caption=caption)
@@ -428,7 +428,7 @@ async def report_last_7_days(client, callback_query):
     start_date = today - timedelta(days=6)
     end_date = today
 
-    report = "Last 7 Days' Report:\n\n"
+    report = "Last 7 Days' Report:\n{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}\n\n"
 
     for i in range(7):
         current_date = start_date + timedelta(days=i)
@@ -445,16 +445,16 @@ async def report_last_7_days(client, callback_query):
     caption = f"Report for {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
 
     # Create the 'Download' button
-    download_this_week_button = InlineKeyboardButton("Download", callback_data="download_report")
+    last_7_days_download_button = InlineKeyboardButton("📥 Download 📥", callback_data="download_last_7_days")
 
     reply_markup = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("Home", callback_data="report"),
-                InlineKeyboardButton("Cancel", callback_data="report_cancel")
+                InlineKeyboardButton("🏠 Home", callback_data="report"),
+                InlineKeyboardButton("❎ Cancel", callback_data="report_cancel")
             ],
             [
-                download_this_week_button
+                last_7_days_download_button
             ]
         ]
     )
@@ -467,14 +467,14 @@ async def report_last_7_days(client, callback_query):
     os.remove(file_name)
 
 
-@Client.on_callback_query(filters.regex("download_report"))
-async def download_report(bot, callback_query):
+@Client.on_callback_query(filters.regex("download_last_7_days))
+async def download_report_last_7_days(bot, callback_query):
     today = date.today()
     past_days = 7
     start_date = today - timedelta(days=6)
     end_date = today
 
-    report = "Last 7 Days' Report:\n\n"
+    report = "Last 7 Days' Report:\n{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}\n\n"
 
     for i in range(7):
         current_date = start_date + timedelta(days=i)
@@ -496,12 +496,6 @@ async def download_report(bot, callback_query):
     os.remove(file_name)
 
 
-    await callback_query.message.edit_text(
-        text=yesterday_report,
-        reply_markup=reply_markup
-    )
-
-    os.remove(file_name)
 
 
 @Client.on_callback_query(filters.regex("last_30_days"))
