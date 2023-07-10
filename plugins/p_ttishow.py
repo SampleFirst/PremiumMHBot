@@ -620,11 +620,10 @@ async def report_every_7_days_total_count(client, callback_query):
     start_index = (page - 1) * results_per_page
     end_index = start_index + results_per_page
 
-    current_date = start_date + timedelta(weeks=i)
     report = "Weekly Report (Last 12 Months):\n\n"
     
     for i in range(int((end_date - start_date).days / 7), -1, -1):
-            break
+        current_date = end_date - timedelta(weeks=i)
         current_datetime = datetime.datetime.combine(current_date, datetime.time.min)
         total_users = await db.daily_users_count(current_datetime)
         total_chats = await db.daily_chats_count(current_datetime)
