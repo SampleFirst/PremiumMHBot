@@ -20,7 +20,7 @@ from info import ADMINS
 
 
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
-async def broadcast(_, message):
+async def broadcast(bot, message):
     users = await db.get_all_users()
     b_msg = message.reply_to_message
     sts = await message.reply_text('Broadcasting your messages...')
@@ -90,7 +90,7 @@ async def remove_junkuser__db(bot, message):
 
 
 @Client.on_message(filters.command("group_broadcast") & filters.user(ADMINS) & filters.reply)
-async def broadcast_group(_, message):
+async def broadcast_group(bot, message):
     groups = await db.get_all_chats()
     b_msg = message.reply_to_message
     sts = await message.reply_text(text='Broadcasting your messages to groups...')
