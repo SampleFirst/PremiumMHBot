@@ -131,3 +131,19 @@ async def delete_connection(user_id, group_id):
         logger.exception(f'Some error occurred! {e}', exc_info=True)
         return False
 
+
+# New function to get the number of downloads for a given file ID
+async def get_downloads_count(file_id):
+    try:
+        # Assuming you have a collection named 'downloads' that stores download records
+        downloads_col = mydb['downloads']
+        query = {
+            "file_id": file_id
+        }
+        downloads_count = downloads_col.count_documents(query)
+        return downloads_count
+
+    except Exception as e:
+        logger.exception(f"Error while fetching downloads count: {e}")
+        return 0
+        
