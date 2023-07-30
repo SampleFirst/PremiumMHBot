@@ -11,7 +11,7 @@ from database.ia_filterdb import get_search_results
 from Script import script
 from utils import is_subscribed, get_size, temp
 from info import CACHE_TIME, AUTH_USERS, AUTH_CHANNEL, CUSTOM_FILE_CAPTION
-from database.connections_mdb import active_connection
+from database.connections_mdb import active_connection, get_downloads_count
 
 logger = logging.getLogger(__name__)
 cache_time = 0 if AUTH_USERS or AUTH_CHANNEL else CACHE_TIME
@@ -70,8 +70,8 @@ async def answer(bot, query):
     )
 
     for file in files:
-        title = f'Tg @PremiumMHBot {file.file_name}'  # Add 'TG' at the beginning of each file name
-        size = get_size(file.file_size)
+        title=file.file_name
+        size=get_size(file.file_size)
         f_caption = file.caption
         if CUSTOM_FILE_CAPTION:
             try:
@@ -85,15 +85,19 @@ async def answer(bot, query):
                 f_caption = f_caption
         if f_caption is None:
             f_caption = f"{file.file_name}"
-        results.append(
-            InlineQueryResultCachedDocument(
-                title=title,
-                document_file_id=file.file_id,
-                caption=f_caption,
-                description=f'Size: {get_size(file.file_size)} Type: {file.file_type}',
-                reply_markup=reply_markup
-            )
+        
+    # Get the number of downloads for this file
+    downloads_count = await get_downloads_count(file.file_id)
+    
+    results.append(
+        InlineQueryResultCachedDocument(
+            title = f'Tg @PremiumMHBot {file.file_name}',  # Add 'TG' at the beginning of each file name
+            document_file_id=file.file_id,
+            caption=f_caption,
+            description=f'Downloads: {downloads_count} Size: {get_size(file.file_size)}',
+            reply_markup=reply_markup
         )
+    )
 
     if results:
         switch_pm_text = f"{emoji.FILE_FOLDER} Results - {total}"
@@ -132,4 +136,5 @@ def get_reply_markup(query):
         ]
     ]
     return InlineKeyboardMarkup(buttons)
+    
     
