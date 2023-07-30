@@ -70,8 +70,8 @@ async def answer(bot, query):
     )
 
     for file in files:
-        title=file.file_name
-        size=get_size(file.file_size)
+        title = file.file_name
+        size = get_size(file.file_size)
         f_caption = file.caption
         if CUSTOM_FILE_CAPTION:
             try:
@@ -85,19 +85,19 @@ async def answer(bot, query):
                 f_caption = f_caption
         if f_caption is None:
             f_caption = f"{file.file_name}"
-        
-    # Get the number of downloads for this file
-    downloads_count = await get_downloads_count(file.file_id)
-    
-    results.append(
-        InlineQueryResultCachedDocument(
-            title=f'Tg @PremiumMHBot {file.file_name}',  # Add 'TG' at the beginning of each file name
-            document_file_id=file.file_id,
-            caption=f_caption,
-            description=f'Downloads: {downloads_count} Size: {get_size(file.file_size)}',
-            reply_markup=reply_markup
+
+        # Transfer line 90 here
+        downloads_count = await get_downloads_count(file.file_id)
+
+        results.append(
+            InlineQueryResultCachedDocument(
+                title=f'Tg @PremiumMHBot {file.file_name}',  # Add 'TG' at the beginning of each file name
+                document_file_id=file.file_id,
+                caption=f_caption,
+                description=f'Downloads: {downloads_count} Size: {get_size(file.file_size)}',
+                reply_markup=reply_markup
+            )
         )
-    )
 
     if results:
         switch_pm_text = f"{emoji.FILE_FOLDER} Results - {total}"
@@ -122,10 +122,10 @@ async def answer(bot, query):
             switch_pm_text += f' for "{string}"'
 
         await query.answer(results=[],
-            is_personal = True,
-            cache_time=cache_time,
-            switch_pm_text=switch_pm_text,
-            switch_pm_parameter="okay")
+                           is_personal=True,
+                           cache_time=cache_time,
+                           switch_pm_text=switch_pm_text,
+                           switch_pm_parameter="okay")
 
 
 def get_reply_markup(query):
@@ -136,5 +136,3 @@ def get_reply_markup(query):
         ]
     ]
     return InlineKeyboardMarkup(buttons)
-    
-    
