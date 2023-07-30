@@ -91,7 +91,7 @@ async def answer(bot, query):
     
     results.append(
         InlineQueryResultCachedDocument(
-            title = f'Tg @PremiumMHBot {file.file_name}',  # Add 'TG' at the beginning of each file name
+            title=f'Tg @PremiumMHBot {file.file_name}',  # Add 'TG' at the beginning of each file name
             document_file_id=file.file_id,
             caption=f_caption,
             description=f'Downloads: {downloads_count} Size: {get_size(file.file_size)}',
