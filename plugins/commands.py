@@ -152,6 +152,9 @@ async def start(client, message):
             reply_markup = InlineKeyboardMarkup(buttons)
             await message.reply_photo(
                 photo=random.choice(PICS),
+                tz = pytz.timezone('Asia/Kolkata'), 
+                now = datetime.now(tz), 
+                today = now.date(), # Get the current date in the defined time zone
                 caption=script.ADMIN_START_TXT.format(
                 user=message.from_user.mention if message.from_user else message.chat.title,
                 bot=temp.B_LINK,
@@ -159,7 +162,7 @@ async def start(client, message):
                 total_chats=await db.total_chat_count(),
                 daily_users=await db.daily_users_count(today), 
                 daily_chats=await db.daily_chats_count(today),
-                current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
+                current_time=now.strftime('%I:%M:%S %p')
             ),
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
@@ -252,6 +255,9 @@ async def start(client, message):
             reply_markup = InlineKeyboardMarkup(buttons)
             await message.reply_photo(
                 photo=random.choice(PICS),
+                tz = pytz.timezone('Asia/Kolkata'), 
+                now = datetime.now(tz), 
+                today = now.date(), # Get the current date in the defined time zone
                 caption=script.ADMIN_START_TXT.format(
                 user=message.from_user.mention if message.from_user else message.chat.title,
                 bot=temp.B_LINK,
@@ -259,7 +265,7 @@ async def start(client, message):
                 total_chats=await db.total_chat_count(),
                 daily_users=await db.daily_users_count(today), 
                 daily_chats=await db.daily_chats_count(today),
-                current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
+                current_time=now.strftime('%I:%M:%S %p')
             ),
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
