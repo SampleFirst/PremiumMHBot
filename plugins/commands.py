@@ -153,7 +153,7 @@ async def start(client, message):
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
             current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
-            caption = ADMIN_START_TXT.format(
+            caption = script.ADMIN_START_TXT.format(
                 admin=message.from_user.mention,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
@@ -257,7 +257,7 @@ async def start(client, message):
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
             current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
-            caption = ADMIN_START_TXT.format(
+            caption = script.ADMIN_START_TXT.format(
                 admin=message.from_user.mention,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
