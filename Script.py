@@ -2,12 +2,8 @@ class script(object):
     START_TXT = """<b>Hello 👋 {user},
 My Name Is {bot}, I Can Provide Movies, Just Add Me To Your Group And Enjoy</b>"""
 
-    ADMIN_START_TXT = """<b>Hello Admin 👋 {user},
-My Name Is {bot},
-I Can Provide Movies, Just Add Me To Your Group And Enjoy
-Total Users = {total_users} Total Chats = {total_chat}
-Today Users = {daily_users} Today Chats = {daily_chats}
-Today = {current_time}</b>"""
+    ADMIN_START_TXT = """<b>Hello Admin 👋 Minute,\nMy Name Is Premium Movies Bot,\nI Can Provide Movies, Just Add Me To Your Group And Enjoy\nTotal Users = {total_users} Total Chats = {total_chat}\nToday Users = {daily_users} Today Chats = {daily_chats}\nToday = {current_time}</b>"""
+
     
     HELP_TXT = """<b>Hey {}
 Here Is The Help For My Commands.</b>"""
