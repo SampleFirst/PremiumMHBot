@@ -148,24 +148,23 @@ async def start(client, message):
                 [
                     InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
                 ]
-            ]
-        
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_photo(
-            photo=random.choice(PICS),
-            caption=script.ADMIN_START_TXT.format(
-            user=message.from_user.mention if message.from_user else message.chat.title,
-            bot=temp.B_LINK,
-            total_users=await db.total_users_count(),
-            total_chats=await db.total_chat_count(),
-            daily_users=await db.daily_users_count(today), 
-            daily_chats=await db.daily_chats_count(today),
-            current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
-        ),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML,
-            quote=True
-        )
+            ]        
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=script.ADMIN_START_TXT.format(
+                user=message.from_user.mention if message.from_user else message.chat.title,
+                bot=temp.B_LINK,
+                total_users=await db.total_users_count(),
+                total_chats=await db.total_chat_count(),
+                daily_users=await db.daily_users_count(today), 
+                daily_chats=await db.daily_chats_count(today),
+                current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
+            ),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML,
+                quote=True
+            )
         else:
             # If the user is not an admin, show regular buttons
             buttons = [
