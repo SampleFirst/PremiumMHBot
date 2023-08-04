@@ -2,6 +2,12 @@ class script(object):
     START_TXT = """<b>Hᴇʟʟᴏ {},
 Mʏ Nᴀᴍᴇ Is <a href=https://t.me/{}>{}</a>, I Cᴀɴ Pʀᴏᴠɪᴅᴇ Mᴏᴠɪᴇs, Jᴜsᴛ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ Aɴᴅ Eɴᴊᴏʏ 😍</b>"""
 
+    ADMIN_START_TXT = """<b>Hello Admin 👋 {user},
+My Name Is {bot}, I Can Provide Movies, Just Add Me To Your Group And Enjoy
+Total Users = {total_users} Total Chats = {total_chat}
+Today = {current_time}
+Today Users = {daily_users} Today Chats = {daily_chats} </b>"""
+    
     HELP_TXT = """<b>Hᴇʏ {}
 Hᴇʀᴇ Is Tʜᴇ Hᴇʟᴘ Fᴏʀ Mʏ Cᴏᴍᴍᴀɴᴅs.</b>"""
 
