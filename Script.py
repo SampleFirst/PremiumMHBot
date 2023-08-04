@@ -3,10 +3,11 @@ class script(object):
 My Name Is {bot}, I Can Provide Movies, Just Add Me To Your Group And Enjoy</b>"""
 
     ADMIN_START_TXT = """<b>Hello Admin 👋 {user},
-My Name Is {bot}, I Can Provide Movies, Just Add Me To Your Group And Enjoy
+My Name Is {bot},
+I Can Provide Movies, Just Add Me To Your Group And Enjoy
 Total Users = {total_users} Total Chats = {total_chat}
-Today = {current_time}
-Today Users = {daily_users} Today Chats = {daily_chats} </b>"""
+Today Users = {daily_users} Today Chats = {daily_chats}
+Today = {current_time}</b>"""
     
     HELP_TXT = """<b>Hey {}
 Here Is The Help For My Commands.</b>"""
