@@ -12,10 +12,24 @@ from pyrogram import Client, filters, enums
 from pyrogram.errors import ChatAdminRequired, FloodWait
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
-from Script import script
+from database.users_chats_db import db
 from database.connections_mdb import active_connection
 from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_bad_files
-from database.users_chats_db import db
+
+from Script import script
+from utils import (
+    get_settings,
+    get_size,
+    is_subscribed,
+    save_group_settings,
+    temp,
+    verify_user,
+    check_token,
+    check_verification,
+    get_token,
+    send_all,
+)
+
 from info import (
     CHANNELS,
     ADMINS,
@@ -33,35 +47,43 @@ from info import (
     IS_VERIFY,
     HOW_TO_VERIFY,
 )
-from utils import (
-    get_settings,
-    get_size,
-    is_subscribed,
-    save_group_settings,
-    temp,
-    verify_user,
-    check_token,
-    check_verification,
-    get_token,
-    send_all,
-)
+
 
 logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
 
+    
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
+    # Check if the user is an admin
+    is_admin = message.from_user and message.from_user.id in ADMINS
+    
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        buttons = [
-            [
-                InlineKeyboardButton('Support Group', url=GRP_LNK),
-                InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
-            ],
-            [
-                InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
+        if is_admin:
+            # If the user is an admin, show admin-specific buttons
+            buttons = [
+                [
+                    InlineKeyboardButton('Support Group', url=GRP_LNK),
+                    InlineKeyboardButton('Updates Channel', url=CHNL_LNK),
+                    InlineKeyboardButton("🔒 Admin Settings", callback_data='admin_settings')
+                ],
+                [
+                    InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
+                ]
             ]
-        ]
+        else:
+            # If the user is not an admin, show regular buttons
+            buttons = [
+                [
+                    InlineKeyboardButton('Support Group', url=GRP_LNK),
+                    InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
+                ],
+                [
+                    InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
+                ]
+            ]
+        
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply(script.START_TXT.format(user=message.from_user.mention if message.from_user else message.chat.title, bot=temp.B_LINK), reply_markup=reply_markup)
         await asyncio.sleep(2)
@@ -95,7 +117,7 @@ async def start(client, message):
         now = datetime.now(tz)
         time = now.strftime('%I:%M:%S %p')
         today = now.date()  # Get the current date in the defined time zone
-        daily_chats = await db.daily_chats_count(today) + 1  # Increment daily_chats by 1
+        daily_users = await db.daily_users_count(today) + 1  # Increment daily_chats by 1
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(
             a=message.from_user.id,
             b=message.from_user.mention,
@@ -107,24 +129,66 @@ async def start(client, message):
             h=temp.B_LINK
         ))
         
-    if len(message.command) != 2:
-        buttons = [
-            [
-                InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
-            ],
-            [
-                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
-                InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
-            ],
-            [
-                InlineKeyboardButton('❓ Help', callback_data='help'),
-                InlineKeyboardButton('ℹ️ About', callback_data='about'),
-                InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
-            ],
-            [
-                InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+    if len(message.command) != 2:            
+        if is_admin:
+            # If the user is an admin, show admin-specific buttons
+            buttons = [
+                [
+                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                ],
+                [
+                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
+                ],
+                [
+                    InlineKeyboardButton('❓ Help', callback_data='help'),
+                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
+                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
+                ],
+                [
+                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                ],
+                [
+                    InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
+                ]
             ]
-        ]
+        
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await message.reply_photo(
+            photo=random.choice(PICS),
+            caption = script.ADMIN_START_TXT.format(
+            user=message.from_user.mention if message.from_user else message.chat.title,
+            bot=temp.B_LINK,
+            total_users=await db.total_users_count(),
+            total_chats=await db.total_chat_count(),
+            daily_users=await db.daily_users_count(),
+            daily_chats=await db.daily_chats_count(),
+            current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
+        )
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML,
+            quote=True
+        )
+        else:
+            # If the user is not an admin, show regular buttons
+            buttons = [
+                [
+                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                ],
+                [
+                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
+                ],
+                [
+                    InlineKeyboardButton('❓ Help', callback_data='help'),
+                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
+                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
+                ],
+                [
+                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                ]
+            ]
+        
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
             photo=random.choice(PICS),
@@ -133,7 +197,7 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML,
             quote=True
         )
-
+    
         return
 
     if AUTH_CHANNEL and not await is_subscribed(client, message):
@@ -167,32 +231,72 @@ async def start(client, message):
         return
 
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
-        buttons = [
-            [
-                InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
-            ],
-            [
-                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
-                InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
-            ],
-            [
-                InlineKeyboardButton('❓ Help', callback_data='help'),
-                InlineKeyboardButton('ℹ️ About', callback_data='about'),
-                InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
-            ],
-            [
-                InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+        if is_admin:
+            # If the user is an admin, show admin-specific buttons
+            buttons = [
+                [
+                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                ],
+                [
+                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
+                ],
+                [
+                    InlineKeyboardButton('❓ Help', callback_data='help'),
+                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
+                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
+                ],
+                [
+                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                ],
+                [
+                    InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
+                ]
             ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_photo(
-            photo=random.choice(PICS),
-            caption=script.START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML,
-            quote=True
-        )
-        return
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption = script.ADMIN_START_TXT.format(
+                user=message.from_user.mention if message.from_user else message.chat.title,
+                bot=temp.B_LINK,
+                total_users=await db.total_users_count(),
+                total_chats=await db.total_chat_count(),
+                daily_users=await db.daily_users_count(),
+                daily_chats=await db.daily_chats_count(),
+                current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
+            )
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML,
+                quote=True
+            )
+        else:
+            # If the user is not an admin, show regular buttons
+            buttons = [
+                [
+                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                ],
+                [
+                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
+                ],
+                [
+                    InlineKeyboardButton('❓ Help', callback_data='help'),
+                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
+                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
+                ],
+                [
+                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=script.START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML,
+                quote=True
+            )
+            return
     data = message.command[1]
 
     try:
