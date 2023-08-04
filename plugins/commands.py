@@ -48,12 +48,10 @@ from info import (
     HOW_TO_VERIFY,
 )
 
-
 logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
 
-    
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     # Check if the user is an admin
@@ -65,8 +63,7 @@ async def start(client, message):
             buttons = [
                 [
                     InlineKeyboardButton('Support Group', url=GRP_LNK),
-                    InlineKeyboardButton('Updates Channel', url=CHNL_LNK),
-                    InlineKeyboardButton("🔒 Admin Settings", callback_data='admin_settings')
+                    InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
                 ],
                 [
                     InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
@@ -156,7 +153,7 @@ async def start(client, message):
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
             photo=random.choice(PICS),
-            caption = script.ADMIN_START_TXT.format(
+            caption=script.ADMIN_START_TXT.format(
             user=message.from_user.mention if message.from_user else message.chat.title,
             bot=temp.B_LINK,
             total_users=await db.total_users_count(),
@@ -164,7 +161,7 @@ async def start(client, message):
             daily_users=await db.daily_users_count(),
             daily_chats=await db.daily_chats_count(),
             current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
-        )
+        ),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML,
             quote=True
@@ -256,7 +253,7 @@ async def start(client, message):
             reply_markup = InlineKeyboardMarkup(buttons)
             await message.reply_photo(
                 photo=random.choice(PICS),
-                caption = script.ADMIN_START_TXT.format(
+                caption=script.ADMIN_START_TXT.format(
                 user=message.from_user.mention if message.from_user else message.chat.title,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
@@ -264,7 +261,7 @@ async def start(client, message):
                 daily_users=await db.daily_users_count(),
                 daily_chats=await db.daily_chats_count(),
                 current_time=datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%I:%M:%S %p')
-            )
+            ),
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
