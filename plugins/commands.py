@@ -156,7 +156,7 @@ async def start(client, message):
                 user=message.from_user.mention if message.from_user else message.chat.title,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
-                total_chats=await db.total_chats_count(),
+                total_chat=await db.total_chat_count(),
                 daily_users=await db.daily_users_count(now.date()),
                 daily_chats=await db.daily_chats_count(now.date()),
                 current_time=now.strftime('%Y-%m-%d %H:%M:%S %Z')  # Update time to show date and time
@@ -259,7 +259,7 @@ async def start(client, message):
                 user=message.from_user.mention if message.from_user else message.chat.title,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
-                total_chats=await db.total_chats_count(),
+                total_chat=await db.total_chat_count(),
                 daily_users=await db.daily_users_count(now.date()),
                 daily_chats=await db.daily_chats_count(now.date()),
                 current_time=now.strftime('%Y-%m-%d %H:%M:%S %Z')  # Update time to show date and time
