@@ -153,13 +153,13 @@ async def start(client, message):
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
             caption = script.ADMIN_START_TXT.format(
-                user=message.from_user.mention if message.from_user else message.chat.title,
+                user=message.from_user.mention,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
                 total_chat=await db.total_chat_count(),
                 daily_users=await db.daily_users_count(now.date()),
                 daily_chats=await db.daily_chats_count(now.date()),
-                current_time=now.strftime('%Y-%m-%d %H:%M:%S %Z')  # Update time to show date and time
+                current_time=now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
             ), 
             await message.reply_photo(
                 photo=random.choice(PICS),
@@ -256,13 +256,13 @@ async def start(client, message):
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
             caption = script.ADMIN_START_TXT.format(
-                user=message.from_user.mention if message.from_user else message.chat.title,
+                user=message.from_user.mention,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
                 total_chat=await db.total_chat_count(),
                 daily_users=await db.daily_users_count(now.date()),
                 daily_chats=await db.daily_chats_count(now.date()),
-                current_time=now.strftime('%Y-%m-%d %H:%M:%S %Z')  # Update time to show date and time
+                current_time=now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
             ), 
             await message.reply_photo(
                 photo=random.choice(PICS),
