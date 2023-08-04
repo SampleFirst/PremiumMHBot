@@ -152,10 +152,9 @@ async def start(client, message):
             reply_markup = InlineKeyboardMarkup(buttons)
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
-            caption = script.ADMIN_START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK, total_users=await db.total_users_count(), total_chat=await db.total_chat_count(), daily_users=await db.daily_users_count(now.date()), daily_chats=await db.daily_chats_count(now.date()), current_time=now.strftime('%Y-%m-%d %I:%M:%S %p')), # Update time to show date and time
-            await message.reply_photo(
+                await message.reply_photo(
                 photo=random.choice(PICS),
-                caption=caption,
+                caption=script.ADMIN_START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK, total_users=await db.total_users_count(), total_chat=await db.total_chat_count(), daily_users=await db.daily_users_count(now.date()), daily_chats=await db.daily_chats_count(now.date()), current_time=now.strftime('%Y-%m-%d %I:%M:%S %p')), # Update time to show date and time
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
@@ -247,10 +246,9 @@ async def start(client, message):
             reply_markup = InlineKeyboardMarkup(buttons)
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
-            caption = script.ADMIN_START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK, total_users=await db.total_users_count(), total_chat=await db.total_chat_count(), daily_users=await db.daily_users_count(now.date()), daily_chats=await db.daily_chats_count(now.date()), current_time=now.strftime('%Y-%m-%d %I:%M:%S %p')), # Update time to show date and time
-            await message.reply_photo(
+                await message.reply_photo(
                 photo=random.choice(PICS),
-                caption=caption,
+                caption=script.ADMIN_START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK, total_users=await db.total_users_count(), total_chat=await db.total_chat_count(), daily_users=await db.daily_users_count(now.date()), daily_chats=await db.daily_chats_count(now.date()), current_time=now.strftime('%Y-%m-%d %I:%M:%S %p')), # Update time to show date and time
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
