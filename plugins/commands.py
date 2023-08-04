@@ -150,20 +150,20 @@ async def start(client, message):
                 ]
             ]        
             reply_markup = InlineKeyboardMarkup(buttons)
-            await message.reply_photo(
-                photo=random.choice(PICS),
-                tz = pytz.timezone('Asia/Kolkata'), 
-                now = datetime.now(tz), 
-                today = now.date(), # Get the current date in the defined time zone
-                caption=script.ADMIN_START_TXT.format(
+            tz = pytz.timezone('Asia/Kolkata')
+            now = datetime.now(tz)
+            caption = script.ADMIN_START_TXT.format(
                 user=message.from_user.mention if message.from_user else message.chat.title,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
                 total_chats=await db.total_chat_count(),
-                daily_users=await db.daily_users_count(today), 
-                daily_chats=await db.daily_chats_count(today),
-                current_time=now.strftime('%I:%M:%S %p')
-            ),
+                daily_users=await db.daily_users_count(now.date()),
+                daily_chats=await db.daily_chats_count(now.date()),
+                current_time=now.strftime('%Y-%m-%d %H:%M:%S %Z')  # Update time to show date and time
+            ), 
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=caption,
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
@@ -253,20 +253,20 @@ async def start(client, message):
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(buttons)
-            await message.reply_photo(
-                photo=random.choice(PICS),
-                tz = pytz.timezone('Asia/Kolkata'), 
-                now = datetime.now(tz), 
-                today = now.date(), # Get the current date in the defined time zone
-                caption=script.ADMIN_START_TXT.format(
+            tz = pytz.timezone('Asia/Kolkata')
+            now = datetime.now(tz)
+            caption = script.ADMIN_START_TXT.format(
                 user=message.from_user.mention if message.from_user else message.chat.title,
                 bot=temp.B_LINK,
                 total_users=await db.total_users_count(),
                 total_chats=await db.total_chat_count(),
-                daily_users=await db.daily_users_count(today), 
-                daily_chats=await db.daily_chats_count(today),
-                current_time=now.strftime('%I:%M:%S %p')
-            ),
+                daily_users=await db.daily_users_count(now.date()),
+                daily_chats=await db.daily_chats_count(now.date()),
+                current_time=now.strftime('%Y-%m-%d %H:%M:%S %Z')  # Update time to show date and time
+            ), 
+            await message.reply_photo(
+                photo=random.choice(PICS),
+                caption=caption,
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
