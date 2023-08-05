@@ -5,6 +5,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
 from database.ia_filterdb import save_file
+from Script import script
 
 media_filter = filters.document | filters.video | filters.audio
 
