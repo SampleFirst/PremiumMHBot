@@ -1235,6 +1235,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(admin_buttons)
+            tz = pytz.timezone('Asia/Kolkata')
+            now = datetime.now(tz)
+            current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
             caption = script.ADMIN_START_TXT.format(
                 admin=query.from_user.mention,
                 bot=temp.B_LINK,
@@ -1242,7 +1245,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 total_chat=await db.total_chat_count(),
                 daily_users=await db.daily_users_count(datetime.now().date()),
                 daily_chats=await db.daily_chats_count(datetime.now().date()),
-                current_time=datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+                current_time=current_time
             )
         else:
             regular_buttons = [
