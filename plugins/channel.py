@@ -23,7 +23,7 @@ async def media(bot, message):
     await save_file(media)
 
     # Extracting the search query from the file name
-    search_query = message.file_name.split(' (')[0]  # Using the part before the first ' (' as the search query
+    search_query = media.file_name.split(' (')[0]  # Using the part before the first ' (' as the search query
 
     # Get the IMDB data and poster based on the search query
     imdb = await get_poster(search_query)
