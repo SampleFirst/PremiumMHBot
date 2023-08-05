@@ -1,6 +1,7 @@
 from pyrogram import Client, filters
 from info import CHANNELS, UPDATE_CHANNEL
 from database.ia_filterdb import save_file
+from utils import get_poster
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -19,4 +20,11 @@ async def media(bot, message):
 
     # Send a log to the UPDATE_CHANNEL about the new added file
     log_message = f"New file added: {media.file_type} - {media.file_name} in {CHANNELS}"
+
+    # Get IMDb poster for the media and add it to the log message
+    poster_info = await get_poster(media.file_name)
+    if poster_info:
+        log_message += f"\nPoster: {poster_info['poster']}"
+
     await bot.send_message(UPDATE_CHANNEL, log_message)
+
