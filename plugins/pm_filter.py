@@ -493,6 +493,7 @@ async def advantage_spoll_choker(bot, query):
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
+    is_admin = message.from_user and message.from_user.id in ADMINS
     if query.data == "close_data":
         await query.message.delete()
     elif query.data == "gfiltersdeleteallconfirm":
@@ -1212,32 +1213,65 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
 
     elif query.data == "start":
-        buttons = [
-            [
-                InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
-            ],
-            [
-                InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
-                InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
-            ],
-            [
-                InlineKeyboardButton('❓ Help', callback_data='help'),
-                InlineKeyboardButton('ℹ️ About', callback_data='about'),
-                InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
-            ],
-            [
-                InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+        if is_admin:
+            admin_buttons = [
+                [
+                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                ],
+                [
+                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
+                ],
+                [
+                    InlineKeyboardButton('❓ Help', callback_data='help'),
+                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
+                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
+                ],
+                [
+                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                ],
+                [
+                    InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
+                ]
             ]
-        ]
-        
-        reply_markup = InlineKeyboardMarkup(buttons)
+            reply_markup = InlineKeyboardMarkup(admin_buttons)
+            caption = script.ADMIN_START_TXT.format(
+                admin=query.from_user.mention,
+                bot=temp.B_LINK,
+                total_users=await db.total_users_count(),
+                total_chat=await db.total_chat_count(),
+                daily_users=await db.daily_users_count(datetime.now().date()),
+                daily_chats=await db.daily_chats_count(datetime.now().date()),
+                current_time=datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+            )
+        else:
+            regular_buttons = [
+                [
+                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                ],
+                [
+                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
+                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
+                ],
+                [
+                    InlineKeyboardButton('❓ Help', callback_data='help'),
+                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
+                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
+                ],
+                [
+                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(regular_buttons)
+            caption = script.START_TXT.format(user=query.from_user.mention, bot=temp.B_LINK)
+
         await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
+            query.message.chat.id,
+            query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.START_TXT.format(user=query.from_user.mention, bot=temp.B_LINK),
+            text=caption,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
