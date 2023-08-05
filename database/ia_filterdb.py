@@ -12,14 +12,16 @@ from marshmallow.exceptions import ValidationError
 from info import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME, CHNL_LNK, USE_CAPTION_FILTER, MAX_B_TN
 from utils import get_settings, save_group_settings
 
+# Set up logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# Connect to the MongoDB
 client = AsyncIOMotorClient(DATABASE_URI)
 db = client[DATABASE_NAME]
 instance = Instance.from_db(db)
 
-
+# Define Media model
 @instance.register
 class Media(Document):
     file_id = fields.StrField(attribute='_id')
@@ -34,16 +36,13 @@ class Media(Document):
         indexes = ('$file_name', )
         collection_name = COLLECTION_NAME
 
-
+# Send update log to a specified channel
 async def send_update_log(file_name):
     async with Client("Media_search") as bot:
-        await bot.send_message("CHNL_LNK", f"New file added: {file_name}")
+        await bot.send_message(CHNL_LNK, f"New file added: {file_name}")
 
-
+# Save file in the database
 async def save_file(media):
-    """Save file in database"""
-
-    # TODO: Find a better way to get the same file_id for the same media to avoid duplicates
     file_id, file_ref = unpack_new_file_id(media.file_id)
     file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
     try:
@@ -63,16 +62,12 @@ async def save_file(media):
         try:
             await file.commit()
         except DuplicateKeyError:      
-            logger.warning(
-                f'{getattr(media, "file_name", "NO_FILE")} is already saved in the database'
-            )
+            logger.warning(f'{getattr(media, "file_name", "NO_FILE")} is already saved in the database')
             return False, 0
         else:
             logger.info(f'{getattr(media, "file_name", "NO_FILE")} is saved to the database')
-
             # Send update log to 'UPDATE_CHANNEL'
             asyncio.create_task(send_update_log(file_name))
-
             return True, 1
 
 
