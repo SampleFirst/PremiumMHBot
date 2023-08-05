@@ -1,7 +1,10 @@
 from pyrogram import Client, filters
-from info import CHANNELS, UPDATE_CHANNEL
+from info import CHANNELS, UPDATE_CHANNEL, IMDB_TEMPLATE
 from database.ia_filterdb import save_file
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
+from database.ia_filterdb import save_file
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -18,13 +21,61 @@ async def media(bot, message):
     media.caption = message.caption
     await save_file(media)
 
-    # Send a log to the UPDATE_CHANNEL about the new added file
-    log_message = f"New file added: {media.file_type} - {media.file_name} in {CHANNELS}"
+    # Get the IMDB data and poster
+    search = media.file_name  # Assuming the file name is used as a search query
+    imdb = await get_poster(search)
 
-    # Get IMDb poster for the media and add it to the log message
-    poster_info = await get_poster(media.file_name)
-    if poster_info:
-        log_message += f"\nPoster: {poster_info['poster']}"
+    # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
+    if imdb:
+        buttons = [
+            [
+                InlineKeyboardButton('Join', url='https://t.me/join')
+            ]
+        ]
+        TEMPLATE = IMDB_TEMPLATE
+        cap = TEMPLATE.format(
+        cap = IMDB_TEMPLATE.format(
+            query=search,
+            title=imdb['title'],
+            votes=imdb['votes'],
+            aka=imdb["aka"],
+            seasons=imdb["seasons"],
+            box_office=imdb['box_office'],
+            localized_title=imdb['localized_title'],
+            kind=imdb['kind'],
+            imdb_id=imdb["imdb_id"],
+            cast=imdb["cast"],
+            runtime=imdb["runtime"],
+            countries=imdb["countries"],
+            certificates=imdb["certificates"],
+            languages=imdb["languages"],
+            director=imdb["director"],
+            writer=imdb["writer"],
+            producer=imdb["producer"],
+            composer=imdb["composer"],
+            cinematographer=imdb["cinematographer"],
+            music_team=imdb["music_team"],
+            distributors=imdb["distributors"],
+            release_date=imdb['release_date'],
+            year=imdb['year'],
+            genres=imdb['genres'],
+            poster=imdb['poster'],
+            plot=imdb['plot'],
+            rating=imdb['rating'],
+            url=imdb['url'],
+            **locals()
+        )
 
-    await bot.send_message(UPDATE_CHANNEL, log_message)
-
+        if imdb.get('poster'):
+            try:
+                await message.reply_photo(photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+                poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
+                await message.reply_photo(photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            except Exception as e:
+                logger.exception(e)
+                await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(buttons))
+        else:
+            await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await message.reply_text(f"Here is what I found for your query {search}")
