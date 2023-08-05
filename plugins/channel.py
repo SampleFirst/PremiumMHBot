@@ -1,3 +1,4 @@
+import os
 from pyrogram import Client, filters
 from info import CHANNELS, CHNL_LNK
 from database.ia_filterdb import save_file
@@ -17,9 +18,12 @@ async def media(bot, message):
     media.caption = message.caption
     await save_file(media)
 
-    # Write the new file to the disk (modify this part according to your needs)
-    # Example:
-    with open(f"new_files/{media.file_name}", "wb") as f:
+    # Create the 'new_files' directory if it doesn't exist
+    if not os.path.exists("new_files"):
+        os.makedirs("new_files")
+
+    # Write the new file to the disk
+    with open(os.path.join("new_files", media.file_name), "wb") as f:
         await media.download(file_name=f.name)
 
     # Send a log to the UPDATE_CHANNEL about the new added file
