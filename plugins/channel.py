@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from info import CHANNELS, CHNL_LNK
+from info import CHANNELS, UPDATE_CHANNEL
 from database.ia_filterdb import save_file
 
 media_filter = filters.document | filters.video | filters.audio
@@ -19,4 +19,4 @@ async def media(bot, message):
 
     # Send a log to the UPDATE_CHANNEL about the new added file
     log_message = f"New file added: {media.file_type} - {media.file_name} in {CHANNELS}"
-    await bot.send_message(CHNL_LNK, log_message)
+    await bot.send_message(UPDATE_CHANNEL, log_message)
