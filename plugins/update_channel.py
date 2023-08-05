@@ -14,7 +14,7 @@ from info import (
     COLLECTION_NAME,
     USE_CAPTION_FILTER,
     MAX_B_TN,
-    UPDATE_CHANNEL,
+    CHNL_LNK,
     NOR_IMG
 )
 from utils import get_settings, save_group_settings
@@ -103,6 +103,6 @@ async def send_update_log(media):
             f"IMDb Poster: {NOR_IMG}\n"
         )
 
-    await bot.send_message(UPDATE_CHANNEL, update_message)
+    await bot.send_message(CHNL_LNK, update_message)
     
     
