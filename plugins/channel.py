@@ -34,7 +34,6 @@ async def media(bot, message):
         ]
         TEMPLATE = IMDB_TEMPLATE
         cap = TEMPLATE.format(
-        cap = IMDB_TEMPLATE.format(
             query=search,
             title=imdb['title'],
             votes=imdb['votes'],
@@ -68,14 +67,14 @@ async def media(bot, message):
 
         if imdb.get('poster'):
             try:
-                await message.reply_photo(photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
             except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
                 poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
-                await message.reply_photo(photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
             except Exception as e:
                 logger.exception(e)
-                await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
         else:
-            await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(buttons))
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await message.reply_text(f"Here is what I found for your query {search}")
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"Here is what I found for your query {search}")
