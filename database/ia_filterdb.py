@@ -4,6 +4,7 @@ import base64
 import asyncio
 from struct import pack
 from pyrogram import Client
+from pyrogram.file_id import FileId
 from pymongo.errors import DuplicateKeyError
 from umongo import Instance, Document, fields
 from motor.motor_asyncio import AsyncIOMotorClient
