@@ -22,9 +22,11 @@ async def media(bot, message):
     media.caption = message.caption
     await save_file(media)
 
-    # Get the IMDB data and poster
-    search = media.file_name  # Assuming the file name is used as a search query
-    imdb = await get_poster(search)
+    # Extracting the search query from the file name
+    search_query = message.file_name.split(' (')[0]  # Using the part before the first ' (' as the search query
+
+    # Get the IMDB data and poster based on the search query
+    imdb = await get_poster(search_query)
 
     # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
     if imdb:
@@ -35,7 +37,7 @@ async def media(bot, message):
         ]
         TEMPLATE = IMDB_TEMPLATE
         cap = TEMPLATE.format(
-            query=search,
+            query=search_query,
             title=imdb['title'],
             votes=imdb['votes'],
             aka=imdb["aka"],
@@ -78,4 +80,4 @@ async def media(bot, message):
         else:
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"Here is what I found for your query {search}")
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"Here is what I found for your query {search_query}")
