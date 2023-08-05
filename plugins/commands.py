@@ -60,7 +60,7 @@ async def start(client, message):
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         if is_admin:
             # If the user is an admin, show admin-specific buttons
-            buttons = [
+            admin_buttons = [
                 [
                     InlineKeyboardButton('Support Group', url=GRP_LNK),
                     InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
@@ -71,7 +71,7 @@ async def start(client, message):
             ]
         else:
             # If the user is not an admin, show regular buttons
-            buttons = [
+            regular_buttons = [
                 [
                     InlineKeyboardButton('Support Group', url=GRP_LNK),
                     InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
@@ -81,7 +81,7 @@ async def start(client, message):
                 ]
             ]
         
-        reply_markup = InlineKeyboardMarkup(buttons)
+        reply_markup = InlineKeyboardMarkup(regular_buttons)
         await message.reply(script.START_TXT.format(user=message.from_user.mention if message.from_user else message.chat.title, bot=temp.B_LINK), reply_markup=reply_markup)
         await asyncio.sleep(2)
         if not await db.get_chat(message.chat.id):
@@ -129,7 +129,7 @@ async def start(client, message):
     if len(message.command) != 2:            
         if is_admin:
             # If the user is an admin, show admin-specific buttons
-            buttons = [
+            admin_buttons = [
                 [
                     InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
                 ],
@@ -149,7 +149,7 @@ async def start(client, message):
                     InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
                 ]
             ]        
-            reply_markup = InlineKeyboardMarkup(buttons)
+            reply_markup = InlineKeyboardMarkup(admin_buttons)
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
             current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
@@ -171,7 +171,7 @@ async def start(client, message):
             )
         else:
             # If the user is not an admin, show regular buttons
-            buttons = [
+            regular_buttons = [
                 [
                     InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
                 ],
@@ -189,7 +189,7 @@ async def start(client, message):
                 ]
             ]
         
-        reply_markup = InlineKeyboardMarkup(buttons)
+        reply_markup = InlineKeyboardMarkup(regular_buttons)
         await message.reply_photo(
             photo=random.choice(PICS),
             caption=script.START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
@@ -233,7 +233,7 @@ async def start(client, message):
     if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
         if is_admin:
             # If the user is an admin, show admin-specific buttons
-            buttons = [
+            admin_buttons = [
                 [
                     InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
                 ],
@@ -253,7 +253,7 @@ async def start(client, message):
                     InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
                 ]
             ]
-            reply_markup = InlineKeyboardMarkup(buttons)
+            reply_markup = InlineKeyboardMarkup(admin_buttons)
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
             current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
@@ -275,7 +275,7 @@ async def start(client, message):
             )
         else:
             # If the user is not an admin, show regular buttons
-            buttons = [
+            regular_buttons = [
                 [
                     InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
                 ],
@@ -292,7 +292,7 @@ async def start(client, message):
                     InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
                 ]
             ]
-            reply_markup = InlineKeyboardMarkup(buttons)
+            reply_markup = InlineKeyboardMarkup(regular_buttons)
             await message.reply_photo(
                 photo=random.choice(PICS),
                 caption=script.START_TXT.format(user=message.from_user.mention, bot=temp.B_LINK),
