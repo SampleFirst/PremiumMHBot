@@ -1,27 +1,23 @@
 import logging
+from struct import pack
 import re
 import base64
-import asyncio
-from struct import pack
-from pyrogram import Client
 from pyrogram.file_id import FileId
 from pymongo.errors import DuplicateKeyError
 from umongo import Instance, Document, fields
 from motor.motor_asyncio import AsyncIOMotorClient
 from marshmallow.exceptions import ValidationError
-from info import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME, CHNL_LNK, USE_CAPTION_FILTER, MAX_B_TN
+from info import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME, USE_CAPTION_FILTER, MAX_B_TN
 from utils import get_settings, save_group_settings
 
-# Set up logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# Connect to the MongoDB
+
 client = AsyncIOMotorClient(DATABASE_URI)
 db = client[DATABASE_NAME]
 instance = Instance.from_db(db)
 
-# Define Media model
 @instance.register
 class Media(Document):
     file_id = fields.StrField(attribute='_id')
@@ -36,13 +32,11 @@ class Media(Document):
         indexes = ('$file_name', )
         collection_name = COLLECTION_NAME
 
-# Send update log to a specified channel
-async def send_update_log(file_name):
-    async with Client("Media_search") as bot:
-        await bot.send_message(CHNL_LNK, f"New file added: {file_name}")
 
-# Save file in the database
 async def save_file(media):
+    """Save file in database"""
+
+    # TODO: Find better way to get same file_id for same media to avoid duplicates
     file_id, file_ref = unpack_new_file_id(media.file_id)
     file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
     try:
@@ -56,23 +50,25 @@ async def save_file(media):
             caption=media.caption.html if media.caption else None,
         )
     except ValidationError:
-        logger.exception('Error occurred while saving the file in the database')
+        logger.exception('Error occurred while saving file in database')
         return False, 2
     else:
         try:
             await file.commit()
         except DuplicateKeyError:      
-            logger.warning(f'{getattr(media, "file_name", "NO_FILE")} is already saved in the database')
+            logger.warning(
+                f'{getattr(media, "file_name", "NO_FILE")} is already saved in database'
+            )
+
             return False, 0
         else:
-            logger.info(f'{getattr(media, "file_name", "NO_FILE")} is saved to the database')
-            # Send update log to 'UPDATE_CHANNEL'
-            asyncio.create_task(send_update_log(file_name))
+            logger.info(f'{getattr(media, "file_name", "NO_FILE")} is saved to database')
             return True, 1
 
 
+
 async def get_search_results(chat_id, query, file_type=None, max_results=10, offset=0, filter=False):
-    """For a given query return (results, next_offset)"""
+    """For given query return (results, next_offset)"""
     if chat_id is not None:
         settings = await get_settings(int(chat_id))
         try:
@@ -88,6 +84,10 @@ async def get_search_results(chat_id, query, file_type=None, max_results=10, off
             else:
                 max_results = int(MAX_B_TN)
     query = query.strip()
+    #if filter:
+        #better ?
+        #query = query.replace(' ', r'(\s|\.|\+|\-|_)')
+        #raw_pattern = r'(\s|_|\-|\.|\+)' + query + r'(\s|_|\-|\.|\+)'
     if not query:
         raw_pattern = '.'
     elif ' ' not in query:
@@ -124,10 +124,13 @@ async def get_search_results(chat_id, query, file_type=None, max_results=10, off
 
     return files, next_offset, total_results
 
-
 async def get_bad_files(query, file_type=None, filter=False):
-    """For a given query return (results, next_offset)"""
+    """For given query return (results, next_offset)"""
     query = query.strip()
+    #if filter:
+        #better ?
+        #query = query.replace(' ', r'(\s|\.|\+|\-|_)')
+        #raw_pattern = r'(\s|_|\-|\.|\+)' + query + r'(\s|_|\-|\.|\+)'
     if not query:
         raw_pattern = '.'
     elif ' ' not in query:
@@ -158,12 +161,11 @@ async def get_bad_files(query, file_type=None, filter=False):
 
     return files, total_results
 
-
 async def get_file_details(query):
     filter = {'file_id': query}
     cursor = Media.find(filter)
-    file_details = await cursor.to_list(length=1)
-    return file_details
+    filedetails = await cursor.to_list(length=1)
+    return filedetails
 
 
 def encode_file_id(s: bytes) -> str:
