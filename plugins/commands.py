@@ -69,6 +69,7 @@ async def start(client, message):
                     InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
                 ]
             ]
+            reply_markup = InlineKeyboardMarkup(admin_buttons)
         else:
             # If the user is not an admin, show regular buttons
             regular_buttons = [
@@ -80,10 +81,11 @@ async def start(client, message):
                     InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
                 ]
             ]
+            reply_markup = InlineKeyboardMarkup(regular_buttons)
         
-        reply_markup = InlineKeyboardMarkup(regular_buttons)
         await message.reply(script.START_TXT.format(user=message.from_user.mention if message.from_user else message.chat.title, bot=temp.B_LINK), reply_markup=reply_markup)
         await asyncio.sleep(2)
+
         if not await db.get_chat(message.chat.id):
             total = await client.get_chat_members_count(message.chat.id)
             total_chat = await db.total_chat_count() + 1  # Increment total_chat by 1
