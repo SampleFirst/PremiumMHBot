@@ -111,8 +111,8 @@ async def get_poster(query, bulk=False, id=False, file=None):
         if not movieid:
             movieid = filtered
         if bulk:
-            return movieid
-        movieid = movieid[0].movieID
+            return movieid[0].movieID if movieid else None
+        movieid = movieid[0].movieID if movieid else None
     else:
         movieid = query
     movie = imdb.get_movie(movieid)
