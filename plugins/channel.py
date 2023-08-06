@@ -4,8 +4,6 @@ from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
-from database.ia_filterdb import save_file
-from Script import script
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -23,7 +21,16 @@ async def media(bot, message):
     await save_file(media)
 
     # Extracting the search query from the file name
-    search_query = media.file_name.split(' (')[0]  # Using the part before the first ' (' as the search query
+    file_name = media.file_name.replace('_', ' ').replace('.mp4', '')
+    year = file_name.split(' ')[-1]
+    if year.isdigit():
+        # Remove the year from the file name
+        file_name_without_year = ' '.join(file_name.split(' ')[:-1])
+        # Combine the file name and year for IMDB search
+        search_query = f"{file_name_without_year} {year}"
+    else:
+        # If the year is not found in the file name, use the entire file name for the search query
+        search_query = file_name
 
     # Get the IMDB data and poster based on the search query
     imdb = await get_poster(search_query)
@@ -32,16 +39,13 @@ async def media(bot, message):
     if imdb:
         buttons = [
             [
-                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),            
+                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
                 InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
             ],
         ]
         TEMPLATE = IMDB_TEMPLATE
-
-        # Remove '_' and '.' from the search query for the file name
-        file_name_without_special_chars = search_query.replace('_', ' ').replace('.', ' ')
         cap = TEMPLATE.format(
-            query=file_name_without_special_chars,
+            query=search_query,
             title=imdb['title'],
             votes=imdb['votes'],
             aka=imdb["aka"],
@@ -84,4 +88,4 @@ async def media(bot, message):
         else:
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name_without_special_chars}")
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
