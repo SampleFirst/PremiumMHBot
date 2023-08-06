@@ -6,6 +6,7 @@ from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidD
 from utils import get_poster
 from database.ia_filterdb import save_file
 from Script import script
+import re
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -22,9 +23,13 @@ async def media(bot, message):
     media.caption = message.caption
     await save_file(media)
 
-    # Extracting the search query from the file name
-    search_query = media.file_name.split('.')[0]  # Using the part before the first '.' as the search query
-    search_query = search_query.replace('_', ' ')  # Replacing underscores with spaces
+    # Extracting the search query (movie title) from the file name
+    file_name = media.file_name
+    search_query = re.search(r'(.*?)\.', file_name)
+    if search_query:
+        search_query = search_query.group(1).replace('_', ' ')  # Replacing underscores with spaces
+    else:
+        search_query = file_name
 
     # Get the IMDB data and poster based on the search query
     imdb = await get_poster(search_query)
@@ -33,7 +38,7 @@ async def media(bot, message):
     if imdb:
         buttons = [
             [
-                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),            
+                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
                 InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
             ],
         ]
