@@ -22,41 +22,31 @@ async def media(bot, message):
     media.caption = message.caption
     await save_file(media)
 
-    # Extracting the search query and year from the file name
-    file_name = media.file_name.replace('_', ' ')
-    file_info = file_name.split('_{')[0]  # Using the part before the first '_{' as the file info
-    file_info = file_info.split('.{')[0]  # Using the part before the first '.{' as the file info
-    search_query = file_info.split(' (')[0]  # Using the part before the first ' (' as the search query
-    year = None
+    # Extracting the search query from the file name
+    search_query = media.file_name.split(' (')[0]  # Using the part before the first ' (' as the search query
 
-    # Check if year is present in the file info
-    if "(" in file_info and ")" in file_info:
-        year_start = file_info.find("(") + 1
-        year_end = file_info.find(")")
-        year = file_info[year_start:year_end]
+    # Get the IMDB data and poster based on the search query
+    imdb_results = await get_poster(search_query)
 
-    # Get the IMDB data and poster based on the search query and year
-    imdb = await get_poster(search_query, year)
-
-    # Add the 'text' line for organizing file names
-    script_format = f"Title: {search_query}\nYear: {year}\nResolution: {media.width}x{media.height}\nCodec: {media.mime_type}\nAudio: {media.audio.mime_type}\nLanguage: {media.audio.language}"
-
-    # Check if the script is present in the file name
-    if "{script}" in file_name:
-        # Extract the script information from the file name
-        script_info_start = file_name.find("{script}") + 8
-        script_info_end = file_name.find("}", script_info_start)
-        script_info = file_name[script_info_start:script_info_end].strip()
-        script_format += f"\nScript: {script_info}"
-    else:
-        # If script is not defined in the file name, add a default message
-        script_format += "\nScript: Not specified"
+    # Find the exact match using additional criteria
+    imdb = None
+    for result in imdb_results:
+        # You can add more criteria to match the exact file, such as IMDb ID or release year
+        if "series" in result.data["kind"].lower():  # Check if it's a series
+            if "year" in result.data and str(result.data["year"]) in media.file_name:  # Check if release year matches
+                imdb = result.data
+                break
+        else:
+            if "year" in result.data and str(result.data["year"]) in media.file_name:  # Check if release year matches
+                imdb = result.data
+                break
 
     if imdb:
         buttons = [
             [
-                InlineKeyboardButton('Use This Bot', url='https://t.me/PremiumMHBot')
-            ]
+                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),            
+                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
+            ],
         ]
         TEMPLATE = IMDB_TEMPLATE
         cap = TEMPLATE.format(
@@ -103,4 +93,4 @@ async def media(bot, message):
         else:
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"Here is what I found for your query {search_query}:\n\n{script_format}")
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{search_query}")
