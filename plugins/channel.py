@@ -37,8 +37,11 @@ async def media(bot, message):
             ],
         ]
         TEMPLATE = IMDB_TEMPLATE
+
+        # Remove '_' and '.' from the search query for the file name
+        file_name_without_special_chars = search_query.replace('_', ' ').replace('.', ' ')
         cap = TEMPLATE.format(
-            query=search_query,
+            query=file_name_without_special_chars,
             title=imdb['title'],
             votes=imdb['votes'],
             aka=imdb["aka"],
@@ -69,20 +72,16 @@ async def media(bot, message):
             **locals()
         )
 
-        # Check if the search_query is found in the UPDATE_CHANNEL
-        # If found, edit the existing message, else send a new message with the file name without '_' or '.'
-        if search_query in script:
+        if imdb.get('poster'):
             try:
-                await bot.edit_message_caption(chat_id=UPDATE_CHANNEL, message_id=script[search_query]['message_id'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
             except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
                 poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
-                await bot.edit_message_caption(chat_id=UPDATE_CHANNEL, message_id=script[search_query]['message_id'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
             except Exception as e:
                 logger.exception(e)
-                await bot.edit_message_text(chat_id=UPDATE_CHANNEL, message_id=script[search_query]['message_id'], text=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
         else:
-            file_name_without_underscore = search_query.replace('_', ' ').replace('.', ' ')
-            await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
-            await bot.send_message(chat_id=UPDATE_CHANNEL, text=file_name_without_underscore, reply_markup=InlineKeyboardMarkup(buttons))
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{search_query}")
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name_without_special_chars}")
