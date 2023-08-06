@@ -21,7 +21,7 @@ async def media(bot, message):
     await save_file(media)
 
     # Extracting the search query from the file name
-    file_name = media.file_name.replace('_', ' ').replace('.mp4', '')
+    file_name = media.file_name.replace('_', ' ').replace('.', '')
     year = file_name.split(' ')[-1]
     if year.isdigit():
         # Remove the year from the file name
