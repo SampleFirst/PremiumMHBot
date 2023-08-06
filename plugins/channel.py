@@ -6,7 +6,6 @@ from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidD
 from utils import get_poster
 from database.ia_filterdb import save_file
 from Script import script
-import re
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -23,13 +22,8 @@ async def media(bot, message):
     media.caption = message.caption
     await save_file(media)
 
-    # Extracting the search query (movie title) from the file name
-    file_name = media.file_name
-    search_query = re.search(r'(.*?)\.', file_name)
-    if search_query:
-        search_query = search_query.group(1).replace('_', ' ')  # Replacing underscores with spaces
-    else:
-        search_query = file_name
+    # Extracting the search query from the file name
+    search_query = media.file_name.split(' (')[0]  # Using the part before the first ' (' as the search query
 
     # Get the IMDB data and poster based on the search query
     imdb = await get_poster(search_query)
@@ -38,7 +32,7 @@ async def media(bot, message):
     if imdb:
         buttons = [
             [
-                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
+                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),            
                 InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
             ],
         ]
@@ -75,16 +69,20 @@ async def media(bot, message):
             **locals()
         )
 
-        if imdb.get('poster'):
+        # Check if the search_query is found in the UPDATE_CHANNEL
+        # If found, edit the existing message, else send a new message with the file name without '_' or '.'
+        if search_query in script:
             try:
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.edit_message_caption(chat_id=UPDATE_CHANNEL, message_id=script[search_query]['message_id'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
             except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
                 poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.edit_message_caption(chat_id=UPDATE_CHANNEL, message_id=script[search_query]['message_id'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
             except Exception as e:
                 logger.exception(e)
-                await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                await bot.edit_message_text(chat_id=UPDATE_CHANNEL, message_id=script[search_query]['message_id'], text=cap, reply_markup=InlineKeyboardMarkup(buttons))
         else:
-            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            file_name_without_underscore = search_query.replace('_', ' ').replace('.', ' ')
+            await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=file_name_without_underscore, reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{search_query}")
