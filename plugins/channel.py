@@ -51,6 +51,9 @@ async def media(bot, message):
         # If the year is not found in the file name, use the entire file name for the search query
         search_query = file_name
 
+     # Get the IMDB data and poster based on the search query
+    imdb = await get_poster(search_query)
+
     # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
     if imdb:
         buttons = [
