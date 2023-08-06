@@ -1,3 +1,4 @@
+import re
 from pyrogram import Client, filters
 from info import CHANNELS, UPDATE_CHANNEL, IMDB_TEMPLATE
 from database.ia_filterdb import save_file
@@ -24,17 +25,26 @@ async def media(bot, message):
 
     # Extracting the search query and year from the file name
     file_name = media.file_name
-    search_query = file_name.split(' (')[0]  # Using the part before the first ' (' as the search query
-    year = None
 
-    # Check if year is present in the file name
-    if "(" in file_name and ")" in file_name:
-        year_start = file_name.find("(") + 1
-        year_end = file_name.find(")")
-        year = file_name[year_start:year_end]
+    # Splitting the file name by underscores
+    name_parts = file_name.split('_')
+
+    # Removing the file extension
+    name_without_extension = name_parts[-1].split('.')[0]
+
+    # Extracting the year using regular expression
+    year_match = re.search(r'\b\d{4}\b', name_without_extension)
+    year = year_match.group() if year_match else None
+
+    # Joining the remaining parts of the file name as the search query
+    search_query = ' '.join(name_parts[:-1])
+
+    # ...
 
     # Get the IMDB data and poster based on the search query and year
     imdb = await get_poster(search_query, year)
+
+    # ...
 
     # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
     if imdb:
