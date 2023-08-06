@@ -71,8 +71,8 @@ async def media(bot, message):
         if imdb:
             buttons = [
                 [
-                    InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
-                    InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
+                    InlineKeyboardButton('Join Channel', url='https://t.me/PremiumMHBot'),
+                    InlineKeyboardButton('Join Group', url='https://t.me/PremiumMHBot')
                 ],
             ]
             TEMPLATE = IMDB_TEMPLATE
@@ -90,21 +90,6 @@ async def media(bot, message):
                 runtime=imdb["runtime"],
                 countries=imdb["countries"],
                 certificates=imdb["certificates"],
-                languages=imdb["languages"],
-                director=imdb["director"],
-                writer=imdb["writer"],
-                producer=imdb["producer"],
-                composer=imdb["composer"],
-                cinematographer=imdb["cinematographer"],
-                music_team=imdb["music_team"],
-                distributors=imdb["distributors"],
-                release_date=imdb['release_date'],
-                year=imdb['year'],
-                genres=imdb['genres'],
-                poster=imdb['poster'],
-                plot=imdb['plot'],
-                rating=imdb['rating'],
-                url=imdb['url'],
                 **locals()
             )
 
@@ -125,4 +110,4 @@ async def media(bot, message):
             year = year_match.group() if year_match else "Unknown"
             video_resolution = video_resolution if video_resolution else "Unknown"
             text = f"New File Added In Bot\n\n🏷 Title: {file_name}\n🎭 Genres: {language}\n📆 Year: {year}\n🌟 Video resolution: {video_resolution}"
-            await bot.send_message(chat_id=UPDATE_CHANNEL, text=text, parse_mode="HTML")
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=text, parse_mode="Markdown")
