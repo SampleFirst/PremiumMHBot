@@ -22,20 +22,26 @@ async def media(bot, message):
     await save_file(media)
 
     # Extracting the search query from the file name
-    full_file_name = re.sub(r'[^\w\d]+', ' ', media.file_name)  # Update: Remove spaces from full_file_name
+    full_file_name = re.sub(r'[^\w\d]+', ' ', media.file_name)  # Update: Remove special characters from full_file_name
     file_name = ""
 
-    # Detecting the year in 4-digit number format
-    year_match = re.search(r'\b\d{4}\b', full_file_name)
-    series_season_match = re.search(r'\bS\d+\b', full_file_name)
-
-    if year_match or series_season_match:
-        # Extracting the part before year or series season
-        file_name = re.search(r'^.*?(?=\d{4}\b|\bS\d+\b)', full_file_name).group().strip()
-
-    if not file_name:
-        # If no year or series season is found, use the entire file name
-        file_name = full_file_name
+    # Extracting the part before year or series season if any
+    file_name_match = re.search(r'^.*?(?=\d{4}\b|\bS\d+\b)', full_file_name)
+    if file_name_match:
+        file_name = file_name_match.group().strip()
+    else:
+        # If year or series season not found, check for language in curly brackets
+        language_match = re.search(r'\{(.*?)\}', full_file_name)
+        if language_match:
+            file_name = full_file_name.replace(language_match.group(), '').strip()
+        else:
+            # If language not found in curly brackets, check for categories or words before a number
+            file_name_match = re.search(r'^.*?(?=\b\d+\b)', full_file_name)
+            if file_name_match:
+                file_name = file_name_match.group().strip()
+            else:
+                # If no year, season, or language found, use the entire file name as file_name
+                file_name = full_file_name
 
     # Detecting video resolution
     video_resolution_match = re.search(r'\b\d{3,4}p\b', file_name)
@@ -47,7 +53,7 @@ async def media(bot, message):
 
     if not languages:
         # If no languages found in curly brackets, try to detect languages without curly brackets
-        languages_match = re.search(r'\b(?:English|Hindi|Bengali|Telugu|Marathi|Tamil|Urdu|Gujarati|Kannada|Odia|Punjabi|Malayalam|Spanish|French|German|Italian|Russian|Chinese)\b', file_name, re.IGNORECASE)
+        languages_match = re.search(r'\b(?:English|Hindi|Bengali|Telugu|Marathi|Tamil|Urdu|Gujarati|Kannada|Odia|Punjabi|Malayalam|Spanish|French|German|Italian|Russian|Korean|Chinese)\b', file_name, re.IGNORECASE)
         languages = languages_match.group() if languages_match else None
 
     if languages:
@@ -55,7 +61,7 @@ async def media(bot, message):
         file_name_without_languages = file_name.replace(languages_match.group(), '').strip()
 
         # Combine the file name without languages and year for IMDB search
-        search_query = f"{file_name_without_languages} {year_match.group()}" if year_match else file_name_without_languages
+        search_query = f"{file_name_without_languages} {file_name_match.group()}" if file_name_match else file_name_without_languages
     else:
         # If no languages found, use the entire file name for the search query
         search_query = file_name
@@ -64,7 +70,7 @@ async def media(bot, message):
     imdb = await get_poster(search_query)
 
     # Check for exact match and send IMDB data and poster to UPDATE_CHANNEL
-    if imdb and imdb['title'] == file_name and imdb['year'] == year_match.group():
+    if imdb and imdb['title'] == file_name and imdb['year'] == file_name_match.group():
         buttons = [
             [
                 InlineKeyboardButton('Join Channel', url='https://t.me/PremiumMHBot'),
@@ -118,8 +124,8 @@ async def media(bot, message):
     else:
         # If IMDB data and poster not found, send the specific message format
         language = languages if languages else "Unknown"
-        year = year_match.group() if year_match else "Unknown"
+        year = file_name_match.group() if file_name_match else "Unknown"
         video_resolution = video_resolution if video_resolution else "Unknown"
         text = f"New File Added In Bot\n\n🏷 Title: {file_name}\n🎭 Genres: {language}\n📆 Year: {year}\n🌟 Video resolution: {video_resolution}"
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=text)
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=text, parse_mode="Markdown")
 
