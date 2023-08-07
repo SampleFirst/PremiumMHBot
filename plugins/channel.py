@@ -22,7 +22,7 @@ async def media(bot, message):
     await save_file(media)
 
     # Extracting the search query from the file name
-    full_file_name = media.file_name.replace('_', ' ').replace('.', ' ')
+    full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
     file_name = ""
 
     # Detecting the year in 4-digit number format
@@ -51,7 +51,7 @@ async def media(bot, message):
         # If the year is not found in the file name, use the entire file name for the search query
         search_query = file_name
 
-     # Get the IMDB data and poster based on the search query
+    # Get the IMDB data and poster based on the search query
     imdb = await get_poster(search_query)
 
     # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
@@ -108,6 +108,3 @@ async def media(bot, message):
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
-        
-        
-        
