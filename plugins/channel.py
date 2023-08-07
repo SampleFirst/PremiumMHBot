@@ -121,5 +121,5 @@ async def media(bot, message):
         year = year_match.group() if year_match else "Unknown"
         video_resolution = video_resolution if video_resolution else "Unknown"
         text = f"New File Added In Bot\n\n🏷 Title: {file_name}\n🎭 Genres: {language}\n📆 Year: {year}\n🌟 Video resolution: {video_resolution}"
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=text, parse_mode="Markdown")
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=text)
 
