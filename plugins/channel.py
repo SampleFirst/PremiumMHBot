@@ -1,12 +1,12 @@
 from pyrogram import Client, filters
 from info import CHANNELS, UPDATE_CHANNEL, IMDB_TEMPLATE
-from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
 import re
 
 media_filter = filters.document | filters.video | filters.audio
+
 
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
 async def media(bot, message):
@@ -19,57 +19,45 @@ async def media(bot, message):
 
     media.file_type = file_type
     media.caption = message.caption
-    await save_file(media)
 
+    # Extracting the search query from the file name
     full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
-    file_name = ""
-    
-    year_match = re.search(r'\b\d{4}\b', full_file_name)
-    series_season_match = re.search(r'\b[Ss]|Season\b\d+\b', full_file_name)
+    file_name = re.search(r'^.*?(?=\d{4}\b|\b[Ss]|Season\b\d+\b)', full_file_name).group().strip()
 
-    if year_match or series_season_match:
-        file_name = re.search(r'^.*?(?=\d{4}\b|\b[Ss]|Season\b\d+\b)', full_file_name).group().strip()
+    # Send the search query to IMDb and process the results
+    await imdb_search(bot, message, file_name)
 
-    if not file_name:
-        file_name = full_file_name
-        
-    series_season_episode_match = re.search(r'\b[Ee]|Episode\b\d+\b', full_file_name)
-    video_resolution_match = re.search(r'\b\d{3,4}p\b', file_name)
-    video_resolution = video_resolution_match.group() if video_resolution_match else None
-
-    if year_match:
-        file_name_without_year = file_name.replace(year_match.group(), '').strip()
-        search_query = f"{file_name_without_year} {year_match.group()}"
-    else:
-        search_query = file_name
-
-    await imdb_search(bot, message, search_query)
-
+# New function to perform IMDb search and display results
 async def imdb_search(bot, message, search_query):
-    k = await message.reply('Searching IMDb')
     movies = await get_poster(search_query, bulk=True)
     if not movies:
-        return await message.reply("No results found")
-    
+        return await bot.send_message(
+            chat_id=message.chat.id,
+            text="No results found"
+        )
     btn = [
         [
             InlineKeyboardButton(
-                text=f"{movie['title']} - {movie['year']}",
-                callback_data=f"imdb#{movie['movieID']}",
+                text=f"{movie.get('title')} - {movie.get('year')}",
+                callback_data=f"imdb#{movie.movieID}",
             )
         ]
         for movie in movies
     ]
-    await k.edit('Here is what I found on IMDb', reply_markup=InlineKeyboardMarkup(btn))
+    await bot.send_message(
+        chat_id=message.from_user.id,  # Send the message to the bot's private message (PM)
+        text='Here is what I found on IMDb',
+        reply_markup=InlineKeyboardMarkup(btn)
+    )
 
 @Client.on_callback_query(filters.regex('^imdb'))
-async def imdb_callback(bot: Client, query: CallbackQuery):
+async def imdb_callback(bot, query):
     i, movie = query.data.split('#')
     imdb = await get_poster(query=movie, id=True)
     btn = [
         [
             InlineKeyboardButton(
-                text=f"{imdb['title']}",
+                text=f"{imdb.get('title')}",
                 url=imdb['url'],
             )
         ]
@@ -109,7 +97,6 @@ async def imdb_callback(bot: Client, query: CallbackQuery):
         )
     else:
         caption = "No Results"
-    
     if imdb.get('poster'):
         try:
             await bot.send_photo(
@@ -142,5 +129,4 @@ async def imdb_callback(bot: Client, query: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(btn),
             disable_web_page_preview=False
         )
-    
-    
+        
