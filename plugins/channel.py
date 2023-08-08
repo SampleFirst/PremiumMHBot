@@ -78,7 +78,7 @@ async def media(bot, message):
         search_query = file_name
 
     # Check if the "update" setting is enabled
-    if admin_settings["update"] = True
+    if admin_settings["update"]:
         # Get IMDb data and poster based on search query
         imdb = await get_poster(search_query)
     
@@ -171,5 +171,4 @@ async def admin_settings_command(bot, message):
             await bot.send_message(message.chat.id, "Invalid usage. Use /settings update on or /settings update off.")
     else:
         await bot.send_message(message.chat.id, "Invalid usage. Use /settings update on or /settings update off.")
-  
-         
+        
