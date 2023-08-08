@@ -4,6 +4,7 @@ from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
+from Script import script
 import re
 
 media_filter = filters.document | filters.video | filters.audio
@@ -45,71 +46,106 @@ async def media(bot, message):
     # Detecting video resolution
     video_resolution_match = re.search(r'\b\d{3,4}p\b', file_name)
     video_resolution = video_resolution_match.group() if video_resolution_match else None
-
+    
+    LANGUAGE_KEYWORDS = {
+        'English': ['English', 'english', 'Eng', 'eng'],
+        'Marathi': ['Marathi', 'marathi', 'Mar', 'mar'],
+        'Hindi': ['Hindi', 'hindi', 'Hin', 'hin'],
+        'Malayalam': ['Malayalam', 'malayalam', 'Mal', 'mal'],
+        'Kannada': ['Kannada', 'kannada', 'Kan', 'kan'],
+        'Bengali': ['Bengali', 'bengali', 'Ben', 'ben'],
+        'Punjabi': ['Punjabi', 'punjabi', 'Pun', 'pun'],
+        'Bhojpuri': ['Bhojpuri', 'bhojpuri', 'Bhoj', 'bhoj'],
+        'Korean': ['Korean', 'korean', 'Kor', 'kor'],
+        'Chinese': ['Chinese', 'chinese', 'Chi', 'chi']
+    }
+    
+    language_match = LANGUAGE_KEYWORDS
+    
     if year_match:
         # Remove the year from the file name
         file_name_without_year = file_name.replace(year_match.group(), '').strip()
 
-        # Combine the file name and year for IMDB search
+        # Combine the file name and year for search query
         search_query = f"{file_name_without_year} {year_match.group()}"
     else:
-        # If the year is not found in the file name, use the entire file name for the search query
+        # If year is not found, use entire file name for search query
         search_query = file_name
 
-    # Get the IMDB data and poster based on the search query
-    imdb = await get_poster(search_query)
-
-    # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
-    if imdb:
-        buttons = [
-            [
-                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
-                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
-            ],
-        ]
-        TEMPLATE = IMDB_TEMPLATE
-        cap = TEMPLATE.format(
-            query=search_query,
-            title=imdb['title'],
-            votes=imdb['votes'],
-            aka=imdb["aka"],
-            seasons=imdb["seasons"],
-            box_office=imdb['box_office'],
-            localized_title=imdb['localized_title'],
-            kind=imdb['kind'],
-            imdb_id=imdb["imdb_id"],
-            cast=imdb["cast"],
-            runtime=imdb["runtime"],
-            countries=imdb["countries"],
-            certificates=imdb["certificates"],
-            languages=imdb["languages"],
-            director=imdb["director"],
-            writer=imdb["writer"],
-            producer=imdb["producer"],
-            composer=imdb["composer"],
-            cinematographer=imdb["cinematographer"],
-            music_team=imdb["music_team"],
-            distributors=imdb["distributors"],
-            release_date=imdb['release_date'],
-            year=imdb['year'],
-            genres=imdb['genres'],
-            poster=imdb['poster'],
-            plot=imdb['plot'],
-            rating=imdb['rating'],
-            url=imdb['url'],
-            **locals()
-        )
-
-        if imdb.get('poster'):
-            try:
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
-            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
-                poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
-            except Exception as e:
-                logger.exception(e)
+    # Check if the "update" setting is enabled
+    if settings["update"]:
+        # Get IMDb data and poster based on search query
+        imdb = await get_poster(search_query)
+    
+        # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDb poster
+        if imdb:
+            buttons = [
+                [
+                    InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
+                    InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
+                ],
+            ]
+            TEMPLATE = IMDB_TEMPLATE
+            cap = TEMPLATE.format(
+                query=search_query,
+                title=imdb['title'],
+                votes=imdb['votes'],
+                aka=imdb["aka"],
+                seasons=imdb["seasons"],
+                box_office=imdb['box_office'],
+                localized_title=imdb['localized_title'],
+                kind=imdb['kind'],
+                imdb_id=imdb["imdb_id"],
+                cast=imdb["cast"],
+                runtime=imdb["runtime"],
+                countries=imdb["countries"],
+                certificates=imdb["certificates"],
+                languages=imdb["languages"],
+                director=imdb["director"],
+                writer=imdb["writer"],
+                producer=imdb["producer"],
+                composer=imdb["composer"],
+                cinematographer=imdb["cinematographer"],
+                music_team=imdb["music_team"],
+                distributors=imdb["distributors"],
+                release_date=imdb['release_date'],
+                year=imdb['year'],
+                genres=imdb['genres'],
+                poster=imdb['poster'],
+                plot=imdb['plot'],
+                rating=imdb['rating'],
+                url=imdb['url'],
+                **locals()
+            )
+    
+            if imdb.get('poster'):
+                try:
+                    await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+                    poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
+                    await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+                except Exception as e:
+                    logger.exception(e)
+                    await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            else:
                 await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
         else:
-            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
+
     else:
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
+        # Your code to send IMDb poster with FILE_INFO format
+        file_info_caption = FILE_INFO.format(
+            title=f"Title 🎬: {imdb['title']}\nQuality 💿 : {video_resolution}\nAudio 🔊: {language_match}",
+            search_query=search_query
+        )
+        if imdb.get('poster'):
+            try:
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=file_info_caption)
+            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+                poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=file_info_caption)
+            except Exception as e:
+                logger.exception(e)
+                await bot.send_message(chat_id=UPDATE_CHANNEL, text=file_info_caption)
+        else:
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=file_info_caption)
