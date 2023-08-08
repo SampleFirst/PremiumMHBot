@@ -6,7 +6,7 @@ from Script import script
 from pyrogram import Client, filters, enums
 from pyrogram.errors import ChatAdminRequired, FloodWait
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_bad_files
+from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_search_results, get_bad_files
 from database.users_chats_db import db
 from info import CHANNELS, ADMINS, AUTH_CHANNEL, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT_ID, MAX_B_TN, IS_VERIFY, HOW_TO_VERIFY
 from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, send_all
@@ -805,6 +805,32 @@ async def send_msg(bot, message):
     else:
         await message.reply_text("<b>Usᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴀs ᴀ ʀᴇᴘʟʏ ᴛᴏ ᴀɴʏ ᴍᴇssᴀɢᴇ ᴜsɪɴɢ ᴛʜᴇ ᴛᴀʀɢᴇᴛ ᴄʜᴀᴛ ɪᴅ. Fᴏʀ ᴇɢ: /send ᴜsᴇʀɪᴅ</b>")
 
+@Client.on_message(filters.private & filters.command("get_files"))
+async def get_files_command_handler(client: Client, message: Message):
+    chat_id = message.chat.id
+    query = ""  # Empty query to match all files
+    max_results = 100  # You can adjust this based on your needs
+    offset = 0
+
+    files, _, _ = await get_search_results(chat_id, query, max_results=max_results, offset=offset)
+
+    if not files:
+        await message.reply("No files found.")
+        return
+
+    file_list = "\n".join([f"{file.file_name} - {file.file_size} bytes" for file in files])
+    txt_content = f"List of files:\n{file_list}"
+
+    # Create and send a .txt file
+    txt_file_name = "file_list.txt"
+    with open(txt_file_name, "w") as txt_file:
+        txt_file.write(txt_content)
+
+    await client.send_document(chat_id, txt_file_name, caption="List of Files")
+
+    # Clean up by removing the temporary .txt file
+    os.remove(txt_file_name)
+    
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
 async def deletemultiplefiles(bot, message):
     chat_type = message.chat.type
