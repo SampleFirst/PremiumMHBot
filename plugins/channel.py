@@ -5,6 +5,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
 import re
+from fuzzywuzzy import fuzz
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -25,31 +26,14 @@ async def media(bot, message):
     full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
     file_name = ""
 
-    # Detecting the year in 4-digit number format
-    year_match = re.search(r'\b\d{4}\b', full_file_name)
-    series_season_match = re.search(r'\bS\d+\b', full_file_name)
-
-    if year_match or series_season_match:
-        # Extracting the part before year or series season
-        file_name = re.search(r'^.*?(?=\d{4}\b|\bS\d+\b)', full_file_name).group().strip()
-
-    if not file_name:
-        # If no year or series season is found, use the entire file name
-        file_name = full_file_name
-
-    # Detecting video resolution
-    video_resolution_match = re.search(r'\b\d{3,4}p\b', file_name)
-    video_resolution = video_resolution_match.group() if video_resolution_match else None
-
-    if year_match:
-        # Remove the year from the file name
-        file_name_without_year = file_name.replace(year_match.group(), '').strip()
-
-        # Combine the file name and year for IMDB search
-        search_query = f"{file_name_without_year} {year_match.group()}"
-    else:
-        # If the year is not found in the file name, use the entire file name for the search query
-        search_query = file_name
+    # Use fuzzy search to find exact same file name matches in IMDB data
+    search_query = None
+    max_similarity = 0
+    for imdb_title in imdb_titles:
+        similarity = fuzz.ratio(file_name, imdb_title)
+        if similarity > max_similarity:
+            max_similarity = similarity
+            search_query = imdb_title
 
     # Get the IMDB data and poster based on the search query
     imdb = await get_poster(search_query)
