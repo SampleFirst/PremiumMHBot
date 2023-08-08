@@ -9,6 +9,11 @@ import re
 
 media_filter = filters.document | filters.video | filters.audio
 
+# Your settings dictionary (update this as per your needs)
+admin_settings = {
+    "update": True  # Default value, you can change it
+}
+
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
 async def media(bot, message):
     for file_type in ("document", "video", "audio"):
@@ -73,7 +78,7 @@ async def media(bot, message):
         search_query = file_name
 
     # Check if the "update" setting is enabled
-    if settings["update"]:
+    if admin_settings["update"] = True
         # Get IMDb data and poster based on search query
         imdb = await get_poster(search_query)
     
@@ -132,7 +137,7 @@ async def media(bot, message):
         else:
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
 
-    else:
+    else: 
         # Your code to send IMDb poster with FILE_INFO format
         file_info_caption = FILE_INFO.format(
             title=f"Title 🎬: {imdb['title']}\nQuality 💿 : {video_resolution}\nAudio 🔊: {language_match}",
@@ -149,3 +154,22 @@ async def media(bot, message):
                 await bot.send_message(chat_id=UPDATE_CHANNEL, text=file_info_caption)
         else:
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=file_info_caption)
+
+
+@Client.on_message(filters.command("admin_settings"))
+async def admin_settings_command(bot, message):
+    # Example: "/settings update on" or "/settings update off"
+    args = message.text.split()[1:]
+    if len(args) == 2 and args[0] == "update":
+        if args[1] == "on":
+            admin_settings["update"] = True
+            await bot.send_message(message.chat.id, "Update setting has been enabled.")
+        elif args[1] == "off":
+            admin_settings["update"] = False
+            await bot.send_message(message.chat.id, "Update setting has been disabled.")
+        else:
+            await bot.send_message(message.chat.id, "Invalid usage. Use /settings update on or /settings update off.")
+    else:
+        await bot.send_message(message.chat.id, "Invalid usage. Use /settings update on or /settings update off.")
+  
+         
