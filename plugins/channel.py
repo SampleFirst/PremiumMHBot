@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from info import CHANNELS, UPDATE_CHANNEL, IMDB_TEMPLATE
 from database.ia_filterdb import save_file
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
 import re
@@ -56,20 +56,42 @@ async def media(bot, message):
         # If the year is not found in the file name, use the entire file name for the search query
         search_query = file_name
 
-    # Get the IMDB data and poster based on the search query
-    imdb = await get_poster(search_query)
+    # Send the search query to IMDb and process the results
+    await imdb_search(bot, message, search_query)
 
-    # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
-    if imdb:
-        buttons = [
-            [
-                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
-                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
-            ],
+# New function to perform IMDb search and display results
+async def imdb_search(bot, message, search_query):
+    k = await message.reply('Searching IMDb')
+    movies = await get_poster(search_query, bulk=True)
+    if not movies:
+        return await message.reply("No results found")
+    btn = [
+        [
+            InlineKeyboardButton(
+                text=f"{movie.get('title')} - {movie.get('year')}",
+                callback_data=f"imdb#{movie.movieID}",
+            )
         ]
-        TEMPLATE = IMDB_TEMPLATE
-        cap = TEMPLATE.format(
-            query=search_query,
+        for movie in movies
+    ]
+    await k.edit('Here is what I found on IMDb', reply_markup=InlineKeyboardMarkup(btn))
+
+@Client.on_callback_query(filters.regex('^imdb'))
+async def imdb_callback(bot: Client, query: CallbackQuery):
+    i, movie = query.data.split('#')
+    imdb = await get_poster(query=movie, id=True)
+    btn = [
+        [
+            InlineKeyboardButton(
+                text=f"{imdb.get('title')}",
+                url=imdb['url'],
+            )
+        ]
+    ]
+    message = query.message.reply_to_message or query.message
+    if imdb:
+        caption = IMDB_TEMPLATE.format(
+            query=imdb['title'],
             title=imdb['title'],
             votes=imdb['votes'],
             aka=imdb["aka"],
@@ -99,17 +121,38 @@ async def media(bot, message):
             url=imdb['url'],
             **locals()
         )
-
-        if imdb.get('poster'):
-            try:
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
-            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
-                poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
-            except Exception as e:
-                logger.exception(e)
-                await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
-        else:
-            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
+        caption = "No Results"
+    if imdb.get('poster'):
+        try:
+            await bot.send_photo(
+                chat_id=UPDATE_CHANNEL,
+                photo=imdb['poster'],
+                caption=caption,
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+        except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+            pic = imdb.get('poster')
+            poster = pic.replace('.jpg', "._V1_UX360.jpg")
+            await bot.send_photo(
+                chat_id=UPDATE_CHANNEL,
+                photo=poster,
+                caption=caption,
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+        except Exception as e:
+            logger.exception(e)
+            await bot.send_message(
+                chat_id=UPDATE_CHANNEL,
+                text=caption,
+                reply_markup=InlineKeyboardMarkup(btn),
+                disable_web_page_preview=False
+            )
+    else:
+        await bot.send_message(
+            chat_id=UPDATE_CHANNEL,
+            text=caption,
+            reply_markup=InlineKeyboardMarkup(btn),
+            disable_web_page_preview=False
+        )
+    await query.answer()
