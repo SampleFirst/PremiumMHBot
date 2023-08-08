@@ -21,55 +21,41 @@ async def media(bot, message):
     media.caption = message.caption
     await save_file(media)
 
-    # Extracting the search query from the file name
     full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
     file_name = ""
-
-    # Detecting the year in 4-digit number format
-    year_match = re.search(r'\b\d{4}\b', full_file_name)
     
-    # Updated: Detecting series season using a more comprehensive pattern
+    year_match = re.search(r'\b\d{4}\b', full_file_name)
     series_season_match = re.search(r'\b[Ss]|Season\b\d+\b', full_file_name)
 
     if year_match or series_season_match:
-        # Extracting the part before year or series season
         file_name = re.search(r'^.*?(?=\d{4}\b|\b[Ss]|Season\b\d+\b)', full_file_name).group().strip()
 
     if not file_name:
-        # If no year or series season is found, use the entire file name
         file_name = full_file_name
         
-    # Detecting Episodes match
     series_season_episode_match = re.search(r'\b[Ee]|Episode\b\d+\b', full_file_name)
-
-    # Detecting video resolution
     video_resolution_match = re.search(r'\b\d{3,4}p\b', file_name)
     video_resolution = video_resolution_match.group() if video_resolution_match else None
 
     if year_match:
-        # Remove the year from the file name
         file_name_without_year = file_name.replace(year_match.group(), '').strip()
-
-        # Combine the file name and year for IMDB search
         search_query = f"{file_name_without_year} {year_match.group()}"
     else:
-        # If the year is not found in the file name, use the entire file name for the search query
         search_query = file_name
 
-    # Send the search query to IMDb and process the results
     await imdb_search(bot, message, search_query)
 
-# New function to perform IMDb search and display results
 async def imdb_search(bot, message, search_query):
     k = await message.reply('Searching IMDb')
     movies = await get_poster(search_query, bulk=True)
     if not movies:
         return await message.reply("No results found")
+    
     btn = [
         [
             InlineKeyboardButton(
-                text=f"{movie.get('title')} - {movie.get('year')}",
-                callback_data=f"imdb#{movie.movieID}",
+                text=f"{movie['title']} - {movie['year']}",
+                callback_data=f"imdb#{movie['movieID']}",
             )
         ]
         for movie in movies
@@ -83,7 +69,7 @@ async def imdb_callback(bot: Client, query: CallbackQuery):
     btn = [
         [
             InlineKeyboardButton(
-                text=f"{imdb.get('title')}",
+                text=f"{imdb['title']}",
                 url=imdb['url'],
             )
         ]
@@ -123,6 +109,7 @@ async def imdb_callback(bot: Client, query: CallbackQuery):
         )
     else:
         caption = "No Results"
+    
     if imdb.get('poster'):
         try:
             await bot.send_photo(
@@ -155,4 +142,5 @@ async def imdb_callback(bot: Client, query: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(btn),
             disable_web_page_preview=False
         )
-    await query.answer()
+    
+    
