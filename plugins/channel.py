@@ -1,12 +1,12 @@
 from pyrogram import Client, filters
 from info import CHANNELS, UPDATE_CHANNEL, IMDB_TEMPLATE
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from database.ia_filterdb import save_file
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
 import re
 
 media_filter = filters.document | filters.video | filters.audio
-
 
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
 async def media(bot, message):
@@ -19,53 +19,57 @@ async def media(bot, message):
 
     media.file_type = file_type
     media.caption = message.caption
+    await save_file(media)
 
     # Extracting the search query from the file name
     full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
-    file_name = re.search(r'^.*?(?=\d{4}\b|\b[Ss]|Season\b\d+\b)', full_file_name).group().strip()
+    file_name = ""
 
-    # Send the search query to IMDb and process the results
-    await imdb_search(bot, message, file_name)
+    # Detecting the year in 4-digit number format
+    year_match = re.search(r'\b\d{4}\b', full_file_name)
+    
+    # Updated: Detecting series season using a more comprehensive pattern
+    series_season_match = re.search(r'\b[Ss]|Season\b\d+\b', full_file_name)
 
-# New function to perform IMDb search and display results
-async def imdb_search(bot, message, search_query):
-    movies = await get_poster(search_query, bulk=True)
-    if not movies:
-        return await bot.send_message(
-            chat_id=message.chat.id,
-            text="No results found"
-        )
-    btn = [
-        [
-            InlineKeyboardButton(
-                text=f"{movie.get('title')} - {movie.get('year')}",
-                callback_data=f"imdb#{movie.movieID}",
-            )
-        ]
-        for movie in movies
-    ]
-    await bot.send_message(
-        chat_id=message.from_user.id,  # Send the message to the bot's private message (PM)
-        text='Here is what I found on IMDb',
-        reply_markup=InlineKeyboardMarkup(btn)
-    )
+    if year_match or series_season_match:
+        # Extracting the part before year or series season
+        file_name = re.search(r'^.*?(?=\d{4}\b|\b[Ss]|Season\b\d+\b)', full_file_name).group().strip()
 
-@Client.on_callback_query(filters.regex('^imdb'))
-async def imdb_callback(bot, query):
-    i, movie = query.data.split('#')
-    imdb = await get_poster(query=movie, id=True)
-    btn = [
-        [
-            InlineKeyboardButton(
-                text=f"{imdb.get('title')}",
-                url=imdb['url'],
-            )
-        ]
-    ]
-    message = query.message.reply_to_message or query.message
+    if not file_name:
+        # If no year or series season is found, use the entire file name
+        file_name = full_file_name
+        
+    # Detecting Episodes match
+    series_season_episode_match = re.search(r'\b[Ee]|Episode\b\d+\b', full_file_name)
+
+    # Detecting video resolution
+    video_resolution_match = re.search(r'\b\d{3,4}p\b', file_name)
+    video_resolution = video_resolution_match.group() if video_resolution_match else None
+
+    if year_match:
+        # Remove the year from the file name
+        file_name_without_year = file_name.replace(year_match.group(), '').strip()
+
+        # Combine the file name and year for IMDB search
+        search_query = f"{file_name_without_year} {year_match.group()}"
+    else:
+        # If the year is not found in the file name, use the entire file name for the search query
+        search_query = file_name
+
+    # Get the IMDB data and poster based on the search query
+    imdb = await get_poster(search_query)
+
+    # Send log in UPDATE_CHANNEL with IMDB_TEMPLATE and IMDB poster
     if imdb:
-        caption = IMDB_TEMPLATE.format(
-            query=imdb['title'],
+        buttons = [
+            [
+                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot'),
+                InlineKeyboardButton('Join', url='https://t.me/PremiumMHBot')
+            ],
+        ]
+        TEMPLATE = IMDB_TEMPLATE
+        cap = TEMPLATE.format(
+            query=search_query,
             title=imdb['title'],
             votes=imdb['votes'],
             aka=imdb["aka"],
@@ -95,38 +99,17 @@ async def imdb_callback(bot, query):
             url=imdb['url'],
             **locals()
         )
+
+        if imdb.get('poster'):
+            try:
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+                poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(buttons))
+            except Exception as e:
+                logger.exception(e)
+                await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
+        else:
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        caption = "No Results"
-    if imdb.get('poster'):
-        try:
-            await bot.send_photo(
-                chat_id=UPDATE_CHANNEL,
-                photo=imdb['poster'],
-                caption=caption,
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-        except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
-            pic = imdb.get('poster')
-            poster = pic.replace('.jpg', "._V1_UX360.jpg")
-            await bot.send_photo(
-                chat_id=UPDATE_CHANNEL,
-                photo=poster,
-                caption=caption,
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-        except Exception as e:
-            logger.exception(e)
-            await bot.send_message(
-                chat_id=UPDATE_CHANNEL,
-                text=caption,
-                reply_markup=InlineKeyboardMarkup(btn),
-                disable_web_page_preview=False
-            )
-    else:
-        await bot.send_message(
-            chat_id=UPDATE_CHANNEL,
-            text=caption,
-            reply_markup=InlineKeyboardMarkup(btn),
-            disable_web_page_preview=False
-        )
-        
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
