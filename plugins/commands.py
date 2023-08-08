@@ -805,31 +805,31 @@ async def send_msg(bot, message):
     else:
         await message.reply_text("<b>Usᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴀs ᴀ ʀᴇᴘʟʏ ᴛᴏ ᴀɴʏ ᴍᴇssᴀɢᴇ ᴜsɪɴɢ ᴛʜᴇ ᴛᴀʀɢᴇᴛ ᴄʜᴀᴛ ɪᴅ. Fᴏʀ ᴇɢ: /send ᴜsᴇʀɪᴅ</b>")
 
-@Client.on_message(filters.private & filters.command("get_files"))
-async def get_files_command_handler(client: Client, message: Message):
-    chat_id = message.chat.id
-    query = ""  # Empty query to match all files
-    max_results = 100  # You can adjust this based on your needs
-    offset = 0
+@Client.on_message(filters.command('get_files') & filters.user(ADMINS))
+async def get_files_command(client, message):
+    # Send a message indicating that the bot is searching for files
+    await message.reply("Searching for files in the database...")
 
-    files, _, _ = await get_search_results(chat_id, query, max_results=max_results, offset=offset)
+    # Fetch the list of files from the database
+    files, _ = await get_search_results(None, "", max_results=10)  # Assuming you have the get_search_results function defined
 
     if not files:
-        await message.reply("No files found.")
+        await message.reply("No files found in the database.")
         return
 
-    file_list = "\n".join([f"{file.file_name} - {file.file_size} bytes" for file in files])
-    txt_content = f"List of files:\n{file_list}"
+    # Create a text representation of the file list
+    file_list_text = "\n".join([file["file_name"] for file in files])
 
-    # Create and send a .txt file
-    txt_file_name = "file_list.txt"
-    with open(txt_file_name, "w") as txt_file:
-        txt_file.write(txt_content)
+    # Save the text to a temporary file
+    with open("file_list.txt", "w") as f:
+        f.write(file_list_text)
 
-    await client.send_document(chat_id, txt_file_name, caption="List of Files")
+    # Send the text file to the admin
+    with open("file_list.txt", "rb") as f:
+        await message.reply_document(document=InputFile(f))
 
-    # Clean up by removing the temporary .txt file
-    os.remove(txt_file_name)
+    # Clean up the temporary file
+    os.remove("file_list.txt")
     
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
 async def deletemultiplefiles(bot, message):
