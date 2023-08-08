@@ -24,9 +24,15 @@ async def media(bot, message):
 
     # Extracting the search query from the file name
     full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
-    file_name = ""
-
-    # Use fuzzy search to find exact same file name matches in IMDB data
+    file_name = ""  # You need to set the value of file_name based on your logic
+    
+    # Fetch IMDb titles using your get_poster function
+    imdb_data = await get_poster(file_name)
+    
+    # Extract IMDb titles from the fetched data
+    imdb_titles = [entry['title'] for entry in imdb_data]
+    
+    # Find the best matching IMDb title using fuzzy search
     search_query = None
     max_similarity = 0
     for imdb_title in imdb_titles:
@@ -92,3 +98,4 @@ async def media(bot, message):
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap, reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
+
