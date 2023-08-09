@@ -158,17 +158,31 @@ async def media(bot, message):
 
 @Client.on_message(filters.command("admin_settings"))
 async def admin_settings_command(bot, message):
-    # Example: "/settings update on" or "/settings update off"
-    args = message.text.split()[1:]
-    if len(args) == 2 and args[0] == "update":
-        if args[1] == "on":
-            admin_settings["update"] = True
-            await bot.send_message(message.chat.id, "Update setting has been enabled.")
-        elif args[1] == "off":
-            admin_settings["update"] = False
-            await bot.send_message(message.chat.id, "Update setting has been disabled.")
-        else:
-            await bot.send_message(message.chat.id, "Invalid usage. Use /settings update on or /settings update off.")
-    else:
-        await bot.send_message(message.chat.id, "Invalid usage. Use /settings update on or /settings update off.")
-        
+    # Assuming this command is meant to be sent only in private chats with the bot
+    buttons = [
+        [
+            InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
+            InlineKeyboardButton('🔘 ON' if admin_settings["update"] else '🔳 OFF', callback_data='toggle_update')
+        ]
+    ]
+    await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+
+@Client.on_callback_query(filters.regex('^imdb_button$'))
+async def imdb_button_callback(bot, callback_query: CallbackQuery):
+    # Your logic for sending IMDb data here...
+    await callback_query.answer()
+
+@Client.on_callback_query(filters.regex('^toggle_update$'))
+async def toggle_update_callback(bot, callback_query: CallbackQuery):
+    admin_settings["update"] = not admin_settings["update"]
+    
+    new_button_text = '🔘 ON' if admin_settings["update"] else '🔳 OFF'
+    buttons = [
+        [
+            InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
+            InlineKeyboardButton(new_button_text, callback_data='toggle_update')
+        ]
+    ]
+    
+    await callback_query.message.edit_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+    await callback_query.answer(text="Update setting has been changed.")
