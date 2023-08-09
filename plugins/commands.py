@@ -1057,15 +1057,17 @@ async def settings(client, message):
 async def get_files_command_handler(client, message):
     query = " "  # Blank query to fetch all files, you can modify this to filter by name or other criteria
     max_results = 10  # Maximum number of results per page
-    offset = 0  # Initial offset for pagination
 
-    files, next_offset, total_results = await get_search_results(None, query, max_results=max_results, offset=offset)
+    page = 1
+    offset = (page - 1) * max_results
+
+    files, total_results = await get_search_results(query, max_results=max_results, offset=offset)
 
     if not files:
         await message.reply("No files found.")
         return
 
-    reply_text = f"Showing {len(files)} out of {total_results} files:\n\n"
+    reply_text = f"Showing {len(files)} out of {total_results} files on page {page}:\n\n"
 
     for index, file in enumerate(files, start=offset+1):
         reply_text += f"{index}. File Name: {file.file_name}\n"
@@ -1073,71 +1075,53 @@ async def get_files_command_handler(client, message):
             reply_text += f"   Caption: {file.caption}\n"
         reply_text += "\n"
 
-    if next_offset:
-        reply_text += f"Use /next to see the next {max_results} files."
+    keyboard = []
 
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Next ➡️", callback_data=f"next_page:{offset+1}:{query}"),
-         InlineKeyboardButton("Back ⬅️", callback_data=f"prev_page:{offset-1}:{query}")],
-        [InlineKeyboardButton("Download 📥", callback_data=f"download_list:{query}"),
-         InlineKeyboardButton("Cancel ❌", callback_data="cancel_find")]
-    ])
+    if page > 1:
+        keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page}")])
+    if len(files) == max_results:
+        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
 
-    await message.reply(reply_text, reply_markup=keyboard)
+    await message.reply(reply_text, reply_markup=InlineKeyboardMarkup(keyboard))
 
-
-@Client.on_callback_query(filters.regex('^next_page|^prev_page|^download_list'))
-async def handle_pagination_or_download(client, callback_query, max_results):  # Add max_results as an argument
-    data = callback_query.data.split(":")
-    action = data[0]
+@Client.on_callback_query()
+async def callback_query_handler(client, query):
+    data = query.data.split("_")
     page = int(data[1])
-    search_query = data[2]
 
-    if action == 'next_page':
-        offset = (page - 1) * max_results
-    elif action == 'prev_page':
-        offset = (page - 1) * max_results
-    else:  # Download action
-        query = {
-            'file_name': {"$regex": f".*{re.escape(search_query)}.*", "$options": "i"}
-        }
-        results = await Media.collection.find(query).to_list(length=None)
+    if data[0] == "prev":
+        page -= 1
+    elif data[0] == "next":
+        page += 1
 
-        file_list = "\n".join([f'File Name: {result["file_name"]}\nFile Size: {result["file_size"]}\n' for result in results])
+    max_results = 10
+    offset = (page - 1) * max_results
 
-        with open("file_list.txt", "w") as file:
-            file.write(file_list)
-
-        await client.send_document(callback_query.message.chat.id, "file_list.txt", caption="List of Files")
-        return
-
-    files, next_offset, total_results = await get_search_results(None, search_query, max_results=max_results, offset=offset)
+    files, total_results = await get_search_results(query, max_results=max_results, offset=offset)
 
     if not files:
-        await callback_query.message.edit_text("No files found.")
+        await query.message.edit_text("No files found.")
         return
 
-    reply_text = f"Showing {len(files)} out of {total_results} files:\n\n"
+    reply_text = f"Showing {len(files)} out of {total_results} files on page {page}:\n\n"
 
-    for index, file in enumerate(files, start=offset + 1):
+    for index, file in enumerate(files, start=offset+1):
         reply_text += f"{index}. File Name: {file.file_name}\n"
         if file.caption:
             reply_text += f"   Caption: {file.caption}\n"
         reply_text += "\n"
 
-    if next_offset:
-        reply_text += f"Use /next to see the next {max_results} files."
+    keyboard = []
 
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Next ➡️", callback_data=f"next_page:{page+1}:{search_query}"),
-         InlineKeyboardButton("Back ⬅️", callback_data=f"prev_page:{page-1}:{search_query}")],
-        [InlineKeyboardButton("Download 📥", callback_data=f"download_list:{search_query}"),
-         InlineKeyboardButton("Cancel ❌", callback_data="cancel_find")]
-    ])
+    if page > 1:
+        keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page}")])
+    if len(files) == max_results:
+        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
 
-    await callback_query.message.edit_text(reply_text, reply_markup=keyboard)
-    await callback_query.answer()
+    await query.message.edit_text(reply_text, reply_markup=InlineKeyboardMarkup(keyboard))
 
+
+    
 @Client.on_message(filters.command('set_template'))
 async def save_template(client, message):
     sts = await message.reply("📝 Checking template...")
