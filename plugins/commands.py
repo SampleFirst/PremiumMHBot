@@ -1061,7 +1061,7 @@ async def get_files_command_handler(client, message):
     page = 1
     offset = (page - 1) * max_results
 
-    files, total_results = await get_search_results(query, max_results=max_results, offset=offset)
+    files, total_results = await get_search_results(query="", max_results=max_results, offset=offset)
 
     if not files:
         await message.reply("No files found.")
