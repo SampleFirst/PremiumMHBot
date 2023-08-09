@@ -14,7 +14,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQ
 
 from database.users_chats_db import db
 from database.connections_mdb import active_connection
-from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_bad_files
+from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_search_results, get_bad_files
 
 from Script import script
 from utils import (
@@ -1053,6 +1053,30 @@ async def settings(client, message):
                 reply_to_message_id=message.message_id if hasattr(message, 'message_id') else None
             )
 
+@Client.on_message(filters.command("getfiles") & filters.user(ADMINS))
+async def get_files_command_handler(client: Client, message: Message):
+    query = " "  # Blank query to fetch all files, you can modify this to filter by name or other criteria
+    max_results = 10  # Maximum number of results per page
+    offset = 0  # Initial offset for pagination
+
+    files, next_offset, total_results = await get_search_results(None, query, max_results=max_results, offset=offset)
+
+    if not files:
+        await message.reply("No files found.")
+        return
+
+    reply_text = f"Showing {len(files)} out of {total_results} files:\n\n"
+
+    for index, file in enumerate(files, start=offset+1):
+        reply_text += f"{index}. File Name: {file.file_name}\n"
+        if file.caption:
+            reply_text += f"   Caption: {file.caption}\n"
+        reply_text += "\n"
+
+    if next_offset:
+        reply_text += f"Use /next to see the next {max_results} files."
+
+    await message.reply(reply_text)
 
 @Client.on_message(filters.command('set_template'))
 async def save_template(client, message):
