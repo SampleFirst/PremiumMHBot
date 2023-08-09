@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from info import CHANNELS, UPDATE_CHANNEL, IMDB_TEMPLATE
 from database.ia_filterdb import save_file
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from utils import get_poster
 from Script import script
