@@ -1085,6 +1085,7 @@ async def get_files_command_handler(client, message):
     await message.reply(
         reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
+    await callback_query.answer("Page changed For Next Page.")
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
 async def prev_page_callback_handler(client, callback_query):
@@ -1111,6 +1112,7 @@ async def prev_page_callback_handler(client, callback_query):
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
+    await callback_query.answer("Page Changed For Back Page.")
 
 @Client.on_callback_query(filters.regex(r"^next_(\d+)$"))
 async def next_page_callback_handler(client, callback_query):
@@ -1140,6 +1142,7 @@ async def next_page_callback_handler(client, callback_query):
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
+    await callback_query.answer("Page changed For Next Page.")
 
 
 
