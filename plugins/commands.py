@@ -1087,7 +1087,7 @@ async def get_files_command_handler(client, message):
 
 
 @Client.on_callback_query(filters.regex('^next_page|^prev_page|^download_list'))
-async def handle_pagination_or_download(client, callback_query):
+async def handle_pagination_or_download(client, callback_query, max_results):  # Add max_results as an argument
     data = callback_query.data.split(":")
     action = data[0]
     page = int(data[1])
