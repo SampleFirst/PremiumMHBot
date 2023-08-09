@@ -154,14 +154,18 @@ async def start(client, message):
             reply_markup = InlineKeyboardMarkup(admin_buttons)
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
+            total_users = await db.total_users_count()
+            total_chats = await db.total_chat_count()
+            daily_users = await db.daily_users_count(today)
+            daily_chats = await db.daily_chats_count(today)
             current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
-            caption = script.ADMIN_START_TXT.format(
+            updated_start_text = script.ADMIN_START_TXT.format(
                 admin=message.from_user.mention,
                 bot=temp.B_LINK,
-                total_users=await db.total_users_count(),
-                total_chat=await db.total_chat_count(),
-                daily_users=await db.daily_users_count(now.date()),
-                daily_chats=await db.daily_chats_count(now.date()),
+                total_users=total_users,
+                total_chat=total_chats,
+                daily_users=daily_users,
+                daily_chats=daily_chats,
                 current_time=current_time
             )
             await message.reply_photo(
@@ -171,6 +175,8 @@ async def start(client, message):
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
             )
+            # Edit the previously sent message with the updated text
+            await message.edit_text(updated_start_text, reply_markup=reply_markup)
         else:
             # If the user is not an admin, show regular buttons
             regular_buttons = [
@@ -258,14 +264,18 @@ async def start(client, message):
             reply_markup = InlineKeyboardMarkup(admin_buttons)
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
+            total_users = await db.total_users_count()
+            total_chats = await db.total_chat_count()
+            daily_users = await db.daily_users_count(today)
+            daily_chats = await db.daily_chats_count(today)
             current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
-            caption = script.ADMIN_START_TXT.format(
+            updated_start_text = script.ADMIN_START_TXT.format(
                 admin=message.from_user.mention,
                 bot=temp.B_LINK,
-                total_users=await db.total_users_count(),
-                total_chat=await db.total_chat_count(),
-                daily_users=await db.daily_users_count(now.date()),
-                daily_chats=await db.daily_chats_count(now.date()),
+                total_users=total_users,
+                total_chat=total_chats,
+                daily_users=daily_users,
+                daily_chats=daily_chats,
                 current_time=current_time
             )
             await message.reply_photo(
@@ -275,6 +285,8 @@ async def start(client, message):
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
             )
+            # Edit the previously sent message with the updated text
+            await message.edit_text(updated_start_text, reply_markup=reply_markup)
         else:
             # If the user is not an admin, show regular buttons
             regular_buttons = [
