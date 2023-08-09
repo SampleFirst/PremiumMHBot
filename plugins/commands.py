@@ -171,7 +171,7 @@ async def start(client, message):
             )
             await message.reply_photo(
                 photo=random.choice(PICS),
-                caption=caption,
+                caption=updated_start_text,
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
@@ -282,7 +282,7 @@ async def start(client, message):
             )
             await message.reply_photo(
                 photo=random.choice(PICS),
-                caption=caption,
+                caption=updated_start_text,
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML,
                 quote=True
