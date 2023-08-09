@@ -1081,11 +1081,14 @@ async def get_files_command_handler(client, message):
         keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page}")])
     if next_offset:
         keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
+    
+    # Add "Download" button
+    keyboard.append([InlineKeyboardButton("Download", callback_data="download_all")])
 
     await message.reply(
         reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
-    await callback_query.answer("Page changed For Next Page.")
+    await message.reply_to_message.reply("File list sent as .txt")
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
 async def prev_page_callback_handler(client, callback_query):
@@ -1145,7 +1148,36 @@ async def next_page_callback_handler(client, callback_query):
     await callback_query.answer("Page changed For Next Page.")
 
 
+@Client.on_callback_query(filters.regex(r"^download_all$"))
+async def download_all_callback_handler(client, callback_query):
+    max_results = 10
+    total_results = await get_total_results(None, query="")  # Define the function to get total results
 
+    all_files = []
+    for page in range(1, (total_results // max_results) + 2):
+        offset = (page - 1) * max_results
+        files, _, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
+        all_files.extend(files)
+
+    if not all_files:
+        await callback_query.answer("No files to download.")
+        return
+
+    reply_text = "All Files:\n\n"
+
+    for index, file in enumerate(all_files, start=1):
+        reply_text += f"{index}. File Name: {file.file_name}\n"
+        if file.caption:
+            reply_text += f"   Caption: {file.caption}\n"
+        reply_text += "\n"
+
+    with open("all_files_list.txt", "w") as txt_file:
+        txt_file.write(reply_text)
+
+    await callback_query.answer("All file list downloaded.")
+    await callback_query.edit_message_text(
+        text=reply_text
+    )
 
     
 @Client.on_message(filters.command('set_template'))
