@@ -1055,7 +1055,7 @@ async def settings(client, message):
 
 @Client.on_message(filters.command("getfiles") & filters.user(ADMINS))
 async def get_files_command_handler(client, message):
-           # Blank query to fetch all files, you can modify this to filter by name or other criteria
+    query = " "  # Blank query to fetch all files, you can modify this to filter by name or other criteria
     max_results = 10  # Maximum number of results per page
 
     page = 1
