@@ -1055,7 +1055,7 @@ async def settings(client, message):
 
 @Client.on_message(filters.command("getfiles") & filters.user(ADMINS))
 async def get_files_command_handler(client, message):
-    query = " "  # Blank query to fetch all files, you can modify this to filter by name or other criteria
+           # Blank query to fetch all files, you can modify this to filter by name or other criteria
     max_results = 10  # Maximum number of results per page
 
     page = 1
@@ -1069,7 +1069,7 @@ async def get_files_command_handler(client, message):
 
     reply_text = f"Showing {len(files)} out of {total_results} files on page {page}:\n\n"
 
-    for index, file in enumerate(files, start=offset+1):
+    for index, file in enumerate(files, start=offset + 1):
         reply_text += f"{index}. File Name: {file.file_name}\n"
         if file.caption:
             reply_text += f"   Caption: {file.caption}\n"
@@ -1082,43 +1082,65 @@ async def get_files_command_handler(client, message):
     if len(files) == max_results:
         keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
 
-    await message.reply(reply_text, reply_markup=InlineKeyboardMarkup(keyboard))
+    await message.reply(
+        reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
-@Client.on_callback_query()
-async def callback_query_handler(client, query):
-    data = query.data.split("_")
-    page = int(data[1])
 
-    if data[0] == "prev":
-        page -= 1
-    elif data[0] == "next":
-        page += 1
-
+@Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
+async def prev_page_callback_handler(client, callback_query):
+    page = int(callback_query.matches[0].group(1))
     max_results = 10
-    offset = (page - 1) * max_results
+    offset = (page - 2) * max_results
 
-    files, total_results = await get_search_results(query, max_results=max_results, offset=offset)
+    files, _ = await get_search_results(query="", max_results=max_results, offset=offset)
+
+    reply_text = f"Showing {len(files)} files on page {page - 1}:\n\n"
+
+    for index, file in enumerate(files, start=offset + 1):
+        reply_text += f"{index}. File Name: {file.file_name}\n"
+        if file.caption:
+            reply_text += f"   Caption: {file.caption}\n"
+        reply_text += "\n"
+
+    keyboard = []
+    if page > 2:
+        keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}")])
+    keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page - 1}")])
+
+    await callback_query.edit_message_text(
+        text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+
+@Client.on_callback_query(filters.regex(r"^next_(\d+)$"))
+async def next_page_callback_handler(client, callback_query):
+    page = int(callback_query.matches[0].group(1))
+    max_results = 10
+    offset = page * max_results
+
+    files, total_results = await get_search_results(query="", max_results=max_results, offset=offset)
 
     if not files:
-        await query.message.edit_text("No files found.")
+        await callback_query.answer("No more files.")
         return
 
-    reply_text = f"Showing {len(files)} out of {total_results} files on page {page}:\n\n"
+    reply_text = f"Showing {len(files)} out of {total_results} files on page {page + 1}:\n\n"
 
-    for index, file in enumerate(files, start=offset+1):
+    for index, file in enumerate(files, start=offset + 1):
         reply_text += f"{index}. File Name: {file.file_name}\n"
         if file.caption:
             reply_text += f"   Caption: {file.caption}\n"
         reply_text += "\n"
 
     keyboard = []
-
-    if page > 1:
-        keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page}")])
+    keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}")])
     if len(files) == max_results:
-        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
+        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page + 1}")])
 
-    await query.message.edit_text(reply_text, reply_markup=InlineKeyboardMarkup(keyboard))
+    await callback_query.edit_message_text(
+        text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
 
     
