@@ -1157,6 +1157,8 @@ async def download_all_callback_handler(client, callback_query):
     max_results = 10
     total_results = await get_total_results(None, query="")  # Define the function to get total results
 
+    await callback_query.answer("Creating your .txt file...")  # Show a message that the file is being created
+
     all_files = []
     for page in range(1, (total_results // max_results) + 2):
         offset = (page - 1) * max_results
@@ -1164,7 +1166,7 @@ async def download_all_callback_handler(client, callback_query):
         all_files.extend(files)
 
     if not all_files:
-        await callback_query.answer("No files to download.")
+        await callback_query.message.edit_text("No files to download.")
         return
 
     reply_text = "All Files:\n\n"
@@ -1179,7 +1181,12 @@ async def download_all_callback_handler(client, callback_query):
         txt_file.write(reply_text)
 
     await callback_query.answer("All file list downloaded.")
-    await callback_query.edit_message_text(
+
+    # Sending the .txt file to the user
+    with open("all_files_list.txt", "rb") as txt_file:
+        await callback_query.message.reply_document(document=txt_file, filename="all_files_list.txt")
+
+    await callback_query.message.edit_text(
         text=reply_text
     )
 
