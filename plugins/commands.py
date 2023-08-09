@@ -1061,7 +1061,7 @@ async def get_files_command_handler(client, message):
     page = 1
     offset = (page - 1) * max_results
 
-    files, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
+    files, next_offset, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
     if not files:
         await message.reply("No files found.")
@@ -1079,13 +1079,12 @@ async def get_files_command_handler(client, message):
 
     if page > 1:
         keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page}")])
-    if len(files) == max_results:
+    if next_offset:
         keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
 
     await message.reply(
         reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
-
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
 async def prev_page_callback_handler(client, callback_query):
@@ -1093,7 +1092,7 @@ async def prev_page_callback_handler(client, callback_query):
     max_results = 10
     offset = (page - 2) * max_results
 
-    files, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
+    files, next_offset, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
     reply_text = f"Showing {len(files)} files on page {page - 1}:\n\n"
 
@@ -1106,12 +1105,12 @@ async def prev_page_callback_handler(client, callback_query):
     keyboard = []
     if page > 2:
         keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}")])
-    keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page - 1}")])
+    if next_offset:
+        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page - 1}")])
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
-
 
 @Client.on_callback_query(filters.regex(r"^next_(\d+)$"))
 async def next_page_callback_handler(client, callback_query):
@@ -1119,7 +1118,7 @@ async def next_page_callback_handler(client, callback_query):
     max_results = 10
     offset = page * max_results
 
-    files, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
+    files, next_offset, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
     if not files:
         await callback_query.answer("No more files.")
@@ -1135,12 +1134,14 @@ async def next_page_callback_handler(client, callback_query):
 
     keyboard = []
     keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}")])
-    if len(files) == max_results:
+    if next_offset:
         keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page + 1}")])
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
+
 
 
     
