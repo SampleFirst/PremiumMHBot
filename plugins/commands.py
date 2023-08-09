@@ -1085,10 +1085,14 @@ async def get_files_command_handler(client, message):
     # Add "Download" button
     keyboard.append([InlineKeyboardButton("Download", callback_data="download_all")])
 
-    await message.reply(
+    if message.reply_to_message:
+        await message.reply_to_message.reply_text("File list sent as .txt")
+    else:
+        await message.reply_text("File list sent as .txt")
+
+    await message.reply_text(
         reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
-    await message.reply_to_message.reply("File list sent as .txt")
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
 async def prev_page_callback_handler(client, callback_query):
