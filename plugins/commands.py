@@ -1059,6 +1059,21 @@ async def get_files_command_handler(client, message):
     max_results = 10  # Maximum number of results per page
     offset = 0  # Initial offset for pagination
 
+    # Get the category from the command arguments
+    category = message.command[1] if len(message.command) > 1 else None
+
+    # Modify the query based on the selected category
+    if category == "480p":
+        query = "resolution:480p"
+    elif category == "720p":
+        query = "resolution:720p"
+    elif category == "1080p":
+        query = "resolution:1080p"
+    elif category == "alphabetical":
+        query = "*"  # Show all files in alphabetical order
+    else:
+        query = "*"  # Show all files
+
     files, next_offset, total_results = await get_search_results(None, query, max_results=max_results, offset=offset)
 
     if not files:
@@ -1076,7 +1091,22 @@ async def get_files_command_handler(client, message):
     if next_offset:
         reply_text += f"Use /next to see the next {max_results} files."
 
-    await message.reply(reply_text)
+    # Create buttons for different categories
+    buttons = [
+        InlineKeyboardButton("Alphabetical Order", callback_data="category:alphabetical"),
+        InlineKeyboardButton("480p Files", callback_data="category:480p"),
+        InlineKeyboardButton("720p Files", callback_data="category:720p"),
+        InlineKeyboardButton("1080p Files", callback_data="category:1080p")
+    ]
+    reply_markup = InlineKeyboardMarkup([buttons])
+
+    await message.reply(reply_text, reply_markup=reply_markup)
+
+@Client.on_callback_query()
+async def handle_callback_query(client, query):
+    await query.answer()  # Acknowledge the callback
+    category = query.data.split(":")[1]
+    await get_files_command_handler(client, query.message, category)
 
 @Client.on_message(filters.command('set_template'))
 async def save_template(client, message):
