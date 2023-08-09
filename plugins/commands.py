@@ -1061,7 +1061,7 @@ async def get_files_command_handler(client, message):
     page = 1
     offset = (page - 1) * max_results
 
-    files, total_results = await get_search_results(query="", max_results=max_results, offset=offset)
+    files, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
     if not files:
         await message.reply("No files found.")
@@ -1093,7 +1093,7 @@ async def prev_page_callback_handler(client, callback_query):
     max_results = 10
     offset = (page - 2) * max_results
 
-    files, _ = await get_search_results(query="", max_results=max_results, offset=offset)
+    files, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
     reply_text = f"Showing {len(files)} files on page {page - 1}:\n\n"
 
@@ -1119,7 +1119,7 @@ async def next_page_callback_handler(client, callback_query):
     max_results = 10
     offset = page * max_results
 
-    files, total_results = await get_search_results(query="", max_results=max_results, offset=offset)
+    files, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
     if not files:
         await callback_query.answer("No more files.")
