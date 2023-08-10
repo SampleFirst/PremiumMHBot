@@ -1190,6 +1190,7 @@ async def next_page_callback_handler(client, callback_query):
     
 @Client.on_callback_query(filters.regex(r"^download_all$"))
 async def download_all_callback_handler(client, callback_query):
+    total_results = await Media.count_documents()  # Define the function to get total results
     max_results = total_results  # Define the function to get total results
 
     await callback_query.answer("Creating your .txt file...")  # Show a message that the file is being created
