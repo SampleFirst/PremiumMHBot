@@ -1067,7 +1067,9 @@ async def get_files_command_handler(client, message):
         await message.reply("No files found.")
         return
 
-    reply_text = f"Showing {len(files)} out of {total_results} files on page {page}:\n\n"
+    total_pages = (total_results // max_results) + 1
+
+    reply_text = f"Showing {len(files)} out of {total_results} files on page {page} of {total_pages}:\n\n"
 
     for index, file in enumerate(files, start=offset + 1):
         reply_text += f"{index}. File Name: {file.file_name}\n"
@@ -1079,6 +1081,7 @@ async def get_files_command_handler(client, message):
 
     if page > 1:
         keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page}")])
+    keyboard.append([InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")])
     if next_offset:
         keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
     
@@ -1102,7 +1105,9 @@ async def prev_page_callback_handler(client, callback_query):
 
     files, next_offset, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
-    reply_text = f"Showing {len(files)} files on page {page - 1}:\n\n"
+    total_pages = (total_results // max_results) + 1
+
+    reply_text = f"Showing {len(files)} out of {total_results} files on page {page} of {total_pages}:\n\n"
 
     for index, file in enumerate(files, start=offset + 1):
         reply_text += f"{index}. File Name: {file.file_name}\n"
@@ -1113,8 +1118,12 @@ async def prev_page_callback_handler(client, callback_query):
     keyboard = []
     if page > 2:
         keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}")])
+    keyboard.append([InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")])
     if next_offset:
         keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page - 1}")])
+
+    # Add "Download" button
+    keyboard.append([InlineKeyboardButton("Download", callback_data="download_all")])
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
@@ -1133,7 +1142,9 @@ async def next_page_callback_handler(client, callback_query):
         await callback_query.answer("No more files.")
         return
 
-    reply_text = f"Showing {len(files)} out of {total_results} files on page {page + 1}:\n\n"
+    total_pages = (total_results // max_results) + 1
+
+    reply_text = f"Showing {len(files)} out of {total_results} files on page {page} of {total_pages}:\n\n"
 
     for index, file in enumerate(files, start=offset + 1):
         reply_text += f"{index}. File Name: {file.file_name}\n"
@@ -1143,14 +1154,17 @@ async def next_page_callback_handler(client, callback_query):
 
     keyboard = []
     keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}")])
+    keyboard.append([InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")])
     if next_offset:
         keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page + 1}")])
+
+    # Add "Download" button
+    keyboard.append([InlineKeyboardButton("Download", callback_data="download_all")])
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
     await callback_query.answer("Page changed For Next Page.")
-
 
 @Client.on_callback_query(filters.regex(r"^download_all$"))
 async def download_all_callback_handler(client, callback_query):
@@ -1189,7 +1203,6 @@ async def download_all_callback_handler(client, callback_query):
     await callback_query.message.edit_text(
         text=reply_text
     )
-
     
 @Client.on_message(filters.command('set_template'))
 async def save_template(client, message):
