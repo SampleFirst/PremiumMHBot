@@ -14,7 +14,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQ
 
 from database.users_chats_db import db
 from database.connections_mdb import active_connection
-from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_search_results, get_total_results, get_bad_files
+from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_search_results, get_bad_files
 
 from Script import script
 from utils import (
@@ -1222,9 +1222,8 @@ async def download_all_callback_handler(client, callback_query):
     with open("all_files_list.txt", "rb") as txtfile:
         await callback_query.message.reply_document('all_files_list.txt', caption=f"Total Files = {total_results}")
 
-    await callback_query.message.edit_text(
-        text=reply_text
-    )
+    await callback_query.message.edit_text("Your Files Sent..")
+    
     
 @Client.on_message(filters.command('set_template'))
 async def save_template(client, message):
