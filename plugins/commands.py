@@ -1091,11 +1091,12 @@ async def get_files_command_handler(client, message):
             InlineKeyboardButton("Next", callback_data=f"next_{page}")
         )
 
-    download_button = [InlineKeyboardButton("Download", callback_data="download_all")]
+    download_button = (InlineKeyboardButton("Download", callback_data="download_all")
+    )
     keyboard.append(download_button)
 
     await message.reply_text(
-        reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_text, reply_markup=InlineKeyboardMarkup([keyboard])
     )
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
