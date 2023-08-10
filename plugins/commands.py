@@ -1190,15 +1190,14 @@ async def next_page_callback_handler(client, callback_query):
     
 @Client.on_callback_query(filters.regex(r"^download_all$"))
 async def download_all_callback_handler(client, callback_query):
-    max_results = 10
-    total_results = await get_total_results(None, query="")  # Define the function to get total results
+    max_results = total_results  # Define the function to get total results
 
     await callback_query.answer("Creating your .txt file...")  # Show a message that the file is being created
 
     all_files = []
     for page in range(1, (total_results // max_results) + 2):
         offset = (page - 1) * max_results
-        files, _, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
+        files, _, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
         all_files.extend(files)
 
     if not all_files:
