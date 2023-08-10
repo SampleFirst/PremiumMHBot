@@ -1184,7 +1184,7 @@ async def download_all_callback_handler(client, callback_query):
 
     # Sending the .txt file to the user
     with open("all_files_list.txt", "rb") as txt_file:
-        await callback_query.message.reply_document(document=txt_file, filename="all_files_list.txt")
+        await callback_query.message.reply_document(document=("all_files_list.txt", txt_file))
 
     await callback_query.message.edit_text(
         text=reply_text
