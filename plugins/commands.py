@@ -1091,8 +1091,11 @@ async def get_files_command_handler(client, message):
             InlineKeyboardButton("Next", callback_data=f"next_{page}")
         )
 
-    download_button = (InlineKeyboardButton("Download", callback_data="download_all")
-    )
+    download_button = [
+        [
+            InlineKeyboardButton("Download", callback_data="download_all")
+        ]
+    ]
     keyboard.append(download_button)
 
     await message.reply_text(
