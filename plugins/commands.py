@@ -1080,9 +1080,8 @@ async def get_files_command_handler(client, message):
     keyboard = []
 
     if page > 1:
-        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page}"))
-    
-    keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
+        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page}"))    
+        keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
     
     if next_offset:
         keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page}"))
@@ -1118,13 +1117,13 @@ async def prev_page_callback_handler(client, callback_query):
 
     keyboard = []
     if page > 2:
-        keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}")])
-    keyboard.append([InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")])
+        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}"))
+        keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
     if next_offset:
-        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page - 1}")])
+        keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page - 1}"))
 
     # Add "Download" button
-    keyboard.append([InlineKeyboardButton("Download", callback_data="download_all")])
+    keyboard.append(InlineKeyboardButton("Download", callback_data="download_all"))
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
@@ -1154,13 +1153,13 @@ async def next_page_callback_handler(client, callback_query):
         reply_text += "\n"
 
     keyboard = []
-    keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}")])
-    keyboard.append([InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")])
+        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}"))
+        keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
     if next_offset:
-        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page + 1}")])
+        keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page + 1}"))
 
     # Add "Download" button
-    keyboard.append([InlineKeyboardButton("Download", callback_data="download_all")])
+    keyboard.append(InlineKeyboardButton("Download", callback_data="download_all"))
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
@@ -1192,14 +1191,14 @@ async def download_all_callback_handler(client, callback_query):
             reply_text += f"   Caption: {file.caption}\n"
         reply_text += "\n"
 
-    with open("all_files_list.txt", "w") as txt_file:
-        txt_file.write(reply_text)
+    with open("all_files_list.txt", "w") as txtfile:
+        txtfile.write(reply_text)
 
     await callback_query.answer("All file list downloaded.")
 
     # Sending the .txt file to the user
-    with open("all_files_list.txt", "rb") as txt_file:
-        await callback_query.message.reply_document(document=("all_files_list.txt", txt_file))
+    with open("all_files_list.txt", "rb") as txtfile:
+        await callback_query.message.reply_document('all_files_list.txt', caption=f"Total Files = {total_results}")
 
     await callback_query.message.edit_text(
         text=reply_text
