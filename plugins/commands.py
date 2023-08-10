@@ -1153,8 +1153,8 @@ async def next_page_callback_handler(client, callback_query):
         reply_text += "\n"
 
     keyboard = []
-        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}"))
-        keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
+    keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}"))
+    keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
     if next_offset:
         keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page + 1}"))
 
@@ -1165,7 +1165,7 @@ async def next_page_callback_handler(client, callback_query):
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
     )
     await callback_query.answer("Page changed For Next Page.")
-
+    
 @Client.on_callback_query(filters.regex(r"^download_all$"))
 async def download_all_callback_handler(client, callback_query):
     max_results = 10
