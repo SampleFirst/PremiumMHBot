@@ -1080,13 +1080,19 @@ async def get_files_command_handler(client, message):
     keyboard = []
 
     if page > 1:
-        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page}"))    
-        keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
-    
+        keyboard.append(
+            InlineKeyboardButton("Back", callback_data=f"prev_{page}")
+        )
+    keyboard.append(
+        InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")
+    )
     if next_offset:
-        keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page}"))
-    
-    keyboard.append(InlineKeyboardButton("Download", callback_data="download_all"))
+        keyboard.append(
+            InlineKeyboardButton("Next", callback_data=f"next_{page}")
+        )
+    keyboard.append(
+        InlineKeyboardButton("Download", callback_data="download_all")
+    )
 
     if message.reply_to_message:
         await message.reply_to_message.reply_text("File list sent as .txt")
@@ -1117,13 +1123,21 @@ async def prev_page_callback_handler(client, callback_query):
 
     keyboard = []
     if page > 2:
-        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}"))
-        keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
+        keyboard.append(
+            InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}")
+        )
+    keyboard.append(
+        InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")
+    )
     if next_offset:
-        keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page - 1}"))
+        keyboard.append(
+            InlineKeyboardButton("Next", callback_data=f"next_{page - 1}")
+        )
 
     # Add "Download" button
-    keyboard.append(InlineKeyboardButton("Download", callback_data="download_all"))
+    keyboard.append(
+        InlineKeyboardButton("Download", callback_data="download_all")
+    )
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
@@ -1153,13 +1167,21 @@ async def next_page_callback_handler(client, callback_query):
         reply_text += "\n"
 
     keyboard = []
-    keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}"))
-    keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
+    keyboard.append(
+        InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}")
+    )
+    keyboard.append(
+        InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")
+    )
     if next_offset:
-        keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page + 1}"))
+        keyboard.append(
+            InlineKeyboardButton("Next", callback_data=f"next_{page + 1}")
+        )
 
     # Add "Download" button
-    keyboard.append(InlineKeyboardButton("Download", callback_data="download_all"))
+    keyboard.append(
+        InlineKeyboardButton("Download", callback_data="download_all")
+    )
 
     await callback_query.edit_message_text(
         text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
@@ -1168,16 +1190,15 @@ async def next_page_callback_handler(client, callback_query):
     
 @Client.on_callback_query(filters.regex(r"^download_all$"))
 async def download_all_callback_handler(client, callback_query):
-    max_results = 10
     total_results = await get_total_results(None, query="")  # Define the function to get total results
 
     await callback_query.answer("Creating your .txt file...")  # Show a message that the file is being created
 
     all_files = []
-    for page in range(1, (total_results // max_results) + 2):
-        offset = (page - 1) * max_results
-        files, _, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
-        all_files.extend(files)
+    max_results = total_results  # Fetch all files at once
+    offset = 0
+    files, _, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
+    all_files.extend(files)
 
     if not all_files:
         await callback_query.message.edit_text("No files to download.")
