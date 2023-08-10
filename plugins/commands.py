@@ -1080,10 +1080,12 @@ async def get_files_command_handler(client, message):
     keyboard = []
 
     if page > 1:
-        keyboard.append([InlineKeyboardButton("Back", callback_data=f"prev_{page}")])
-    keyboard.append([InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")])
+        keyboard.append(InlineKeyboardButton("Back", callback_data=f"prev_{page}"))
+    
+    keyboard.append(InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page"))
+    
     if next_offset:
-        keyboard.append([InlineKeyboardButton("Next", callback_data=f"next_{page}")])
+        keyboard.append(InlineKeyboardButton("Next", callback_data=f"next_{page}"))
     
     # Add "Download" button
     keyboard.append([InlineKeyboardButton("Download", callback_data="download_all")])
@@ -1094,7 +1096,7 @@ async def get_files_command_handler(client, message):
         await message.reply_text("File list sent as .txt")
 
     await message.reply_text(
-        reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_text, reply_markup=InlineKeyboardMarkup([keyboard])
     )
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
