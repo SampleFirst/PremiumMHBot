@@ -1090,14 +1090,10 @@ async def get_files_command_handler(client, message):
         keyboard.append(
             InlineKeyboardButton("Next", callback_data=f"next_{page}")
         )
-    keyboard.append(
-        InlineKeyboardButton("Download", callback_data="download_all")
-    )
 
-    if message.reply_to_message:
-        await message.reply_to_message.reply_text("File list sent as .txt")
-    else:
-        await message.reply_text("File list sent as .txt")
+    download_button = [InlineKeyboardButton("Download", callback_data="download_all")]
+    
+    keyboard.append(download_button)
 
     await message.reply_text(
         reply_text, reply_markup=InlineKeyboardMarkup([keyboard])
