@@ -1197,7 +1197,7 @@ async def download_all_callback_handler(client, callback_query):
     all_files = []
     max_results = total_results  # Fetch all files at once
     offset = 0
-    files, _, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
+    files, _, _ = await get_total_results(None, query="", max_results=max_results, offset=offset)
     all_files.extend(files)
 
     if not all_files:
