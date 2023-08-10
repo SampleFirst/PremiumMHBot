@@ -1140,7 +1140,7 @@ async def prev_page_callback_handler(client, callback_query):
     )
 
     await callback_query.edit_message_text(
-        text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
+        text=reply_text, reply_markup=InlineKeyboardMarkup([keyboard])
     )
     await callback_query.answer("Page Changed For Back Page.")
 
@@ -1184,7 +1184,7 @@ async def next_page_callback_handler(client, callback_query):
     )
 
     await callback_query.edit_message_text(
-        text=reply_text, reply_markup=InlineKeyboardMarkup(keyboard)
+        text=reply_text, reply_markup=InlineKeyboardMarkup([keyboard])
     )
     await callback_query.answer("Page changed For Next Page.")
     
