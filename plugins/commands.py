@@ -1109,7 +1109,7 @@ async def prev_page_callback_handler(client, callback_query):
     max_results = 10
     offset = (page - 2) * max_results
 
-    files, next_offset, _ = await get_search_results(None, query="", max_results=max_results, offset=offset)
+    files, next_offset, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
 
     total_pages = (total_results // max_results) + 1
 
@@ -1190,7 +1190,7 @@ async def next_page_callback_handler(client, callback_query):
     
 @Client.on_callback_query(filters.regex(r"^download_all$"))
 async def download_all_callback_handler(client, callback_query):
-    total_results = await get_total_results(None, query="")  # Define the function to get total results
+    total_results = await get_search_results(None, query="")  # Define the function to get total results
 
     await callback_query.answer("Creating your .txt file...")  # Show a message that the file is being created
 
