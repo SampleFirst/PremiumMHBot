@@ -1175,7 +1175,7 @@ async def next_page_callback_handler(client, callback_query):
         InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}")
     )
     keyboard_group1.append(
-        InlineKeyboardButton(f"Page {page + 1} of {total_pages}", callback_data="page")
+        InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")
     )
     if next_offset:
         keyboard_group1.append(
@@ -1200,10 +1200,15 @@ async def download_all_callback_handler(client, callback_query):
     await callback_query.answer("Creating your .txt file...")  # Show a message that the file is being created
 
     all_files = []
+    start_time = time.time()  # Record the start time
     for page in range(1, (total_results // max_results) + 2):
         offset = (page - 1) * max_results
         files, _, total_results = await get_search_results(None, query="", max_results=max_results, offset=offset)
         all_files.extend(files)
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+        estimated_remaining_time = (elapsed_time / page) * ((total_results // max_results) + 1 - page)
+        await callback_query.message.edit_text(f"Creating your .txt file...\nProgress: {page}/{(total_results // max_results) + 1}\nEstimated time remaining: {int(estimated_remaining_time)} seconds")
 
     if not all_files:
         await callback_query.message.edit_text("No files to download.")
