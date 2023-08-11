@@ -1129,7 +1129,7 @@ async def prev_page_callback_handler(client, callback_query):
             InlineKeyboardButton("Back", callback_data=f"prev_{page - 1}")
         )
     keyboard_group1.append(
-        InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")
+        InlineKeyboardButton(f"Page {page + 1} of {total_pages}", callback_data="page")
     )
     if next_offset:
         keyboard_group1.append(
@@ -1175,7 +1175,7 @@ async def next_page_callback_handler(client, callback_query):
         InlineKeyboardButton("Back", callback_data=f"prev_{page + 1}")
     )
     keyboard_group1.append(
-        InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")
+        InlineKeyboardButton(f"Page {page + 1} of {total_pages}", callback_data="page")
     )
     if next_offset:
         keyboard_group1.append(
