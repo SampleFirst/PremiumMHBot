@@ -1077,29 +1077,27 @@ async def get_files_command_handler(client, message):
             reply_text += f"   Caption: {file.caption}\n"
         reply_text += "\n"
 
-    keyboard = []
+    keyboard_group1 = []
+    keyboard_group2 = []
 
     if page > 1:
-        keyboard.append(
+        keyboard_group1.append[
             InlineKeyboardButton("Back", callback_data=f"prev_{page}")
         )
-    keyboard.append(
+    keyboard_group1.append(
         InlineKeyboardButton(f"Page {page} of {total_pages}", callback_data="page")
     )
     if next_offset:
-        keyboard.append(
+        keyboard_group1.append(
             InlineKeyboardButton("Next", callback_data=f"next_{page}")
         )
 
-    download_button = [
-        [
-            InlineKeyboardButton("Download", callback_data="download_all")
-        ]
-    ]
-    keyboard.append(download_button)
+    # Add "Download" button to the second group
+    keyboard_group2 = [InlineKeyboardButton("Download", callback_data="download_all")]
+
 
     await message.reply_text(
-        reply_text, reply_markup=InlineKeyboardMarkup([keyboard])
+        reply_text, reply_markup=InlineKeyboardMarkup([keyboard_group1, keyboard_group2])
     )
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
