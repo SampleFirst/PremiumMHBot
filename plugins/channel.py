@@ -16,6 +16,7 @@ admin_settings = {
 
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
 async def media(bot, message):
+    """Media Handler"""
     for file_type in ("document", "video", "audio"):
         media = getattr(message, file_type, None)
         if media is not None:
@@ -23,6 +24,22 @@ async def media(bot, message):
     else:
         return
 
+    # Save the original file message as a quote
+    quote_message = await message.reply_to_message.copy()
+
+    # Remove the original file message
+    await message.delete()
+
+    # Display the file in the channel without a quote
+    await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
+
+    # Add file name and size to the channel
+    file_name = media.file_name
+    file_size = media.file_size
+    info_text = f"File name = {file_name}\nFile Size = {file_size}"
+    await bot.send_message(message.chat.id, text=info_text)
+
+    # Save the file to the database
     media.file_type = file_type
     media.caption = message.caption
     await save_file(media)
