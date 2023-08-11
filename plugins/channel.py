@@ -24,8 +24,10 @@ async def media(bot, message):
     else:
         return
 
-    # Save the original file message as a quote
-    quote_message = await message.reply_to_message.copy()
+    # Check if the message is a reply to another message
+    if message.reply_to_message:
+        # Save the original file message as a quote
+        quote_message = await message.reply_to_message.copy()
 
     # Remove the original file message
     await message.delete()
