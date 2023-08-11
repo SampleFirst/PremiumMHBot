@@ -1081,7 +1081,7 @@ async def get_files_command_handler(client, message):
     keyboard_group2 = []
 
     if page > 1:
-        keyboard_group1.append[(
+        keyboard_group1.append(
             InlineKeyboardButton("Back", callback_data=f"prev_{page}")
         )
     keyboard_group1.append(
@@ -1090,10 +1090,11 @@ async def get_files_command_handler(client, message):
     if next_offset:
         keyboard_group1.append(
             InlineKeyboardButton("Next", callback_data=f"next_{page}"))
-        ]
+        
 
     # Add "Download" button to the second group
-    keyboard_group2 = [InlineKeyboardButton("Download", callback_data="download_all")]
+    keyboard_group2 = (InlineKeyboardButton("Download", callback_data="download_all"))
+                       
 
 
     await message.reply_text(
