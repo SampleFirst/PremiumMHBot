@@ -1231,7 +1231,19 @@ async def download_all_callback_handler(client, callback_query):
     with open("FileList.txt", "rb") as txtfile:
         await callback_query.message.reply_document('FileList.txt', caption=f"Total Files = {total_results}")
 
-    await callback_query.message.edit_text("👇 This is Your File...")
+    # Add 'Send Log' button
+    log_button = InlineKeyboardButton('Send Log', callback_data='send_log')
+    keyboard = InlineKeyboardMarkup([[log_button]])
+    
+    await callback_query.message.edit_text("👇 This is Your File...", reply_markup=keyboard)
+
+@Client.on_callback_query(filters.regex(r"^send_log$"))
+async def send_log_callback_handler(client, callback_query):
+    # Sending the .txt file to the LOG_CHANNEL
+    with open("FileList.txt", "rb") as txtfile:
+        await client.send_document(LOG_CHANNEL, document=txtfile, caption="Backup - FileList.txt")
+
+    await callback_query.answer("Log file sent to LOG_CHANNEL.")
     
     
 @Client.on_message(filters.command('set_template'))
