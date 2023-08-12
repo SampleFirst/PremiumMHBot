@@ -40,11 +40,64 @@ async def media(bot, message):
     elif file_type == "audio":
         sent_message = await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
 
-
     # Add file name and size to the channel
     file_name = media.file_name
     file_size = media.file_size
-    info_text = f"File name = {file_name}\nFile Size = {file_size}"
+    
+    
+        # Extracting the search query from the file name
+    full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
+    file_name = ""
+    
+    
+    # Extract year using regular expression
+    year_match = re.search(r'\b\d{4}\b', file_name)
+    year = year_match.group() if year_match else "N/A"
+    
+    # Extract video resolution using regular expression
+    video_resolution_match = re.search(r'\b\d{3,4}p\b', file_name)
+    video_resolution = video_resolution_match.group() if video_resolution_match else "N/A"
+    
+    # Extract video format using regular expression
+    video_format_match = re.search(r'(Bluray|HDRip|WEB-DL|WebRip)', file_name)
+    video_format = video_format_match.group() if video_format_match else "N/A"
+    
+    # Extract HEVC match
+    hevc_match = re.search(r'HEVC', file_name)
+    
+    # Extract HEVC match
+    uncut_match = re.search(r'UNCUT|UnCut', file_name)
+    
+    # Extract audio codec using regular expression
+    audio_codec_match = re.search(r'(\dx|H{3})', file_name)
+    audio_codec = audio_codec_match.group() if audio_codec_match else "N/A"
+    
+    # Extract subtitle match
+    sub_match = re.search(r'(Subtitle|ESub|MSub|Hindi-Sub|HC-Sub)', file_name)
+    
+    # Extract language match using regular expression
+    language_match = "N/A"
+    for language, keywords in LANGUAGE_KEYWORDS.items():
+        if any(keyword in file_name for keyword in keywords):
+            language_match = language
+            break
+    
+
+    
+    series_season_match = re.search(r'\b[Ss]|Season\b\d+\b', full_file_name)
+    season_episode_match = re.search(r'\bSeason\b\s*(\d+)\b.*?\bEpisode\b\s*(\d+)\b', full_file_name)
+    
+    if year_match:
+        file_name = re.search(r'^.*?(?=\d{4}\b|\b[Ss]|Season\b\d+\b)', full_file_name).group().strip()
+    elif series_season_match:
+        file_name = re.search(r'^.*?(?=\b[Ss]|Season\b\d+\b)', full_file_name).group().strip()
+
+    # Construct the info_text with the extracted information
+    info_text = ""
+    if series_season_match:
+        info_text += f"Title 🎬: {file_name} ({year or ''})\nSeries Info: Season {season_episode_match.group(1)} Episode {season_episode_match.group(2)}\nQuality 💿: {video_resolution} {hevc_match or ''} {uncut_match or ''} {video_format} {audio_codec or ''}\nAudio 🔊: #{language_match} {(sub_match) or ''}"
+    else:
+        info_text += f"Title 🎬: {file_name} ({year or ''})\nQuality 💿: {video_resolution} {hevc_match or ''} {uncut_match or ''} {video_format or ''} {audio_codec or ''}\nAudio 🔊: #{language_match} {(sub_match) or ''}"
 
     # Edit the sent message with new text
     await sent_message.edit_text(info_text)
