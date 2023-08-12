@@ -46,7 +46,7 @@ async def media(bot, message):
     info_text = f"File name = {file_name}\nFile Size = {file_size}"
     
     # Edit the original message with new text
-    await quote_message.edit_text(info_text)
+    await message.caption.edit_text(info_text)
 
     # Save the file to the database
     media.file_type = file_type
