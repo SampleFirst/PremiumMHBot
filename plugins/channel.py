@@ -44,15 +44,15 @@ async def media(bot, message):
     file_name = media.file_name
     file_size = media.file_size
     info_text = f"File name = {file_name}\nFile Size = {file_size}"
-    
-    # Edit the original message with new text
-    await message.caption.edit_text(info_text)
+
+    # Edit the sent message with new text
+    await sent_message.edit_text(info_text)
 
     # Save the file to the database
     media.file_type = file_type
     media.caption = message.caption
     await save_file(media)
-
+    
     # Extracting the search query from the file name
     full_file_name = media.file_name.replace('_', ' ').replace('(', ' ').replace(')', ' ').replace('.', ' ')
     file_name = ""
