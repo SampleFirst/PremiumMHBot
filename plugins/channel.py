@@ -32,8 +32,13 @@ async def media(bot, message):
     # Remove the original file message
     await message.delete()
 
-    # Display the file in the channel without a quote
-    await bot.send_media(message.chat.id, media.file_id, caption=message.caption)
+    # Send the appropriate media type based on the detected type
+    if file_type == "document":
+        await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
+    elif file_type == "video":
+        await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
+    elif file_type == "audio":
+        await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
 
     # Add file name and size to the channel
     file_name = media.file_name
