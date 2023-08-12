@@ -34,11 +34,12 @@ async def media(bot, message):
 
     # Send the appropriate media type based on the detected type
     if file_type == "document":
-        await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
+        sent_message = await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
     elif file_type == "video":
-        await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
+        sent_message = await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
     elif file_type == "audio":
-        await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
+        sent_message = await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
+
 
     # Add file name and size to the channel
     file_name = media.file_name
