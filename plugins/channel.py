@@ -7,19 +7,7 @@ from utils import get_poster
 from Script import script
 import re
 
-# Define LANGUAGE_KEYWORDS dictionary
-LANGUAGE_KEYWORDS = {
-    'English': ['English', 'english', 'Eng', 'eng'],
-    'Marathi': ['Marathi', 'marathi', 'Mar', 'mar'],
-    'Hindi': ['Hindi', 'hindi', 'Hin', 'hin'],
-    'Malayalam': ['Malayalam', 'malayalam', 'Mal', 'mal'],
-    'Kannada': ['Kannada', 'kannada', 'Kan', 'kan'],
-    'Bengali': ['Bengali', 'bengali', 'Ben', 'ben'],
-    'Punjabi': ['Punjabi', 'punjabi', 'Pun', 'pun'],
-    'Bhojpuri': ['Bhojpuri', 'bhojpuri', 'Bhoj', 'bhoj'],
-    'Korean': ['Korean', 'korean', 'Kor', 'kor'],
-    'Chinese': ['Chinese', 'chinese', 'Chi', 'chi']
-}
+
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -88,6 +76,21 @@ async def media(bot, message):
     
     # Extract subtitle match
     sub_match = re.search(r'(Subtitle|ESub|MSub|Hindi-Sub|HC-Sub)', file_name)
+
+
+    # Define LANGUAGE_KEYWORDS dictionary
+    LANGUAGE_KEYWORDS = {
+        'English': ['English', 'english', 'Eng', 'eng'],
+        'Marathi': ['Marathi', 'marathi', 'Mar', 'mar'],
+        'Hindi': ['Hindi', 'hindi', 'Hin', 'hin'],
+        'Malayalam': ['Malayalam', 'malayalam', 'Mal', 'mal'],
+        'Kannada': ['Kannada', 'kannada', 'Kan', 'kan'],
+        'Bengali': ['Bengali', 'bengali', 'Ben', 'ben'],
+        'Punjabi': ['Punjabi', 'punjabi', 'Pun', 'pun'],
+        'Bhojpuri': ['Bhojpuri', 'bhojpuri', 'Bhoj', 'bhoj'],
+        'Korean': ['Korean', 'korean', 'Kor', 'kor'],
+        'Chinese': ['Chinese', 'chinese', 'Chi', 'chi']
+    }
     
     # Extract language match using regular expression
     language_match = "N/A"
