@@ -304,7 +304,7 @@ async def admin_settings_command(bot, message):
             InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'), callback_data='toggle_caption')
         ]
     ]
-    await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+    await message.reply_text("Welcome to Admin Settings! You can update the CAP and choose the caption format for your channel:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @Client.on_callback_query(filters.regex('^imdb_button$'))
 async def imdb_button_callback(bot, callback_query: CallbackQuery):
@@ -321,6 +321,8 @@ async def toggle_update_callback(bot, callback_query: CallbackQuery):
     admin_settings["update"] = not admin_settings["update"]
 
     new_button_text = '🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else ('🔳 Custom Cap' if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom')
+    new_text = f"Admin Settings:\nCaption Format: {new_button_text}"
+    
     buttons = [
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
@@ -332,7 +334,7 @@ async def toggle_update_callback(bot, callback_query: CallbackQuery):
         ]
     ]
 
-    await callback_query.message.edit_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+    await callback_query.message.edit_text(new_text, reply_markup=InlineKeyboardMarkup(buttons))
     await callback_query.answer(text="Update setting has been changed. Showing all buttons.", show_alert=True)
 
 @Client.on_callback_query(filters.regex('^toggle_caption$'))
@@ -340,6 +342,8 @@ async def toggle_caption_callback(bot, callback_query: CallbackQuery):
     admin_settings["caption_format"] = not admin_settings["caption_format"]
 
     new_button_text = '📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap')
+    new_text = f"Admin Settings:\nCaption Format: {new_button_text}"
+
     buttons = [
         [
             InlineKeyboardButton('Update CAP', callback_data='default_button'),
@@ -351,6 +355,5 @@ async def toggle_caption_callback(bot, callback_query: CallbackQuery):
         ]
     ]
 
-    await callback_query.message.edit_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+    await callback_query.message.edit_text(new_text, reply_markup=InlineKeyboardMarkup(buttons))
     await callback_query.answer(text="Caption format setting has been changed. Showing all buttons.", show_alert=True)
-    
