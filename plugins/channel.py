@@ -11,7 +11,8 @@ media_filter = filters.document | filters.video | filters.audio
 
 # Your settings dictionary (update this as per your needs)
 admin_settings = {
-    "update": True  # Default value, you can change it
+    "update": True,               # Default value, you can change it
+    "info_text_format": True      # Default value, can be changed to "custom"
 }
 
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
@@ -31,15 +32,26 @@ async def media(bot, message):
 
     # Remove the original file message
     await message.delete()
+    
+    # Check if the "update" setting is enabled
+    if admin_settings["caption_format"]:
+        # Send the appropriate media type based on the detected type
+        if file_type == "document":
+            await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
+        elif file_type == "video":
+            await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
+        elif file_type == "audio":
+            await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
 
-    # Send the appropriate media type based on the detected type
-    if file_type == "document":
-        sent_message = await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
-    elif file_type == "video":
-        sent_message = await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
-    elif file_type == "audio":
-        sent_message = await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
-
+    elif:
+        # Send the appropriate media type based on the detected type
+        if file_type == "document":
+            sent_message = await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
+        elif file_type == "video":
+            sent_message = await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
+        elif file_type == "audio":
+            sent_message = await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
+    
     # Add file name and size to the channel
     file_name = media.file_name
     file_size = media.file_size
@@ -252,14 +264,25 @@ async def admin_settings_command(bot, message):
         [
             InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
             InlineKeyboardButton('🔘 ON' if admin_settings["update"] else '🔳 OFF', callback_data='toggle_update')
+        ],
+        [
+            InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap', callback_data='toggle_caption')
         ]
     ]
+    
+    admin_settings["info_text_format"]:
     await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @Client.on_callback_query(filters.regex('^imdb_button$'))
 async def imdb_button_callback(bot, callback_query: CallbackQuery):
     # Your logic for sending IMDb data here...
     await query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)
+    
+@Client.on_callback_query(filters.regex('^channel_button$'))
+async def imdb_button_callback(bot, callback_query: CallbackQuery):
+    # Your logic for sending IMDb data here...
+    await query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)    
 
 @Client.on_callback_query(filters.regex('^toggle_update$'))
 async def toggle_update_callback(bot, callback_query: CallbackQuery):
@@ -270,6 +293,22 @@ async def toggle_update_callback(bot, callback_query: CallbackQuery):
         [
             InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
             InlineKeyboardButton(new_button_text, callback_data='toggle_update')
+        ]
+    ]
+
+    await callback_query.message.edit_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+    await callback_query.answer(text="Update setting has been changed.")
+
+
+@Client.on_callback_query(filters.regex('^toggle_caption$'))
+async def toggle_update_callback(bot, callback_query: CallbackQuery):
+    admin_settings["caption_format"] = not admin_settings["caption_format"]
+
+    new_button_text = '📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap'
+    buttons = [
+        [
+            InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
+            InlineKeyboardButton(new_button_text, callback_data='toggle_caption')
         ]
     ]
 
