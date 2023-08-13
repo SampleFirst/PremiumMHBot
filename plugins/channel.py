@@ -34,7 +34,7 @@ async def media(bot, message):
     await message.delete()
     
     # Check if the "update" setting is enabled
-    if admin_settings["caption_format"] == "DEFAULT"
+    if admin_settings["caption_format"] == "DEFAULT":
         # Send the appropriate media type based on the detected type
         if file_type == "document":
             await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
@@ -43,7 +43,7 @@ async def media(bot, message):
         elif file_type == "audio":
             await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
     
-    if admin_settings["caption_format"] == "NORMAL"
+    if admin_settings["caption_format"] == "NORMAL":
         # Send the appropriate media type based on the detected type
         if file_type == "document":
             sent_mes = await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
@@ -200,13 +200,13 @@ async def media(bot, message):
         # If year is not found, use entire file name for search query
         search_query = file_name
 
-    if admin_settings["update"] == "DEFAULT"
+    if admin_settings["update"] == "DEFAULT":
         # Your code to send DEFAULT_TEXT format
         cap = DEFAULT_TEXT.format({search_query})
         ifawait bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
         
         
-    if admin_settings["update"] == "CUSTOM"
+    if admin_settings["update"] == "CUSTOM":
         # Your code to send IMDb poster with FILE_INFO format
         cap = CUSTOM_TEXT.format(
             title=f"Title 🎬: {imdb['title']}
