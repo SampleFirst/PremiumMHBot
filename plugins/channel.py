@@ -263,15 +263,15 @@ async def admin_settings_command(bot, message):
     buttons = [
         [
             InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
-            InlineKeyboardButton('🔘 ON' if admin_settings["update"] else '🔳 OFF', callback_data='update_button')
+            InlineKeyboardButton('🔘 ON' if admin_settings["update"] else '🔳 OFF', callback_data='toggle_update'
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap', callback_data=f'admin_setgs#caption_format#{admin_settings["caption_format"]}')
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap', callback_data='toggle_caption'
         ]
     ]
     await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
-
+    
 @Client.on_callback_query(filters.regex('^imdb_button$'))
 async def imdb_button_callback(bot, callback_query: CallbackQuery):
     # Your logic for sending IMDb data here...
@@ -281,3 +281,42 @@ async def imdb_button_callback(bot, callback_query: CallbackQuery):
 async def channel_button_callback(bot, callback_query: CallbackQuery):
     # Your logic for sending IMDb data here...
     await callback_query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)    
+
+@Client.on_callback_query(filters.regex('^toggle_update$'))
+async def toggle_update_callback(bot, callback_query: CallbackQuery):
+    admin_settings["update"] = not admin_settings["update"]
+
+    new_button_text = '🔘 ON' if admin_settings["update"] else '🔳 OFF'
+    buttons = [
+        [
+            InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
+            InlineKeyboardButton(new_button_text, callback_data='toggle_update')
+        ],
+        [
+            InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap', callback_data='toggle_caption')
+        ]
+    ]
+
+    await callback_query.message.edit_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+    await callback_query.answer(text="Update setting has been changed. Showing all buttons.", show_alert=True)
+
+@Client.on_callback_query(filters.regex('^toggle_caption$'))
+async def toggle_caption_callback(bot, callback_query: CallbackQuery):
+    admin_settings["caption_format"] = not admin_settings["caption_format"]
+
+    new_button_text = '📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap'
+    buttons = [
+        [
+            InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
+            InlineKeyboardButton('🔘 ON' if admin_settings["update"] else '🔳 OFF', callback_data='toggle_update')
+        ],
+        [
+            InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
+            InlineKeyboardButton(new_button_text, callback_data='toggle_caption')
+        ]
+    ]
+
+    await callback_query.message.edit_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
+    await callback_query.answer(text="Caption format setting has been changed. Showing all buttons.", show_alert=True)
+    
