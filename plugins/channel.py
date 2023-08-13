@@ -111,11 +111,11 @@ async def media(bot, message):
 
     # Construct the info_text with the extracted information
     info_text = ""
-    if series_season_match:
-        info_text += f"Title 🎬: {file_name} ({year or ''})\nSeries Info: Season {season_episode_match.group(1)} Episode {season_episode_match.group(2)}\nQuality 💿: {video_resolution} {hevc_match or ''} {uncut_match or ''} {video_format} {audio_codec or ''}\nAudio 🔊: #{language_match} {(sub_match) or ''}"
-    else:
-        info_text += f"Title 🎬: {file_name} ({year or ''})\nQuality 💿: {video_resolution} {hevc_match or ''} {uncut_match or ''} {video_format or ''} {audio_codec or ''}\nAudio 🔊: #{language_match} {(sub_match) or ''}"
-
+    if season_episode_match:
+    info_text += f"Title 🎬: {file_name} ({year or ''})\nSeries Info: Season {season_episode_match.group(1)} Episode {season_episode_match.group(2)}\nQuality 💿: {video_resolution} {hevc_match or ''} {uncut_match or ''} {video_format} {audio_codec or ''}\nAudio 🔊: #{language_match} {(sub_match) or ''}"
+else:
+    info_text += f"Title 🎬: {file_name} ({year or ''})\nQuality 💿: {video_resolution} {hevc_match or ''} {uncut_match or ''} {video_format} {audio_codec or ''}\nAudio 🔊: #{language_match} {(sub_match) or ''}"
+    
     # Edit the sent message with new text
     await sent_message.edit_text(info_text)
 
