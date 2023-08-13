@@ -12,7 +12,7 @@ media_filter = filters.document | filters.video | filters.audio
 # Your settings dictionary (update this as per your needs)
 admin_settings = {
     "update": True,               # Default value, you can change it
-    "info_text_format": True      # Default value, can be changed to "custom"
+    "caption_format": True      # Default value, can be changed to "custom"
 }
 
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
