@@ -275,12 +275,12 @@ async def admin_settings_command(bot, message):
 @Client.on_callback_query(filters.regex('^imdb_button$'))
 async def imdb_button_callback(bot, callback_query: CallbackQuery):
     # Your logic for sending IMDb data here...
-    await query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)
+    await callback_query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)
     
 @Client.on_callback_query(filters.regex('^channel_button$'))
 async def imdb_button_callback(bot, callback_query: CallbackQuery):
     # Your logic for sending IMDb data here...
-    await query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)    
+    await callback_query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)    
 
 @Client.on_callback_query(filters.regex('^toggle_update$'))
 async def toggle_update_callback(bot, callback_query: CallbackQuery):
