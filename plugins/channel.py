@@ -203,7 +203,7 @@ async def media(bot, message):
     if admin_settings["update"] == "DEFAULT":
         # Your code to send DEFAULT_TEXT format
         cap = DEFAULT_TEXT.format({search_query})
-        ifawait bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
         
         
     if admin_settings["update"] == "CUSTOM":
