@@ -11,8 +11,8 @@ media_filter = filters.document | filters.video | filters.audio
 
 # Your settings dictionary (update this as per your needs)
 admin_settings = {
-    "update": True,               # Default value, you can change it
-    "caption_format": True      # Default value, can be changed to "custom"
+    "update": DEFAULT,            # Default value, you can change it
+    "caption_format": DEFAULT,   # Default value, can be changed to "custom"
 }
 
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
@@ -34,14 +34,14 @@ async def media(bot, message):
     await message.delete()
     
     # Check if the "update" setting is enabled
-    if admin_settings["caption_format"] == "CUSTOM"
+    if admin_settings["caption_format"] == "DEFAULT"
         # Send the appropriate media type based on the detected type
         if file_type == "document":
-            sent_message = await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
+            await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
         elif file_type == "video":
-            sent_message = await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
+            await bot.send_video(message.chat.id, media.file_id, caption=message.caption)
         elif file_type == "audio":
-            sent_message = await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
+            await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
     
     if admin_settings["caption_format"] == "NORMAL"
         # Send the appropriate media type based on the detected type
@@ -200,8 +200,37 @@ async def media(bot, message):
         # If year is not found, use entire file name for search query
         search_query = file_name
 
+    if admin_settings["update"] == "DEFAULT"
+        # Your code to send DEFAULT_TEXT format
+        cap = DEFAULT_TEXT.format({search_query})
+        ifawait bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
+        
+        
+    if admin_settings["update"] == "CUSTOM"
+        # Your code to send IMDb poster with FILE_INFO format
+        cap = CUSTOM_TEXT.format(
+            title=f"Title 🎬: {imdb['title']}
+            Quality 💿 : {video_resolution}
+            Audio 🔊: {language_match}",
+            search_query=search_query
+        )
+        if imdb.get('poster'):
+            try:
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap)
+            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+                poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
+                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap)
+            except Exception as e:
+                logger.exception(e)
+                await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
+        else:
+            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
+
+        await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
+        
+        
     # Check if the "update" setting is enabled
-    if admin_settings["update"] == "IMDB"
+    else:
         # Get IMDb data and poster based on search query
         imdb = await get_poster(search_query)
 
@@ -260,44 +289,19 @@ async def media(bot, message):
         else:
             await bot.send_message(chat_id=UPDATE_CHANNEL, text=f"New File Added In Bot\n{file_name}")
 
-    if admin_settings["update"] == "CUSTOM"
-        # Your code to send IMDb poster with FILE_INFO format
-        cap = CUSTOM_TEXT.format(
-            title=f"Title 🎬: {imdb['title']}
-            Quality 💿 : {video_resolution}
-            Audio 🔊: {language_match}",
-            search_query=search_query
-        )
-        if imdb.get('poster'):
-            try:
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=imdb['poster'], caption=cap)
-            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
-                poster = imdb['poster'].replace('.jpg', '._V1_UX360.jpg')
-                await bot.send_photo(chat_id=UPDATE_CHANNEL, photo=poster, caption=cap)
-            except Exception as e:
-                logger.exception(e)
-                await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
-        else:
-            await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
-
-        await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
     
-    else:
-        # Your code to send DEFAULT_TEXT format
-        cap = DEFAULT_TEXT.format({search_query})
-        ifawait bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
     
 @Client.on_message(filters.command("admin_settings"))
 async def admin_settings_command(bot, message):
     # Assuming this command is meant to be sent only in private chats with the bot
     buttons = [
         [
-            InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
-            InlineKeyboardButton('🔘 IMDB Cap' if admin_settings["update"] == "IMDB" else '🔳 Custom Cap', if admin_settings["update"] == "CUSTOM" else '⚙️ Default', callback_data='toggle_update')
+            InlineKeyboardButton('Update CAP', callback_data='default_button'),
+            InlineKeyboardButton('🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap', if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom', callback_data='toggle_update')
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Custom Cap' if admin_settings["caption_format"] == "CUSTOM" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Default Cap'), callback_data='toggle_caption')
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'), callback_data='toggle_caption')
         ]
     ]
     await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
@@ -316,7 +320,7 @@ async def channel_button_callback(bot, callback_query: CallbackQuery):
 async def toggle_update_callback(bot, callback_query: CallbackQuery):
     admin_settings["update"] = not admin_settings["update"]
 
-    new_button_text = '🔘 IMDB Cap' if admin_settings["update"] == "IMDB" else '🔳 Custom Cap', if admin_settings["update"] == "CUSTOM" else '⚙️ Default'
+    new_button_text = '🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap', if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom'
     buttons = [
         [
             InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
@@ -324,7 +328,7 @@ async def toggle_update_callback(bot, callback_query: CallbackQuery):
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Custom Cap' if admin_settings["caption_format"] == "CUSTOM" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Default Cap'), callback_data='toggle_caption')
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'), callback_data='toggle_caption')
         ]
     ]
 
@@ -335,11 +339,11 @@ async def toggle_update_callback(bot, callback_query: CallbackQuery):
 async def toggle_caption_callback(bot, callback_query: CallbackQuery):
     admin_settings["caption_format"] = not admin_settings["caption_format"]
 
-    new_button_text = '📝 Custom Cap' if admin_settings["caption_format"] == "CUSTOM" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Default Cap'), callback_data='toggle_caption')
+    new_button_text = '📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'),
     buttons = [
         [
-            InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
-            InlineKeyboardButton('🔘 IMDB Cap' if admin_settings["update"] == "IMDB" else '🔳 Custom Cap', if admin_settings["update"] == "CUSTOM" else '⚙️ Default', callback_data='toggle_update')
+            InlineKeyboardButton('Update CAP', callback_data='default_button'),
+            InlineKeyboardButton('🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap', if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom', callback_data='toggle_update')
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
@@ -350,4 +354,3 @@ async def toggle_caption_callback(bot, callback_query: CallbackQuery):
     await callback_query.message.edit_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
     await callback_query.answer(text="Caption format setting has been changed. Showing all buttons.", show_alert=True)
     
-
