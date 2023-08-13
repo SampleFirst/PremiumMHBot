@@ -263,11 +263,11 @@ async def admin_settings_command(bot, message):
     buttons = [
         [
             InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
-            InlineKeyboardButton('🔘 ON' if admin_settings["update"] else '🔳 OFF', callback_data='imdb_button')
+            InlineKeyboardButton('🔘 ON' if admin_settings["update"] else '🔳 OFF', callback_data='update_button')
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap', callback_data=f'admin_setgs#caption_format#{admin_settings["caption_format"]}
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap', callback_data=f'admin_setgs#caption_format#{admin_settings["caption_format"]}')
         ]
     ]
     await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
