@@ -301,7 +301,7 @@ async def admin_settings_command(bot, message):
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'), callback_data='toggle_caption')
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else '📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap', callback_data='toggle_caption')
         ]
     ]
     await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
@@ -323,12 +323,12 @@ async def toggle_update_callback(bot, callback_query: CallbackQuery):
     new_button_text = '🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap', if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom'
     buttons = [
         [
-            InlineKeyboardButton('IMDB Button', callback_data='imdb_button'),
+            InlineKeyboardButton('Update CAP', callback_data='default_button'),
             InlineKeyboardButton(new_button_text, callback_data='toggle_update')
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'), callback_data='toggle_caption')
+            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else '📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap', callback_data='toggle_caption')
         ]
     ]
 
@@ -339,7 +339,7 @@ async def toggle_update_callback(bot, callback_query: CallbackQuery):
 async def toggle_caption_callback(bot, callback_query: CallbackQuery):
     admin_settings["caption_format"] = not admin_settings["caption_format"]
 
-    new_button_text = '📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else ('📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'),
+    new_button_text = '📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else '📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap', callback_data='toggle_caption')
     buttons = [
         [
             InlineKeyboardButton('Update CAP', callback_data='default_button'),
