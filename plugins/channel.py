@@ -209,9 +209,9 @@ async def media(bot, message):
     if admin_settings["update"] == "CUSTOM":
         # Your code to send IMDb poster with FILE_INFO format
         cap = CUSTOM_TEXT.format(
-            title=f"Title 🎬: {imdb['title']}
-            Quality 💿 : {video_resolution}
-            Audio 🔊: {language_match}",
+            title=f"Title 🎬: {imdb['title']}",
+            quality=f"Quality 💿 : {video_resolution}",
+            audio=f"Audio 🔊: {language_match}",
             search_query=search_query
         )
         if imdb.get('poster'):
