@@ -43,7 +43,7 @@ async def media(bot, message):
         elif file_type == "audio":
             await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
 
-    elif:
+    else:
         # Send the appropriate media type based on the detected type
         if file_type == "document":
             sent_message = await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
