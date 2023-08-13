@@ -270,8 +270,6 @@ async def admin_settings_command(bot, message):
             InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] else '📝 Custom Cap', callback_data='toggle_caption')
         ]
     ]
-    
-    admin_settings["info_text_format"]:
     await message.reply_text("Admin Settings:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @Client.on_callback_query(filters.regex('^imdb_button$'))
