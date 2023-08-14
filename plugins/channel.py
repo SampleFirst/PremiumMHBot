@@ -43,7 +43,7 @@ async def media(bot, message):
         elif file_type == "audio":
             await bot.send_audio(message.chat.id, media.file_id, caption=message.caption)
     
-    if admin_settings["caption_format"] == "NORMAL":
+    elif admin_settings["caption_format"] == "NORMAL":
         # Send the appropriate media type based on the detected type
         if file_type == "document":
             sent_mes = await bot.send_document(message.chat.id, media.file_id, caption=message.caption)
@@ -206,7 +206,7 @@ async def media(bot, message):
         await bot.send_message(chat_id=UPDATE_CHANNEL, text=cap)
         
         
-    if admin_settings["update"] == "CUSTOM":
+    elif admin_settings["update"] == "CUSTOM":
         # Your code to send IMDb poster with FILE_INFO format
         cap = CUSTOM_TEXT.format(
             title=f"Title 🎬: {imdb['title']}",
@@ -292,18 +292,40 @@ async def media(bot, message):
     
 @Client.on_message(filters.command("admin_settings"))
 async def admin_settings_command(_, message):
+    update_button_text = '🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap' if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom'
+    caption_button_text = '📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else '📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'
+
+    update_button_callback = 'toggle_update'
+    caption_button_callback = 'toggle_caption'
+
+    if admin_settings["update"] == "DEFAULT":
+        update_button_text = '🔘 Default Cap'
+    elif admin_settings["update"] == "CUSTOM":
+        update_button_text = '🔳 Custom Cap'
+    else:
+        update_button_text = '⚙️ IMDB Custom'
+
+    if admin_settings["caption_format"] == "DEFAULT":
+        caption_button_text = '📝 Default Cap'
+    elif admin_settings["caption_format"] == "NORMAL":
+        caption_button_text = '📝 Normal Cap'
+    else:
+        caption_button_text = '📝 Custom Cap'
+
     buttons = [
         [
             InlineKeyboardButton('Update CAP', callback_data='imdb_button'),
-            InlineKeyboardButton('🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap' if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom', callback_data='toggle_update')
+            InlineKeyboardButton(update_button_text, callback_data=update_button_callback)
         ],
         [
             InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else '📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap', callback_data='toggle_caption')
+            InlineKeyboardButton(caption_button_text, callback_data=caption_button_callback)
         ]
     ]
-    await message.reply_text("Welcome to Admin Settings! You can update the CAP and choose the caption format for your channel:", reply_markup=InlineKeyboardMarkup(buttons))
-
+    
+    reply_text = "Welcome to Admin Settings! You can update the CAP and choose the caption format for your channel:"
+    await message.reply_text(reply_text, reply_markup=InlineKeyboardMarkup(buttons))
+    
 @Client.on_callback_query(filters.regex('^imdb_button$'))
 async def imdb_button_callback(_, callback_query: CallbackQuery):
     # Your logic for sending IMDb data here...
@@ -313,45 +335,3 @@ async def imdb_button_callback(_, callback_query: CallbackQuery):
 async def channel_button_callback(_, callback_query: CallbackQuery):
     # Your logic for sending channel data here...
     await callback_query.answer(text="ℹ️ Here is the detailed information:", show_alert=True)    
-
-@Client.on_callback_query(filters.regex('^toggle_update$'))
-async def toggle_update_callback(_, callback_query: CallbackQuery):
-    admin_settings["update"] = "CUSTOM" if admin_settings["update"] == "DEFAULT" else "DEFAULT"
-
-    new_button_text = '🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap' if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom'
-    new_text = f"Admin Settings:\nCaption Format: {new_button_text}"
-    
-    buttons = [
-        [
-            InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton(new_button_text, callback_data='toggle_update')
-        ],
-        [
-            InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton('📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else '📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap', callback_data='toggle_caption')
-        ]
-    ]
-
-    await callback_query.message.edit_text(new_text, reply_markup=InlineKeyboardMarkup(buttons))
-    await callback_query.answer(text="Update setting has been changed. Showing all buttons.", show_alert=True)
-
-@Client.on_callback_query(filters.regex('^toggle_caption$'))
-async def toggle_caption_callback(_, callback_query: CallbackQuery):
-    admin_settings["caption_format"] = "NORMAL" if admin_settings["caption_format"] == "DEFAULT" else "DEFAULT"
-
-    new_button_text = '📝 Default Cap' if admin_settings["caption_format"] == "DEFAULT" else '📝 Normal Cap' if admin_settings["caption_format"] == "NORMAL" else '📝 Custom Cap'
-    new_text = f"Admin Settings:\nCaption Format: {new_button_text}"
-
-    buttons = [
-        [
-            InlineKeyboardButton('Update CAP', callback_data='imdb_button'),
-            InlineKeyboardButton('🔘 Default Cap' if admin_settings["update"] == "DEFAULT" else '🔳 Custom Cap' if admin_settings["update"] == "CUSTOM" else '⚙️ IMDB Custom', callback_data='toggle_update')
-        ],
-        [
-            InlineKeyboardButton('Channel CAP', callback_data='channel_button'),
-            InlineKeyboardButton(new_button_text, callback_data='toggle_caption')
-        ]
-    ]
-
-    await callback_query.message.edit_text(new_text, reply_markup=InlineKeyboardMarkup(buttons))
-    await callback_query.answer(text="Caption format setting has been changed. Showing all buttons.", show_alert=True)
