@@ -49,16 +49,16 @@ async def mention_group_broadcast(bot, message):
 
 async def broadcast_messages_group_with_mentions(bot, group_id, message):
     try:
-        group = await bot.get_chat(group_id)
-        mention_text = create_mention_text(group)
+        members = await bot.get_chat_members(group_id)
+        mention_text = create_mention_text(members)
         await bot.send_message(group_id, f"{mention_text}\n\n{message.text}")
         return True, "Success", ""
     except (InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid) as e:
         return False, "deleted", str(e)
 
-def create_mention_text(group):
+def create_mention_text(members):
     mention_text = ""
-    for member in group.members:
+    for member in members:
         if member.user.username:
             mention_text += f"@{member.user.username} "
     return mention_text
