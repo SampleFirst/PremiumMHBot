@@ -49,8 +49,10 @@ async def mention_group_broadcast(bot, message):
 
 async def broadcast_messages_group_with_mentions(bot, group_id, message):
     try:
-        members = await bot.get_chat_members(group_id)
-        mention_text = create_mention_text(members)
+        async with bot.get_chat_members(group_id) as members:
+            member_list = [member async for member in members]
+        
+        mention_text = create_mention_text(member_list)
         await bot.send_message(group_id, f"{mention_text}\n\n{message.text}")
         return True, "Success", ""
     except (InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid) as e:
