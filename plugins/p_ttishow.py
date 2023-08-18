@@ -204,23 +204,49 @@ async def get_stats(bot, message):
     await rju.edit(f"📊 *Statistics* 📊\n\nTotal Users: {total_users}\nTotal Chats: {total_chats}\nTotal Files: {files}\nDatabase Size: {size}\nFree Space: {free}")
 
 
-@Client.on_message(filters.command('invite') & filters.user(ADMINS))
-async def gen_invite(bot, message):
+@Client.on_message(filters.command('invite') & filters.private & filters.user(ADMINS))
+async def gen_invite_update(bot, message):
     if len(message.command) == 1:
-        return await message.reply('Give me a chat ID')
-    chat = message.command[1]
-    try:
-        chat = int(chat)
-    except:
-        return await message.reply('Give me a valid Chat ID')
-    try:
-        link = await bot.create_chat_invite_link(chat)
-    except ChatAdminRequired:
-        return await message.reply("Failed to generate invite link. I do not have sufficient rights.")
-    except Exception as e:
-        return await message.reply(f'Error: {e}')
-    await message.reply(f'Here is your Invite Link: {link.invite_link}')
+        # Retrieve a list of all the chats the bot is in
+        chats = await bot.get_dialogs()
+        
+        # Create a list of InlineKeyboardButtons for each chat
+        buttons = [
+            [InlineKeyboardButton(chat.chat.title, callback_data=f"get_invite_{chat.chat.id}")]
+            for chat in chats
+        ]
+        
+        # Create an InlineKeyboardMarkup from the buttons
+        reply_markup = InlineKeyboardMarkup(buttons)
+        
+        await message.reply("Select a chat to get its invite link:", reply_markup=reply_markup)
+    else:
+        chat_id = message.command[1]
+        try:
+            chat_id = int(chat_id)
+        except:
+            return await message.reply('Give Me A Valid Chat ID')
+        try:
+            link = await bot.create_chat_invite_link(chat_id)
+        except ChatAdminRequired:
+            return await message.reply("Invite Link Generation Failed, I am Not Having Sufficient Rights")
+        except Exception as e:
+            return await message.reply(f'Error {e}')
+        await message.reply(f'Here is the Invite Link for the selected chat: {link.invite_link}')
 
+# Callback function to handle chat selection
+@Client.on_callback_query(filters.regex(r'^get_invite_(\d+)'))
+async def callback_get_invite_link(_, callback_query):
+    chat_id = int(callback_query.matches[0].group(1))
+    try:
+        link = await _.create_chat_invite_link(chat_id)
+    except ChatAdminRequired:
+        return await callback_query.answer("Invite Link Generation Failed, I am Not Having Sufficient Rights", show_alert=True)
+    except Exception as e:
+        return await callback_query.answer(f'Error {e}', show_alert=True)
+    await callback_query.answer('Here is the Invite Link:', show_alert=True)
+    await callback_query.message.edit_text(f'Here is the Invite Link for the selected chat: {link.invite_link}')
+    
 
 @Client.on_message(filters.command('ban') & filters.user(ADMINS))
 async def ban_a_user(bot, message):
