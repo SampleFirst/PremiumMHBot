@@ -647,19 +647,13 @@ async def total(bot, message):
 @Client.on_message(filters.command('mentionall') & filters.user(ADMINS))
 async def mention_all(client, message):
     chat_id = message.chat.id
-
+    
+    # Check if the user is an admin
+    is_admin = message.from_user and message.from_user.id in ADMINS
+    
     if message.chat.type == "private":
         await message.reply("__This command can be used in groups and channels!__")
         return
-
-    is_admin = False
-    try:
-        participant = await client.get_chat_member(chat_id, message.from_user.id)
-    except Exception as e:
-        is_admin = False
-    else:
-        if participant.status in ("administrator", "creator"):
-            is_admin = True
 
     if not is_admin:
         await message.reply("__Only admins can mention all!__")
