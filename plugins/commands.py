@@ -53,6 +53,7 @@ logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
 RESULTS_PER_PAGE = 10
+spam_chats = []
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
@@ -642,6 +643,65 @@ async def total(bot, message):
         await msg.edit(f'Error: {e}')
         
 
+
+@Client.on_message(filters.command('mentionall') & filters.user(ADMINS))
+async def mention_all(client, message):
+    chat_id = message.chat.id
+
+    if message.chat.type == "private":
+        await message.reply("__This command can be used in groups and channels!__")
+        return
+
+    is_admin = False
+    try:
+        participant = await client.get_chat_member(chat_id, message.from_user.id)
+    except Exception as e:
+        is_admin = False
+    else:
+        if participant.status in ("administrator", "creator"):
+            is_admin = True
+
+    if not is_admin:
+        await message.reply("__Only admins can mention all!__")
+        return
+
+    if len(message.command) > 1 and message.reply_to_message:
+        await message.reply("__Give me only one argument!__")
+    elif len(message.command) > 1:
+        mode = "text_on_cmd"
+        msg = " ".join(message.command[1:])
+    elif message.reply_to_message:
+        mode = "text_on_reply"
+        msg = message.reply_to_message
+        if msg is None:
+            await message.reply("__I can't mention members for older messages!__")
+            return
+    else:
+        await message.reply("__Reply to a message or give me some text to mention others!__")
+        return
+
+    spam_chats.append(chat_id)
+    usrnum = 0
+    usrtxt = ''
+    async for user in client.iter_chat_members(chat_id):
+        if chat_id not in spam_chats:
+            break
+        usrnum += 1
+        usrtxt += f"[{user.user.first_name}](tg://user?id={user.user.id}) "
+        if usrnum == 5:
+            if mode == "text_on_cmd":
+                txt = f"{usrtxt}\n\n{msg}"
+                await client.send_message(chat_id, txt)
+            elif mode == "text_on_reply":
+                await msg.reply_text(usrtxt)
+            await asyncio.sleep(2)
+            usrnum = 0
+            usrtxt = ''
+    try:
+        spam_chats.remove(chat_id)
+    except:
+        pass
+                   
 @Client.on_message(filters.command('findfiles') & filters.user(ADMINS))
 async def find_files(client, message):
     """Find files in the database based on search criteria"""
