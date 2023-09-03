@@ -26,7 +26,6 @@ async def add_admin(client, message):
         await client.promote_chat_member(
             chat_id,
             user_id,
-            is_anonymous=False,
             privileges=ChatPrivileges(
                 can_manage_chat=True,
                 can_delete_messages=True,
@@ -39,3 +38,4 @@ async def add_admin(client, message):
         await message.reply("The user must be a member of the chat to use this command.")
     except Exception as e:
         await message.reply(f"An error occurred: {str(e)}")
+
