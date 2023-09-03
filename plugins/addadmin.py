@@ -17,7 +17,7 @@ async def add_admin(client, message):
         return
 
     if len(message.command) != 2:
-        await message.reply("Usage: /addadmin <user_id>")
+        await message.reply("Usage: /addadmin user_id")
         return
 
     user_id = int(message.command[1])
@@ -29,8 +29,15 @@ async def add_admin(client, message):
             privileges=ChatPrivileges(
                 can_manage_chat=True,
                 can_delete_messages=True,
+                can_manage_video_chats=True,
                 can_restrict_members=True,
-                can_promote_members=True,  # Adjust privileges as needed
+                can_promote_members=True,
+                can_change_info=True,
+                can_post_messages=True,
+                can_edit_messages=True,
+                can_invite_users=True,
+                can_pin_messages=True,
+                is_anonymous=True
             ),
         )
         await message.reply("User added as an admin with specified privileges.")
@@ -38,4 +45,3 @@ async def add_admin(client, message):
         await message.reply("The user must be a member of the chat to use this command.")
     except Exception as e:
         await message.reply(f"An error occurred: {str(e)}")
-
