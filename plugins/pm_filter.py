@@ -925,7 +925,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await query.answer()
             await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
