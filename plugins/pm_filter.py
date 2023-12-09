@@ -94,7 +94,22 @@ async def pm_text(bot, message):
         quote=quote
     )
 
-
+@Client.on_message(filters.photo & filters.private)
+async def payment_screenshot_received(client, message):
+    user = message.from_user.username  # Get the username of the user
+    
+    # Send message to user and admin about payment screenshot received
+    if user:
+        user_notification = "Payment screenshot received. ADMIN will check the payment."
+        admin_notification = f"{user}'s payment screenshot has been received. Checking the payment..."
+        await message.reply_text(user_notification)
+        await client.send_message("ADMIN", admin_notification)
+    else:
+        # If user sends anything other than a photo
+        await message.reply_text("Process cancelled!")
+        await message.reply_text("Process cancelled!")
+        await client.send_message("ADMIN", "Process cancelled for user who tried to buy premium plan.")
+        
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
     ident, req, key, offset = query.data.split("_")
@@ -901,6 +916,213 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.message.edit_text(f"Process completed for file deletion! Successfully deleted {str(deleted)} files from DB for your query '{keyword}'. ✅")
       
+    elif query.data == "premium_plans":
+        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
+        ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
+        ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
+        ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
+        ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
+        ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
+        ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
+        ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
+        await callback_query.answer()
+        await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("Silver Plan", callback_data="silver_plan"),
+                    InlineKeyboardButton("Gold Plan", callback_data="gold_plan"),
+                ],
+                [
+                    InlineKeyboardButton("Diamond Plan", callback_data="diamond_plan"),
+                    InlineKeyboardButton("Platinum Plan", callback_data="platinum_plan"),
+                ]
+            ]
+        )
+    )
+
+    elif query.data == "silver_plan":
+        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
+            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
+            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
+            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
+            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
+            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
+            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
+            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
+            await callback_query.answer()
+            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton("Upgrade To Silver", callback_data="upgrade_silver"),
+                    ],
+                    [
+                        InlineKeyboardButton("Cancel", callback_data="cancel_plan")
+                    ]
+                ]
+            )
+        )
+    elif query.data == "gold_plan":
+        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
+            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
+            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
+            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
+            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
+            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
+            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
+            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
+            await callback_query.answer()
+            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton("Upgrade To Gold", callback_data="upgrade_gold"),
+                    ],
+                    [
+                        InlineKeyboardButton("Cancel", callback_data="cancel_plan")
+                    ]
+                ]
+            )
+        )
+    elif query.data == "diamond_plan":
+        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
+            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
+            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
+            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
+            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
+            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
+            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
+            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
+            await callback_query.answer()
+            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton("Upgrade To Diamond", callback_data="upgrade_diamond"),
+                    ],
+                    [
+                        InlineKeyboardButton("Cancel", callback_data="cancel_plan")
+                    ]
+                ]
+            )
+        )
+    elif query.data == "platinum_plan":
+        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
+            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
+            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
+            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
+            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
+            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
+            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
+            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
+            await callback_query.answer()
+            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton("Upgrade To Platinum", callback_data="upgrade_platinum"),
+                    ],
+                    [
+                        InlineKeyboardButton("Cancel", callback_data="cancel_plan")
+                    ]
+                ]
+            )
+        )
+    elif query.data == "upgrade_silver|upgrade_gold|upgrade_diamond|upgrade_platinum":
+        upgrade_message = "Please choose your preferred duration"
+        plan_type = callback_query.data.split('_')[1]  # Extract 'silver' or 'gold'
+        
+        prices = []
+        if plan_type == "silver":
+            prices.extend([
+                InlineKeyboardButton("39 ₹ = 1 Month", callback_data="upgrade_1_month_silver"),
+                InlineKeyboardButton("69 ₹ = 2 Months", callback_data="upgrade_2_months_silver")
+            ])
+        elif plan_type == "gold":
+            prices.extend([
+                InlineKeyboardButton("60 ₹ = 1 Month", callback_data="upgrade_1_month_gold"),
+                InlineKeyboardButton("109 ₹ = 2 Months", callback_data="upgrade_2_months_gold")
+            ])
+        elif plan_type == "diamond":
+            prices.extend([
+                InlineKeyboardButton("99 ₹ = 1 Month", callback_data="upgrade_1_month_diamond"),
+                InlineKeyboardButton("179 ₹ = 2 Months", callback_data="upgrade_2_months_diamond")
+            ])
+        elif plan_type == "platinum":
+            prices.extend([
+                InlineKeyboardButton("199 ₹ = 1 Month", callback_data="upgrade_1_month_platinum"),
+                InlineKeyboardButton("369 ₹ = 2 Months", callback_data="upgrade_2_months_platinum")
+            ])
+        else:
+            prices = []  # Handle invalid plan_type
+            
+        await callback_query.answer()
+        await callback_query.message.edit_text(
+            text=upgrade_message,
+            reply_markup=InlineKeyboardMarkup([prices])
+        )
+
+    elif query.data == "upgrade_1_month|upgrade_2_months":
+        user = callback_query.from_user.username  # Get the username of the user
+        
+        # Extract plan type and duration from callback_data
+        callback_data_parts = callback_query.data.split('_')
+        plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
+        duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
+        
+        # Determine plan amount based on plan_type and duration
+        if duration == "1 Month":
+            if plan_type == "silver":
+                plan_amount = "39 ₹"
+            elif plan_type == "gold":
+                plan_amount = "60 ₹"
+            elif plan_type == "diamond":
+                plan_amount = "99 ₹"
+            elif plan_type == "platinum":
+                plan_amount = "199 ₹"
+        else:  # 2 Months
+            if plan_type == "silver":
+                plan_amount = "69 ₹"
+            elif plan_type == "gold":
+                plan_amount = "109 ₹"
+            elif plan_type == "diamond":
+                plan_amount = "179 ₹"
+            elif plan_type == "platinum":
+                plan_amount = "369 ₹"
+        
+        # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
+        days_validity = 30 if "1_month" in callback_query.data else 60
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+        
+        payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
+        await callback_query.answer()
+        await callback_query.message.edit_text(
+            text=payment_message,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton("Confirmed", callback_data="confirmed_payment")
+                    ],
+                    [
+                        InlineKeyboardButton("Back", callback_data="back_to_upgrade")
+                    ]
+                ]
+            )
+        )
+        
+        # Send ADMIN message about the user's intent to buy
+        admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
+        await client.send_message("ADMIN", admin_message)
+    
+    elif query.data == "confirmed_payment":
+        user = callback_query.from_user.username  # Get the username of the user
+        
+        # Send confirmation message to the user
+        confirmation_message = "Confirm Payment\n\nSend here your successful payment screenshot."
+        await callback_query.answer()
+        await callback_query.message.edit_text(text=confirmation_message)
+    
+        # Notify user to send payment screenshot
+        user_notification = "Please send your payment screenshot now."
+        await client.send_message(user, user_notification)
+
     
     elif query.data == "deletefiletype":
         keyboard = InlineKeyboardMarkup(
@@ -1258,19 +1480,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             regular_buttons = [
                 [
-                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
+                    InlineKeyboardButton('Premium List', callback_data="list"),
+                    InlineKeyboardButton("Premium Plans", callback_data="premium_plans")
                 ],
                 [
-                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
-                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
-                ],
-                [
-                    InlineKeyboardButton('❓ Help', callback_data='help'),
-                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
-                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
-                ],
-                [
-                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
+                    InlineKeyboardButton('Bots Premium', callback_data="bots"),
+                    InlineKeyboardButton('Database Premium', callback_data="database")
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(regular_buttons)
