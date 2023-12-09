@@ -949,7 +949,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.answer()
             await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
@@ -970,7 +969,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.answer()
             await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
@@ -991,7 +989,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.answer()
             await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
@@ -1012,7 +1009,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.answer()
             await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
@@ -1051,8 +1047,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ])
         else:
             prices = []  # Handle invalid plan_type
-            
-        await callback_query.answer()
         await callback_query.message.edit_text(
             text=upgrade_message,
             reply_markup=InlineKeyboardMarkup([prices])
@@ -1092,7 +1086,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_formatted = validity_date.strftime("%B %d, %Y")
         
         payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
-        await callback_query.answer()
         await callback_query.message.edit_text(
             text=payment_message,
             reply_markup=InlineKeyboardMarkup(
@@ -1116,7 +1109,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         # Send confirmation message to the user
         confirmation_message = "Confirm Payment\n\nSend here your successful payment screenshot."
-        await callback_query.answer()
         await callback_query.message.edit_text(text=confirmation_message)
     
         # Notify user to send payment screenshot
