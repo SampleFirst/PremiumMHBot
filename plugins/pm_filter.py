@@ -918,27 +918,27 @@ async def cb_handler(client: Client, query: CallbackQuery):
       
     elif query.data == "premium_plans":
         plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
-        ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
-        ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
-        ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
-        ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
-        ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
-        ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
-        ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-        await query.answer("Set to Uploaded!")
-        await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
-            [
+            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
+            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
+            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
+            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
+            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
+            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
+            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
+            await query.answer()
+            await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
-                    InlineKeyboardButton("Silver Plan", callback_data="silver_plan"),
-                    InlineKeyboardButton("Gold Plan", callback_data="gold_plan"),
-                ],
-                [
-                    InlineKeyboardButton("Diamond Plan", callback_data="diamond_plan"),
-                    InlineKeyboardButton("Platinum Plan", callback_data="platinum_plan"),
+                    [
+                        InlineKeyboardButton("Silver Plan", callback_data="silver_plan"),
+                        InlineKeyboardButton("Gold Plan", callback_data="gold_plan"),
+                    ],
+                    [
+                        InlineKeyboardButton("Diamond Plan", callback_data="diamond_plan"),
+                        InlineKeyboardButton("Platinum Plan", callback_data="platinum_plan"),
+                    ]
                 ]
-            ]
+            )
         )
-    )
 
     elif query.data == "silver_plan":
         plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
