@@ -1600,7 +1600,208 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+    elif query.data == "bots":
+        buttons = [
+            [
+                InlineKeyboardButton('Movies Bot', callback_data='mbot'),
+                InlineKeyboardButton('Anime Bot', callback_data='abot')
+            ],
+            [
+                InlineKeyboardButton('Rename Bot', callback_data='rbot'),
+                InlineKeyboardButton('Yt & Insta Bot', callback_data='yibot')
+            ],
+            [
+                InlineKeyboardButton('Back', callback_data='start')
+            ]
+        ]           
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.ALL_FILTERS.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
     
+    elif query.data == "database":
+        buttons = [
+            [
+                InlineKeyboardButton('Movies Database', callback_data='mdb'),
+                InlineKeyboardButton('Anime Database', callback_data='adb')
+            ],
+            [
+                InlineKeyboardButton('TV Show Database', callback_data='tvsdb'),
+                InlineKeyboardButton('Back', callback_data='start')
+            ]
+        ]           
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.ALL_FILTERS.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+        
+    elif query.data == "list":
+        buttons = [
+            [
+                InlineKeyboardButton('Back', callback_data='filters')
+            ]
+        ]
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.GFILTER_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+        
+    elif query.data == "mbot":
+        buttons = [
+            [
+                InlineKeyboardButton('Buy it', callback_data='buym'),
+                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+            ]
+        ]
+            
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    elif query.data == "abot":
+        buttons = [
+            [
+                InlineKeyboardButton('Buy it', callback_data='buya'),
+                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+            ]
+        ]
+            
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    elif query.data == "rbot":
+        buttons = [
+            [
+                InlineKeyboardButton('Buy it', callback_data='buyr'),
+                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+            ]
+        ]
+            
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    elif query.data == "yibot":
+        buttons = [
+            [
+                InlineKeyboardButton('Buy it', callback_data='buyyi'),
+                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+            ]
+        ]
+            
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+        
+    elif query.data == "mdb":
+        buttons = [
+            [
+                InlineKeyboardButton('Buy it', callback_data='buymdb'),
+                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+            ]
+        ]
+            
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    elif query.data == "adb":
+        buttons = [
+            [
+                InlineKeyboardButton('Buy it', callback_data='buyadb'),
+                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+            ]
+        ]
+            
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    elif query.data == "tvsdb":
+        buttons = [
+            [
+                InlineKeyboardButton('Buy it', callback_data='buytvsdb'),
+                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+            ]
+        ]
+            
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id, 
+            query.message.id, 
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+        
     elif query.data.startswith("setgs"):
         ident, set_type, status, grp_id = query.data.split("#")
         grpid = await active_connection(str(query.from_user.id))
