@@ -925,8 +925,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
         ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
         ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-        await callback_query.answer()
-        await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+        await query.answer()
+        await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton("Silver Plan", callback_data="silver_plan"),
@@ -949,7 +949,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+            await query.answer()
+            await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton("Upgrade To Silver", callback_data="upgrade_silver"),
@@ -969,7 +970,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+            await query.answer()
+            await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton("Upgrade To Gold", callback_data="upgrade_gold"),
@@ -989,7 +991,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+            await query.answer()
+            await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton("Upgrade To Diamond", callback_data="upgrade_diamond"),
@@ -1009,7 +1012,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-            await callback_query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+            await query.answer()
+            await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton("Upgrade To Platinum", callback_data="upgrade_platinum"),
@@ -1047,7 +1051,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ])
         else:
             prices = []  # Handle invalid plan_type
-        await callback_query.message.edit_text(
+            
+        await query.answer()
+        await query.message.edit_text(
             text=upgrade_message,
             reply_markup=InlineKeyboardMarkup([prices])
         )
@@ -1086,7 +1092,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_formatted = validity_date.strftime("%B %d, %Y")
         
         payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
-        await callback_query.message.edit_text(
+        await query.answer()
+        await query.message.edit_text(
             text=payment_message,
             reply_markup=InlineKeyboardMarkup(
                 [
@@ -1100,22 +1107,23 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
         )
         
-        # Send ADMIN message about the user's intent to buy
+        # Send ADMINS message about the user's intent to buy
         admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
-        await client.send_message("ADMIN", admin_message)
+        await client.send_message("ADMINS", admin_message)
+    
     
     elif query.data == "confirmed_payment":
         user = callback_query.from_user.username  # Get the username of the user
         
         # Send confirmation message to the user
         confirmation_message = "Confirm Payment\n\nSend here your successful payment screenshot."
-        await callback_query.message.edit_text(text=confirmation_message)
+        await query.answer()
+        await query.message.edit_text(text=confirmation_message)
     
         # Notify user to send payment screenshot
         user_notification = "Please send your payment screenshot now."
         await client.send_message(user, user_notification)
-
-    
+        
     elif query.data == "deletefiletype":
         keyboard = InlineKeyboardMarkup(
             [
