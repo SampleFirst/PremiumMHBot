@@ -323,45 +323,27 @@ async def upgrade_callback(client, callback_query):
     )
 
     
-@Client.on_callback_query(filters.regex("upgrade_1_month_silver|upgrade_1_month_gold|upgrade_1_month_diamond|upgrade_1_month_platinum"))
-async def upgrade_1_month_callback(client, callback_query: CallbackQuery):
-    await handle_upgrade_callback(client, callback_query, duration="1 Month")
-
-@Client.on_callback_query(filters.regex("upgrade_2_months_silver|upgrade_2_months_gold|upgrade_2_months_diamond|upgrade_2_months_platinum"))
-async def upgrade_2_months_callback(client, callback_query: CallbackQuery):
-    await handle_upgrade_callback(client, callback_query, duration="2 Months")
-
-async def handle_upgrade_callback(client, callback_query: CallbackQuery, duration: str):
+@Client.on_callback_query(filters.regex("upgrade_1_month_silver|upgrade_2_months_silver|upgrade_1_month_gold|upgrade_2_months_gold|upgrade_1_month_diamond|upgrade_2_months_diamond|upgrade_1_month_platinum|upgrade_2_months_platinum"))
+async def upgrade_duration_callback(client, callback_query):
     user = callback_query.from_user.username  # Get the username of the user
+    
+    # Extract plan type and duration from callback_data
     callback_data_parts = callback_query.data.split('_')
     plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
-
-    # Provide a default value for plan_amount
-    plan_amount = "Unknown Amount"
-
+    duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
+    
     # Determine plan amount based on plan_type and duration
-    if plan_type == "silver":
-        plan_amount = "39 ₹" if duration == "1 Month" else "69 ₹"
-    elif plan_type == "gold":
-        plan_amount = "60 ₹" if duration == "1 Month" else "109 ₹"
-    elif plan_type == "diamond":
-        plan_amount = "99 ₹" if duration == "1 Month" else "179 ₹"
-    elif plan_type == "platinum":
-        plan_amount = "199 ₹" if duration == "1 Month" else "369 ₹"
-
-    # Calculate the validity date
-    days_validity = 30 if duration == "1 Month" else 60
+    if duration == "1 Month":
+        plan_amount = {"silver": "39 ₹", "gold": "60 ₹", "diamond": "99 ₹", "platinum": "199 ₹"}.get(plan_type, "Invalid Plan Type")
+    else:  # 2 Months
+        plan_amount = {"silver": "69 ₹", "gold": "109 ₹", "diamond": "179 ₹", "platinum": "369 ₹"}.get(plan_type, "Invalid Plan Type")
+    
+    # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
+    days_validity = 30 if "1_month" in callback_query.data else 60
     validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
     validity_formatted = validity_date.strftime("%B %d, %Y")
-
-    # Updated payment_message with correct texts
-    payment_message = (
-        f"**Plan Duration:** {duration}\n"
-        f"**Plan Type:** {plan_type}\n"
-        f"**Plan Amount:** {plan_amount}\n"
-        f"**Validity Til:** {validity_formatted}"
-    )
     
+    payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
     await callback_query.answer()
     await callback_query.message.edit_text(
         text=payment_message,
@@ -376,10 +358,10 @@ async def handle_upgrade_callback(client, callback_query: CallbackQuery, duratio
             ]
         )
     )
-
-    # Send ADMINS message about the user's intent to buy
-    admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan for {duration}."
-    await client.send_message(chat_id=ADMINS, caption=admin_message)
+    
+    # Send ADMIN message about the user's intent to buy
+    admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan for {duration.lower()}."
+    await client.send_message("ADMIN", admin_message)
 
     
 @Client.on_callback_query(filters.regex(r"^lang"))
