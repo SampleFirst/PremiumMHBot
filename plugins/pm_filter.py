@@ -358,7 +358,7 @@ async def upgrade_duration_callback(client, callback_query):
     validity_formatted = validity_date.strftime("%B %d, %Y")
     
     # Updated payment_message with correct texts
-    payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
+    payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount.capitalize()}\n➢ Validity till: {validity_formatted}"
     
     await callback_query.answer()
     await callback_query.message.edit_text(
