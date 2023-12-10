@@ -926,7 +926,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
         await query.answer()
-        await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton("Silver Plan", callback_data="silver_plan"),
@@ -950,7 +950,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
         await query.answer()
-        await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton("Upgrade To Silver", callback_data="upgrade_silver"),
@@ -972,7 +972,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
         await query.answer()
-        await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton("Upgrade To Gold", callback_data="upgrade_gold"),
@@ -994,7 +994,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
         await query.answer()
-        await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton("Upgrade To Diamond", callback_data="upgrade_diamond"),
@@ -1015,7 +1015,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
             ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
         await query.answer()
-        await query.message.edit_text(caption=plans_message, reply_markup=InlineKeyboardMarkup(
+        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton("Upgrade To Platinum", callback_data="upgrade_platinum"),
