@@ -331,9 +331,6 @@ async def upgrade_duration_callback(client, callback_query):
     callback_data_parts = callback_query.data.split('_')
     plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
     duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
-
-    # Initialize plan_amount
-    plan_amount = None
     
     # Determine plan amount based on plan_type and duration
     if duration == "1 Month":
@@ -380,7 +377,7 @@ async def upgrade_duration_callback(client, callback_query):
     
     # Send ADMINS message about the user's intent to buy
     admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
-    await client.send_message("ADMINS", admin_message)
+    await client.send_message(chat_id=ADMINS, caption=admin_message)
 
     
 @Client.on_callback_query(filters.regex(r"^lang"))
