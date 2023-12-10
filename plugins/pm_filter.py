@@ -100,15 +100,15 @@ async def payment_screenshot_received(client, message):
     
     # Send message to user and admin about payment screenshot received
     if user:
-        user_notification = "Payment screenshot received. ADMIN will check the payment."
+        user_notification = "Payment screenshot received. ADMINS will check the payment."
         admin_notification = f"{user}'s payment screenshot has been received. Checking the payment..."
         await message.reply_text(user_notification)
-        await client.send_message("ADMIN", admin_notification)
+        await client.send_message("ADMINS", admin_notification)
     else:
         # If user sends anything other than a photo
         await message.reply_text("Process cancelled!")
         await message.reply_text("Process cancelled!")
-        await client.send_message("ADMIN", "Process cancelled for user who tried to buy premium plan.")
+        await client.send_message("ADMINS", "Process cancelled for user who tried to buy premium plan.")
         
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
