@@ -360,7 +360,9 @@ async def upgrade_duration_callback(client, callback_query):
     validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
     validity_formatted = validity_date.strftime("%B %d, %Y")
     
+    # Updated payment_message with correct texts
     payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
+    
     await callback_query.answer()
     await callback_query.message.edit_text(
         text=payment_message,
@@ -379,7 +381,6 @@ async def upgrade_duration_callback(client, callback_query):
     # Send ADMINS message about the user's intent to buy
     admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
     await client.send_message("ADMINS", admin_message)
-
 
     
 @Client.on_callback_query(filters.regex(r"^lang"))
