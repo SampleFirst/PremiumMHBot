@@ -1026,9 +1026,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         )
     )
-    elif query.data in ["upgrade_silver", "upgrade_gold", "upgrade_diamond", "upgrade_platinum"]:
+    elif query in ["upgrade_silver", "upgrade_gold", "upgrade_diamond", "upgrade_platinum"]:
         upgrade_message = "Please choose your preferred duration"
-        plan_type = callback_query.data.split('_')[1]  # Extract 'silver' or 'gold'
+        plan_type = query.split('_')[1]  # Extract 'silver' or 'gold'
         
         prices = []
         if plan_type == "silver":
@@ -1054,17 +1054,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             prices = []  # Handle invalid plan_type
             
-        await query.answer()
-        await query.message.edit_text(
+        await callback_query.answer()
+        await callback_query.message.edit_text(
             text=upgrade_message,
             reply_markup=InlineKeyboardMarkup([prices])
         )
 
-    elif query.data in ["upgrade_1_month", "upgrade_2_months"]:
-        user = callback_query.from_user.username  # Get the username of the user
-        
+    elif query in ["upgrade_1_month", "upgrade_2_months"]:
         # Extract plan type and duration from callback_data
-        callback_data_parts = callback_query.data.split('_')
+        callback_data_parts = query.split('_')
         plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
         duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
         
@@ -1089,13 +1087,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 plan_amount = "369 ₹"
         
         # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
-        days_validity = 30 if "1_month" in callback_query.data else 60
+        days_validity = 30 if "1_month" in query else 60
         validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
         validity_formatted = validity_date.strftime("%B %d, %Y")
         
         payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
-        await query.answer()
-        await query.message.edit_text(
+        await callback_query.answer()
+        await callback_query.message.edit_text(
             text=payment_message,
             reply_markup=InlineKeyboardMarkup(
                 [
