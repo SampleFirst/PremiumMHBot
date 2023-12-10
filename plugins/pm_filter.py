@@ -335,7 +335,10 @@ async def handle_upgrade_callback(client, callback_query: CallbackQuery, duratio
     user = callback_query.from_user.username  # Get the username of the user
     callback_data_parts = callback_query.data.split('_')
     plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
-    
+
+    # Provide a default value for plan_amount
+    plan_amount = "Unknown Amount"
+
     # Determine plan amount based on plan_type and duration
     if plan_type == "silver":
         plan_amount = "39 ₹" if duration == "1 Month" else "69 ₹"
@@ -345,15 +348,15 @@ async def handle_upgrade_callback(client, callback_query: CallbackQuery, duratio
         plan_amount = "99 ₹" if duration == "1 Month" else "179 ₹"
     elif plan_type == "platinum":
         plan_amount = "199 ₹" if duration == "1 Month" else "369 ₹"
-    
+
     # Calculate the validity date
     days_validity = 30 if duration == "1 Month" else 60
     validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
     validity_formatted = validity_date.strftime("%B %d, %Y")
-    
+
     # Updated payment_message with correct texts
     payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
-    
+
     await callback_query.answer()
     await callback_query.message.edit_text(
         text=payment_message,
@@ -368,7 +371,7 @@ async def handle_upgrade_callback(client, callback_query: CallbackQuery, duratio
             ]
         )
     )
-    
+
     # Send ADMINS message about the user's intent to buy
     admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan for {duration}."
     await client.send_message(chat_id=ADMINS, caption=admin_message)
