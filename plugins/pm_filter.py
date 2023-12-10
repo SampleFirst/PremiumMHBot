@@ -287,7 +287,97 @@ async def next_page(bot, query):
     except MessageNotModified:
         pass
     await query.answer()
+@Client.on_callback_query(filters.regex("upgrade_silver|upgrade_gold|upgrade_diamond|upgrade_platinum"))
+async def upgrade_callback(client, callback_query):
+    upgrade_message = "Please choose your preferred duration"
+    plan_type = callback_query.data.split('_')[1]  # Extract 'silver' or 'gold'
+    
+    prices = []
+    if plan_type == "silver":
+        prices.extend([
+            InlineKeyboardButton("39 ₹ = 1 Month", callback_data="upgrade_1_month_silver"),
+            InlineKeyboardButton("69 ₹ = 2 Months", callback_data="upgrade_2_months_silver")
+        ])
+    elif plan_type == "gold":
+        prices.extend([
+            InlineKeyboardButton("60 ₹ = 1 Month", callback_data="upgrade_1_month_gold"),
+            InlineKeyboardButton("109 ₹ = 2 Months", callback_data="upgrade_2_months_gold")
+        ])
+    elif plan_type == "diamond":
+        prices.extend([
+            InlineKeyboardButton("99 ₹ = 1 Month", callback_data="upgrade_1_month_diamond"),
+            InlineKeyboardButton("179 ₹ = 2 Months", callback_data="upgrade_2_months_diamond")
+        ])
+    elif plan_type == "platinum":
+        prices.extend([
+            InlineKeyboardButton("199 ₹ = 1 Month", callback_data="upgrade_1_month_platinum"),
+            InlineKeyboardButton("369 ₹ = 2 Months", callback_data="upgrade_2_months_platinum")
+        ])
+    else:
+        prices = []  # Handle invalid plan_type
+        
+    await callback_query.answer()
+    await callback_query.message.edit_text(
+        text=upgrade_message,
+        reply_markup=InlineKeyboardMarkup([prices])
+    )
 
+    
+@Client.on_callback_query(filters.regex("upgrade_1_month|upgrade_2_months"))
+async def upgrade_duration_callback(client, callback_query):
+    user = callback_query.from_user.username  # Get the username of the user
+    
+    # Extract plan type and duration from callback_data
+    callback_data_parts = callback_query.data.split('_')
+    plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
+    duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
+    
+    # Determine plan amount based on plan_type and duration
+    if duration == "1 Month":
+        if plan_type == "silver":
+            plan_amount = "39 ₹"
+        elif plan_type == "gold":
+            plan_amount = "60 ₹"
+        elif plan_type == "diamond":
+            plan_amount = "99 ₹"
+        elif plan_type == "platinum":
+            plan_amount = "199 ₹"
+    else:  # 2 Months
+        if plan_type == "silver":
+            plan_amount = "69 ₹"
+        elif plan_type == "gold":
+            plan_amount = "109 ₹"
+        elif plan_type == "diamond":
+            plan_amount = "179 ₹"
+        elif plan_type == "platinum":
+            plan_amount = "369 ₹"
+    
+    # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
+    days_validity = 30 if "1_month" in callback_query.data else 60
+    validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
+    validity_formatted = validity_date.strftime("%B %d, %Y")
+    
+    payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
+    await callback_query.answer()
+    await callback_query.message.edit_text(
+        text=payment_message,
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton("Confirmed", callback_data="confirmed_payment")
+                ],
+                [
+                    InlineKeyboardButton("Back", callback_data="back_to_upgrade")
+                ]
+            ]
+        )
+    )
+    
+    # Send ADMIN message about the user's intent to buy
+    admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
+    await client.send_message("ADMIN", admin_message)
+
+    
 @Client.on_callback_query(filters.regex(r"^lang"))
 async def language_check(bot, query):
     _, userid, language = query.data.split("#")
@@ -1026,90 +1116,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         )
     )
-    elif query in ["upgrade_silver", "upgrade_gold", "upgrade_diamond", "upgrade_platinum"]:
-        upgrade_message = "Please choose your preferred duration"
-        plan_type = query.split('_')[1]  # Extract 'silver' or 'gold'
-        
-        prices = []
-        if plan_type == "silver":
-            prices.extend([
-                InlineKeyboardButton("39 ₹ = 1 Month", callback_data="upgrade_1_month_silver"),
-                InlineKeyboardButton("69 ₹ = 2 Months", callback_data="upgrade_2_months_silver")
-            ])
-        elif plan_type == "gold":
-            prices.extend([
-                InlineKeyboardButton("60 ₹ = 1 Month", callback_data="upgrade_1_month_gold"),
-                InlineKeyboardButton("109 ₹ = 2 Months", callback_data="upgrade_2_months_gold")
-            ])
-        elif plan_type == "diamond":
-            prices.extend([
-                InlineKeyboardButton("99 ₹ = 1 Month", callback_data="upgrade_1_month_diamond"),
-                InlineKeyboardButton("179 ₹ = 2 Months", callback_data="upgrade_2_months_diamond")
-            ])
-        elif plan_type == "platinum":
-            prices.extend([
-                InlineKeyboardButton("199 ₹ = 1 Month", callback_data="upgrade_1_month_platinum"),
-                InlineKeyboardButton("369 ₹ = 2 Months", callback_data="upgrade_2_months_platinum")
-            ])
-        else:
-            prices = []  # Handle invalid plan_type
-            
-        await callback_query.answer()
-        await callback_query.message.edit_text(
-            text=upgrade_message,
-            reply_markup=InlineKeyboardMarkup([prices])
-        )
-
-    elif query in ["upgrade_1_month", "upgrade_2_months"]:
-        # Extract plan type and duration from callback_data
-        callback_data_parts = query.split('_')
-        plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
-        duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
-        
-        # Determine plan amount based on plan_type and duration
-        if duration == "1 Month":
-            if plan_type == "silver":
-                plan_amount = "39 ₹"
-            elif plan_type == "gold":
-                plan_amount = "60 ₹"
-            elif plan_type == "diamond":
-                plan_amount = "99 ₹"
-            elif plan_type == "platinum":
-                plan_amount = "199 ₹"
-        else:  # 2 Months
-            if plan_type == "silver":
-                plan_amount = "69 ₹"
-            elif plan_type == "gold":
-                plan_amount = "109 ₹"
-            elif plan_type == "diamond":
-                plan_amount = "179 ₹"
-            elif plan_type == "platinum":
-                plan_amount = "369 ₹"
-        
-        # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
-        days_validity = 30 if "1_month" in query else 60
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
-        
-        payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
-        await callback_query.answer()
-        await callback_query.message.edit_text(
-            text=payment_message,
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton("Confirmed", callback_data="confirmed_payment")
-                    ],
-                    [
-                        InlineKeyboardButton("Back", callback_data="back_to_upgrade")
-                    ]
-                ]
-            )
-        )
-        
-        # Send ADMINS message about the user's intent to buy
-        admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
-        await client.send_message("ADMINS", admin_message)
     
     
     elif query.data == "confirmed_payment":
