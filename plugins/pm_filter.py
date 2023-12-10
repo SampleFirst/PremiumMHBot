@@ -332,6 +332,9 @@ async def upgrade_duration_callback(client, callback_query):
     plan_type = callback_data_parts[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
     duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
     
+    # Initialize plan_amount
+    plan_amount = None
+    
     # Determine plan amount based on plan_type and duration
     if duration == "1 Month":
         if plan_type == "silver":
@@ -352,31 +355,35 @@ async def upgrade_duration_callback(client, callback_query):
         elif plan_type == "platinum":
             plan_amount = "369 ₹"
     
-    # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
-    days_validity = 30 if "1_month" in callback_query.data else 60
-    validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
-    validity_formatted = validity_date.strftime("%B %d, %Y")
-    
-    payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
-    await callback_query.answer()
-    await callback_query.message.edit_text(
-        text=payment_message,
-        reply_markup=InlineKeyboardMarkup(
-            [
+    # Check if plan_amount is assigned before using it
+    if plan_amount is not None:
+        # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
+        days_validity = 30 if "1_month" in callback_query.data else 60
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+        
+        payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
+        await callback_query.answer()
+        await callback_query.message.edit_text(
+            text=payment_message,
+            reply_markup=InlineKeyboardMarkup(
                 [
-                    InlineKeyboardButton("Confirmed", callback_data="confirmed_payment")
-                ],
-                [
-                    InlineKeyboardButton("Back", callback_data="back_to_upgrade")
+                    [
+                        InlineKeyboardButton("Confirmed", callback_data="confirmed_payment")
+                    ],
+                    [
+                        InlineKeyboardButton("Back", callback_data="back_to_upgrade")
+                    ]
                 ]
-            ]
+            )
         )
-    )
-    
-    # Send ADMIN message about the user's intent to buy
-    admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
-    await client.send_message("ADMIN", admin_message)
-
+        
+        # Send ADMIN message about the user's intent to buy
+        admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
+        await client.send_message("ADMIN", admin_message)
+    else:
+        # Handle the case where plan_amount is not assigned
+        await callback_query.answer("Error: Plan details not found. Please try again.")
 
     
 @Client.on_callback_query(filters.regex(r"^lang"))
