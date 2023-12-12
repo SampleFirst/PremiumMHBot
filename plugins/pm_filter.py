@@ -128,12 +128,11 @@ async def upgrade_callback(client, callback_query):
 
 
 @Client.on_callback_query()
-async def cb_handler(client, callback_query):
+async def cb_handler(client: Client, query: CallbackQuery):
     is_admin = query.from_user.id in ADMINS
     if query.data == "close_data":
         await query.message.delete()
 
-    
     elif query.data == "premium_plans":
         plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
             ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
