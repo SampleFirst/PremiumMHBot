@@ -50,82 +50,38 @@ async def payment_screenshot_received(client, message):
 
 @Client.on_callback_query(filters.regex("upgrade_silver|upgrade_gold|upgrade_diamond|upgrade_platinum"))
 async def upgrade_callback(client, callback_query):
-    plan_type = callback_query.data.split('_')[1]
-
+    upgrade_message = "Please choose your preferred duration"
+    plan_type = callback_query.data.split('_')[1]  # Extract 'silver' or 'gold'
+    
     prices = []
-    duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
-
-    # Determine plan amount based on plan_type and duration
-    if duration == "1 Month":
-        if plan_type == "silver":
-            plan_amount = "39 ₹"
-        elif plan_type == "gold":
-            plan_amount = "60 ₹"
-        elif plan_type == "diamond":
-            plan_amount = "99 ₹"
-        elif plan_type == "platinum":
-            plan_amount = "199 ₹"
-    else:  # 2 Months
-        if plan_type == "silver":
-            plan_amount = "69 ₹"
-        elif plan_type == "gold":
-            plan_amount = "109 ₹"
-        elif plan_type == "diamond":
-            plan_amount = "179 ₹"
-        elif plan_type == "platinum":
-            plan_amount = "369 ₹"
-
-    # Calculate the validity date (30 days from today for 1-month plan, 60 days for 2-month plan)
-    days_validity = 30 if "1_month" in callback_query.data else 60
-    validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
-    validity_formatted = validity_date.strftime("%B %d, %Y")
-
-    payment_message = f"**Payment Process**\n\n"
-    payment_message += f"* Plan: {plan_type.capitalize()} Plan\n"
-    payment_message += f"* Duration: {duration}\n"
-    payment_message += f"* Amount: {plan_amount}\n"
-    payment_message += f"* Validity till: {validity_formatted}"
-
-    # Update the buttons based on the chosen plan type and duration
-    upgrade_buttons = []
-    if plan_type == "silver" and duration == "1 Month":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (39 ₹)", callback_data="upgrade_1_month_silver_now")]
-        )
-    elif plan_type == "silver" and duration == "2 Months":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (69 ₹)", callback_data="upgrade_2_months_silver_now")]
-        )
-    elif plan_type == "gold" and duration == "1 Month":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (60 ₹)", callback_data="upgrade_1_month_gold_now")]
-        )
-    elif plan_type == "gold" and duration == "2 Months":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (109 ₹)", callback_data="upgrade_2_months_gold_now")]
-        )
-    elif plan_type == "diamond" and duration == "1 Month":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (99 ₹)", callback_data="upgrade_1_month_diamond_now")]
-        )
-    elif plan_type == "diamond" and duration == "2 Months":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (179 ₹)", callback_data="upgrade_2_months_diamond_now")]
-        )
-    elif plan_type == "platinum" and duration == "1 Month":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (199 ₹)", callback_data="upgrade_1_month_platinum_now")]
-        )
-    elif plan_type == "platinum" and duration == "2 Months":
-        upgrade_buttons.append(
-            [InlineKeyboardButton("Upgrade Now (369 ₹)", callback_data="upgrade_2_months_platinum_now")]
-        )
+    if plan_type == "silver":
+        prices.extend([
+            InlineKeyboardButton("39 ₹ = 1 Month", callback_data="upgrade_1_month_silver"),
+            InlineKeyboardButton("69 ₹ = 2 Months", callback_data="upgrade_2_months_silver")
+        ])
+    elif plan_type == "gold":
+        prices.extend([
+            InlineKeyboardButton("60 ₹ = 1 Month", callback_data="upgrade_1_month_gold"),
+            InlineKeyboardButton("109 ₹ = 2 Months", callback_data="upgrade_2_months_gold")
+        ])
+    elif plan_type == "diamond":
+        prices.extend([
+            InlineKeyboardButton("99 ₹ = 1 Month", callback_data="upgrade_1_month_diamond"),
+            InlineKeyboardButton("179 ₹ = 2 Months", callback_data="upgrade_2_months_diamond")
+        ])
+    elif plan_type == "platinum":
+        prices.extend([
+            InlineKeyboardButton("199 ₹ = 1 Month", callback_data="upgrade_1_month_platinum"),
+            InlineKeyboardButton("369 ₹ = 2 Months", callback_data="upgrade_2_months_platinum")
+        ])
     else:
-        upgrade_buttons = []
-
-    # Additional buttons for back and cancel
-    upgrade_buttons.append([InlineKeyboardButton("Back", callback_data="back")]
-
+        prices = []  # Handle invalid plan_type
+        
+    await callback_query.answer()
+    await callback_query.message.edit_text(
+        text=upgrade_message,
+        reply_markup=InlineKeyboardMarkup([prices])
+    )
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
