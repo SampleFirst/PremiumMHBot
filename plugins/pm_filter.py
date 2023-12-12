@@ -92,11 +92,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.delete()
 
     elif query.data == "upgrade_1_month":
-        user = callback_query.from_user.username  # Get the username of the user
-    
-        # Extract plan type from callback_data
-        plan_type = callback_query.data.split('_')[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
-        
+        user = query.from_user.username  # Get the username of the user
+        plan_type = query.data.split('_')[2]  # Extract 'silver', 'gold', 'diamond', or 'platinum'
+
         # Determine plan amount for 1 Month
         if plan_type == "silver":
             plan_amount = "39 ₹"
@@ -106,32 +104,31 @@ async def cb_handler(client: Client, query: CallbackQuery):
             plan_amount = "99 ₹"
         elif plan_type == "platinum":
             plan_amount = "199 ₹"
-    
+
         # Calculate the validity date (30 days from today for 1-month plan)
         days_validity = 30
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=days_validity)
+        validity_date = datetime.now() + timedelta(days=days_validity)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-    
+
         payment_message = f"Payment Process\n\n➢ Plan: {plan_type.capitalize()} Plan\n➢ Amount: {plan_amount}\n➢ Validity till: {validity_formatted}"
+
         await query.answer()
         await query.message.edit_text(
             text=payment_message,
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton("Confirmed", callback_data="confirmed_payment")
-                    ],
-                    [
-                        InlineKeyboardButton("Back", callback_data="back_to_upgrade")
+                        InlineKeyboardButton("Confirmed", callback_data="confirmed_payment"),
+                        InlineKeyboardButton("Back", callback_data="back_to_upgrade"),
                     ]
                 ]
             )
         )
-    
+
         # Send ADMINS message about the user's intent to buy
         admin_message = f"{user} is trying to buy the {plan_type.capitalize()} plan."
         await client.send_message("ADMINS", admin_message)
-    
+
     elif query.data == "upgrade_2_months":
         user = callback_query.from_user.username  # Get the username of the user
     
