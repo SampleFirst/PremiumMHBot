@@ -50,7 +50,7 @@ async def payment_screenshot_received(client, message):
 
 @Client.on_callback_query(filters.regex("upgrade_silver|upgrade_gold|upgrade_diamond|upgrade_platinum"))
 async def upgrade_callback(client, callback_query):
-    plan_type = callback_query.data.split('_')[1] # Extract 'silver' or 'gold'
+    plan_type = callback_query.data.split('_')[1]
 
     prices = []
     duration = "1 Month" if "1_month" in callback_data_parts[1] else "2 Months"
