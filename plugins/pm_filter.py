@@ -18,14 +18,16 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 @Client.on_message(filters.photo & filters.private)
-async def handle_payment_screenshot(client: Client, message: Message, user_id: int, bot_name: str, user_name: str):
-    # Wait for the user to send a screenshot    
+async def handle_payment_screenshot(client: Client, message: Message, bot_name: str):
+    # Wait for the user to send a screenshot
+    user_id = message.from_user.id
+    user_name = message.from_user.username
     if message.photo:
         # Send message to user and admin about payment screenshot received      
         admin_notification = f"{user_name}'s payment screenshot has been received for {bot_name}, Checking the payment..."
         user_notification = "Payment screenshot received. ADMINS will check the payment."
         for admin_id in ADMINS:
-            await client.send_message(admin_id, admin_notification)
+            await client.send_photo(user_id=admin_id, photo=message.photo.file_id, caption=admin_notification)
         await message.reply_text(user_notification)
     else:
         # If user sends anything other than a photo
@@ -174,9 +176,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit_text(
             text=confirmation_message
         )
-
         # Wait for user to send a screenshot
-        await handle_payment_screenshot(client, message, query.from_user.id, bot_name, user_name)
+        await handle_payment_screenshot(client, message, bot_name)
 
     
     elif query.data.startswith("description_"):
