@@ -136,24 +136,10 @@ async def start(client, message):
             # If the user is an admin, show admin-specific buttons
             admin_buttons = [
                 [
-                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
-                ],
-                [
-                    InlineKeyboardButton('🤖 More Bots', callback_data="more_bots"),
-                    InlineKeyboardButton('🌟 Support Group', url=GRP_LNK)
-                ],
-                [
-                    InlineKeyboardButton('❓ Help', callback_data='help'),
-                    InlineKeyboardButton('ℹ️ About', callback_data='about'),
-                    InlineKeyboardButton('🔎 Inline Search', switch_inline_query_current_chat='')
-                ],
-                [
-                    InlineKeyboardButton('📣 Join Updates Channel 📣', url=CHNL_LNK)
-                ],
-                [
-                    InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
+                    InlineKeyboardButton('Bots Premium', callback_data="bots"),
+                    InlineKeyboardButton('Database Premium', callback_data="database")
                 ]
-            ]        
+            ]
             reply_markup = InlineKeyboardMarkup(admin_buttons)
             tz = pytz.timezone('Asia/Kolkata')
             now = datetime.now(tz)
@@ -184,9 +170,6 @@ async def start(client, message):
         else:
             # If the user is not an admin, show regular buttons
             regular_buttons = [
-                [
-                    InlineKeyboardButton('Premium List', callback_data="list")
-                ],
                 [
                     InlineKeyboardButton('Bots Premium', callback_data="bots"),
                     InlineKeyboardButton('Database Premium', callback_data="database")
