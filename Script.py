@@ -1,9 +1,25 @@
 class script(object):
-    START_TXT = """<b>Hello 👋 {user},
-My Name Is {bot}, I Can Provide Movies, Just Add Me To Your Group And Enjoy</b>"""
-
-    ADMIN_START_TXT = """<b>Hello Admin 👋 {admin},\nMy Name Is {bot},\nI Can Provide Movies, Just Add Me To Your Group And Enjoy\nTotal Users = {total_users} Total Chats = {total_chat}\nToday Users = {daily_users} Today Chats = {daily_chats}\nToday = {current_time}</b>"""
-
+    START_TXT = """Hello {user}! Welcome to the bot. Visit {bot} for more information."""
+    
+    BOTS = """{mention}, choose a bot premium category:"""
+    
+    DATABSE = """{mention}, choose a database premium category:"""
+    
+    ALL_FILTERS = """{mention}, choose a category:"""
+    
+    MOVIES_TEXT = """Here are the details about the Movies Bot premium plan:\n\n- Exclusive movie recommendations\n- High-speed streaming access"""
+    
+    ANIME_TEXT = """Here are the details about the Anime Bot premium plan:\n\n- Curated anime suggestions\n- Early access to new episodes"""
+    
+    RENAME_TEXT = """Here are the details about the Rename Bot premium plan:\n\n- Unlimited username changes\n- Priority support"""
+    
+    YT_TEXT = """Here are the details about the Yt & Insta Bot premium plan:\n\n- Video and photo download\n- Ad-free experience"""
+    
+    MOVIESDB_TEXT = """Here are the details about the Movies Database premium plan:\n\n- Extensive movie collection\n- Advanced search features"""
+    
+    ANIMEDB_TEXT = """Here are the details about the Anime Database premium plan:\n\n- Comprehensive anime database\n- Personalized recommendations"""
+    
+    SERIESDB_TEXT = """Here are the details about the TV Show Database premium plan:\n\n- Access to a wide range of TV shows\n- Latest episode updates"""
     
     HELP_TXT = """<b>Hey {}
 Here Is The Help For My Commands.</b>"""
