@@ -4,7 +4,7 @@ import datetime
 import pytz
 
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Message
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified, PeerIdInvalid
 
