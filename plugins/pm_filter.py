@@ -1,87 +1,20 @@
-7# Kanged From @TroJanZheX
-import asyncio
-import re
-import ast
-import math
 import random
 import logging
-lock = asyncio.Lock()
-from datetime import date, datetime
 import datetime
 import pytz
-from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty, UserNotParticipant
+
+from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
-from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
+from pyrogram.errors import MessageNotModified, PeerIdInvalid
 
-from info import (
-    ADMINS, PICS, MSG_ALRT
-)
-from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, \
-    make_inactive
+from info import ADMINS, PICS
 from database.users_chats_db import db
-from database.ia_filterdb import Media, get_file_details, get_search_results, get_bad_files
-from database.filters_mdb import del_all, find_filter, get_filters
-from database.gfilters_mdb import find_gfilter, get_gfilters, del_allg
 
 from Script import script
-from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, get_shortlink, send_all, check_verification, get_token
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
-
-
-@Client.on_message(filters.photo & filters.private)
-async def payment_screenshot_received(client, message):
-    user = message.from_user.username  # Get the username of the user
-    
-    # Send message to user and admin about payment screenshot received
-    if user:
-        user_notification = "Payment screenshot received. ADMINS will check the payment."
-        admin_notification = f"{user}'s payment screenshot has been received. Checking the payment..."
-        await message.reply_text(user_notification)
-        await client.send_message("ADMINS", admin_notification)
-    else:
-        # If user sends anything other than a photo
-        await message.reply_text("Process cancelled!")
-        await message.reply_text("Process cancelled!")
-        await client.send_message("ADMINS", "Process cancelled for user who tried to buy premium plan.")
-        
-
-@Client.on_callback_query(filters.regex("upgrade_silver|upgrade_gold|upgrade_diamond|upgrade_platinum"))
-async def upgrade_callback(client, callback_query):
-    upgrade_message = "Please choose your preferred duration"
-    plan_type = callback_query.data.split('_')[1]  # Extract 'silver' or 'gold'
-    
-    prices = []
-    if plan_type == "silver":
-        prices.extend([
-            InlineKeyboardButton("39 ₹ = 1 Month", callback_data="upgrade_1_month_silver"),
-            InlineKeyboardButton("69 ₹ = 2 Months", callback_data="upgrade_2_months_silver")
-        ])
-    elif plan_type == "gold":
-        prices.extend([
-            InlineKeyboardButton("60 ₹ = 1 Month", callback_data="upgrade_1_month_gold"),
-            InlineKeyboardButton("109 ₹ = 2 Months", callback_data="upgrade_2_months_gold")
-        ])
-    elif plan_type == "diamond":
-        prices.extend([
-            InlineKeyboardButton("99 ₹ = 1 Month", callback_data="upgrade_1_month_diamond"),
-            InlineKeyboardButton("179 ₹ = 2 Months", callback_data="upgrade_2_months_diamond")
-        ])
-    elif plan_type == "platinum":
-        prices.extend([
-            InlineKeyboardButton("199 ₹ = 1 Month", callback_data="upgrade_1_month_platinum"),
-            InlineKeyboardButton("369 ₹ = 2 Months", callback_data="upgrade_2_months_platinum")
-        ])
-    else:
-        prices = []  # Handle invalid plan_type
-        
-    await callback_query.answer()
-    await callback_query.message.edit_text(
-        text=upgrade_message,
-        reply_markup=InlineKeyboardMarkup([prices])
-    )
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -89,167 +22,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
         await query.message.delete()
 
-    elif query.data == "premium_plans":
-        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
-            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
-            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
-            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
-            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
-            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
-            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
-            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-        await query.answer()
-        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("Silver Plan", callback_data="silver_plan"),
-                    InlineKeyboardButton("Gold Plan", callback_data="gold_plan"),
-                ],
-                [
-                    InlineKeyboardButton("Diamond Plan", callback_data="diamond_plan"),
-                    InlineKeyboardButton("Platinum Plan", callback_data="platinum_plan"),
-                ]
-            ]
-        )
-    )
-    
-    elif query.data == "silver_plan":
-        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
-            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
-            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
-            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
-            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
-            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
-            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
-            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-        await query.answer()
-        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("Upgrade To Silver", callback_data="upgrade_silver"),
-                ],
-                [
-                    InlineKeyboardButton("Cancel", callback_data="cancel_plan")
-                ]
-            ]
-        )
-    )
-    
-    elif query.data == "gold_plan":
-        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
-            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
-            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
-            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
-            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
-            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
-            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
-            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-        await query.answer()
-        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("Upgrade To Gold", callback_data="upgrade_gold"),
-                ],
-                [
-                    InlineKeyboardButton("Cancel", callback_data="cancel_plan")
-                ]
-            ]
-        )
-    )
-    
-    elif query.data == "diamond_plan":
-        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
-            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
-            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
-            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
-            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
-            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
-            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
-            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-        await query.answer()
-        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("Upgrade To Diamond", callback_data="upgrade_diamond"),
-                ],
-                [
-                    InlineKeyboardButton("Cancel", callback_data="cancel_plan")
-                ]
-            ]
-        )
-    )
-    elif query.data == "platinum_plan":
-        plans_message = """🏷 ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ: free
-            ☞ ᴅᴀɪʟʏ ᴜᴘʟᴏᴀᴅ: 0 / 5.0 GB
-            ☞ ᴛɪᴍᴇ ɢᴀᴘ: 6 minutes
-            ☞ 4ɢʙ sᴜᴘᴘᴏʀᴛ: False
-            ☞ sᴄʀᴇᴇɴsʜᴏᴛs: False
-            ☞ sᴀᴍᴘʟᴇ ᴠɪᴅᴇᴏ: False
-            ☞ ᴘᴀʀᴀʟʟᴇʟ ᴘʀᴏᴄᴇss: 1 
-            ☞ ᴠᴀʟɪᴅɪᴛʏ: Life Time"""
-        await query.answer()
-        await query.message.edit_text(text=plans_message, reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("Upgrade To Platinum", callback_data="upgrade_platinum"),
-                ],
-                [
-                    InlineKeyboardButton("Cancel", callback_data="cancel_plan")
-                ]
-            ]
-        )
-    )
-    
-    
-    elif query.data == "confirmed_payment":
-        user = callback_query.from_user.username  # Get the username of the user
-        
-        # Send confirmation message to the user
-        confirmation_message = "Confirm Payment\n\nSend here your successful payment screenshot."
-        await query.answer()
-        await query.message.edit_text(text=confirmation_message)
-    
-        # Notify user to send payment screenshot
-        user_notification = "Please send your payment screenshot now."
-        await client.send_message(user, user_notification)
-        
-    
     elif query.data == "start":
-        if is_admin:
-            admin_buttons = [
-                [
-                    InlineKeyboardButton('➕ Add Me To Your Group ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
-                ],
-                [
-                    InlineKeyboardButton('🔒 Admin Settings', callback_data='admin_settings')
-                ]
+        buttons = [
+            [
+                InlineKeyboardButton('Bots Premium', callback_data="bots"),
+                InlineKeyboardButton('Database Premium', callback_data="database")
             ]
-            reply_markup = InlineKeyboardMarkup(admin_buttons)
-            tz = pytz.timezone('Asia/Kolkata')
-            now = datetime.now(tz)
-            current_time = now.strftime('%Y-%m-%d %I:%M:%S %p')  # Update time to show date and time
-            caption = script.ADMIN_START_TXT.format(
-                admin=query.from_user.mention,
-                bot=temp.B_LINK,
-                total_users=await db.total_users_count(),
-                total_chat=await db.total_chat_count(),
-                daily_users=await db.daily_users_count(datetime.now().date()),
-                daily_chats=await db.daily_chats_count(datetime.now().date()),
-                current_time=current_time
-            )
-        else:
-            regular_buttons = [
-                [
-                    InlineKeyboardButton('Premium List', callback_data="list"),
-                    InlineKeyboardButton("Premium Plans", callback_data="premium_plans")
-                ],
-                [
-                    InlineKeyboardButton('Bots Premium', callback_data="bots"),
-                    InlineKeyboardButton('Database Premium', callback_data="database")
-                ]
-            ]
-            reply_markup = InlineKeyboardMarkup(regular_buttons)
-            caption = script.START_TXT.format(user=query.from_user.mention, bot=temp.B_LINK)
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        caption = script.START_TXT.format(user=query.from_user.mention, bot=temp.B_LINK)
 
         await client.edit_message_media(
             query.message.chat.id,
@@ -261,9 +42,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-        await query.answer(MSG_ALRT)
 
-    
     elif query.data == "bots":
         buttons = [
             [
@@ -277,19 +56,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
             [
                 InlineKeyboardButton('Back', callback_data='start')
             ]
-        ]           
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
         await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
+            query.message.chat.id,
+            query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.ALL_FILTERS.format(query.from_user.mention),
+            text=script.BOTS.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-    
+
     elif query.data == "database":
         buttons = [
             [
@@ -300,170 +79,145 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton('TV Show Database', callback_data='tvsdb'),
                 InlineKeyboardButton('Back', callback_data='start')
             ]
-        ]           
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
         await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
+            query.message.chat.id,
+            query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.ALL_FILTERS.format(query.from_user.mention),
+            text=script.DATABSE.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-        
-    elif query.data == "list":
+
+    elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
+        # Display monthly plan message for selected bot
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+
         buttons = [
             [
-                InlineKeyboardButton('Back', callback_data='filters')
-            ]
-        ]
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
-        )
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.GFILTER_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        
-    elif query.data == "mbot":
-        buttons = [
+                InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
+                InlineKeyboardButton('Description', callback_data=f'description_{query.data}')
+            ],
             [
-                InlineKeyboardButton('Buy it', callback_data='buym'),
-                InlineKeyboardButton('Disclimer', callback_data='disclimer')
+                InlineKeyboardButton('Back', callback_data='bots')
             ]
         ]
-            
         reply_markup = InlineKeyboardMarkup(buttons)
+        message_text = f"🍿 **{query.data.capitalize()} Premium Plan** 🍿\n\n"
+        message_text += f"This plan is valid until {validity_date}.\n\n"
+        message_text += "Make Payments And Then Select **Confirmed** Button:"
         await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
+            query.message.chat.id,
+            query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
+            text=message_text,
             reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+            parse_mode=enums.ParseMode.MARKDOWN
         )
-    elif query.data == "abot":
-        buttons = [
-            [
-                InlineKeyboardButton('Buy it', callback_data='buya'),
-                InlineKeyboardButton('Disclimer', callback_data='disclimer')
-            ]
-        ]
-            
-        reply_markup = InlineKeyboardMarkup(buttons)
+
+    elif query.data.startswith("confirm_bot_"):
+        # Handle user confirming bot subscription
+        selected_bot = query.data.replace("confirm_bot_", "")
+        # Add logic to save user subscription details and handle payment confirmation by admins
+        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+        confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
         await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
+            query.message.chat.id,
+            query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+            text=confirmation_message
         )
-    elif query.data == "rbot":
-        buttons = [
-            [
-                InlineKeyboardButton('Buy it', callback_data='buyr'),
-                InlineKeyboardButton('Disclimer', callback_data='disclimer')
-            ]
-        ]
-            
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-    elif query.data == "yibot":
-        buttons = [
-            [
-                InlineKeyboardButton('Buy it', callback_data='buyyi'),
-                InlineKeyboardButton('Disclimer', callback_data='disclimer')
-            ]
-        ]
-            
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        
-    elif query.data == "mdb":
-        buttons = [
-            [
-                InlineKeyboardButton('Buy it', callback_data='buymdb'),
-                InlineKeyboardButton('Disclimer', callback_data='disclimer')
-            ]
-        ]
-            
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-    elif query.data == "adb":
-        buttons = [
-            [
-                InlineKeyboardButton('Buy it', callback_data='buyadb'),
-                InlineKeyboardButton('Disclimer', callback_data='disclimer')
-            ]
-        ]
-            
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-    elif query.data == "tvsdb":
-        buttons = [
-            [
-                InlineKeyboardButton('Buy it', callback_data='buytvsdb'),
-                InlineKeyboardButton('Disclimer', callback_data='disclimer')
-            ]
-        ]
-            
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        
     
+    elif query.data.startswith("description_"):
+        selected_bot_type = query.data.replace("description_", "")
+        description_text = ""
+
+        if selected_bot_type == "mbot":
+            description_text = script.MOVIES_TEXT.format(query.from_user.mention)
+        elif selected_bot_type == "abot":
+            description_text = script.ANIME_TEXT.format(query.from_user.mention)
+        elif selected_bot_type == "rbot":
+            description_text = script.RENAME_TEXT.format(query.from_user.mention)
+        elif selected_bot_type == "yibot":
+            description_text = script.YT_TEXT.format(query.from_user.mention)
+
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=description_text,
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+    elif query.data == "mdb" or query.data == "adb" or query.data == "tvsdb":
+        # Display monthly plan message for selected bot
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+
+        buttons = [
+            [
+                InlineKeyboardButton('Confirmed', callback_data=f'confirm_db_{query.data}'),
+                InlineKeyboardButton('Description', callback_data=f'description_db_{query.data}')
+            ],
+            [
+                InlineKeyboardButton('Back', callback_data='bots')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        message_text = f"🍿 **{query.data.capitalize()} Premium Database** 🍿\n\n"
+        message_text += f"This plan is valid until {validity_date}.\n\n"
+        message_text += "Make Payments And Then Select **Confirmed** Button:"
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=message_text,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+    elif query.data.startswith("confirm_db_"):
+        # Handle user confirming bot subscription
+        selected_bot = query.data.replace("confirm_db_", "")
+        # Add logic to save user subscription details and handle payment confirmation by admins
+        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+        confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=confirmation_message
+        )
+    
+    elif query.data.startswith("description_db_"):
+        selected_bot_type = query.data.replace("description_", "")
+        description_text = ""
+
+        if selected_bot_type == "mdb":
+            description_text = script.MOVIESDB_TEXT.format(query.from_user.mention)
+        elif selected_bot_type == "adb":
+            description_text = script.ANIMEDB_TEXT.format(query.from_user.mention)
+        elif selected_bot_type == "tvsdb":
+            description_text = script.SERIESDB_TEXT.format(query.from_user.mention)
+        
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=description_text,
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
