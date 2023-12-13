@@ -17,6 +17,24 @@ from utils import temp
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
+@Client.on_message(filters.photo & filters.private)
+async def handle_payment_screenshot(client: Client, user_id: int, bot_name: str, user_name: str):
+    # Wait for the user to send a screenshot    
+    if message.photo:
+        # Send message to user and admin about payment screenshot received      
+        admin_notification = f"{user_name}'s payment screenshot has been received for {bot_name}, Checking the payment..."
+        user_notification = "Payment screenshot received. ADMINS will check the payment."
+        for admin_id in ADMINS:
+            await client.send_message(admin_id, admin_notification)
+        await message.reply_text(user_notification)
+    else:
+        # If user sends anything other than a photo
+        for admin_id in ADMINS:
+            await client.send_message(admin_id, "Process cancelled for user who tried to buy a premium plan.")
+        await message.reply_text("Process cancelled!")
+        await message.reply_text("Process cancelled!")
+
+
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     is_admin = query.from_user.id in ADMINS
@@ -266,16 +284,4 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=description_text,
             parse_mode=enums.ParseMode.MARKDOWN
         )
-
-async def handle_payment_screenshot(client: Client, user_id: int, bot_name: str, user_name: str):
-    # Wait for the user to send a screenshot
-    await client.send_message(user_id, "Please send a payment screenshot for verification.")
-
-    # Wait for the confirmation from the user
-    payment_confirmation_message = await client.listen(filters.photo & filters.private & filters.user(user_id))
-    
-    # Notify admins with the screenshot
-    for admin_id in ADMINS:
-        await client.copy_message(chat_id=admin_id, from_chat_id=user_id, message_id=payment_confirmation_message.message_id)
-        await client.send_message(admin_id, f"Payment Screenshot received for {bot_name} from {user_name}.")
 
