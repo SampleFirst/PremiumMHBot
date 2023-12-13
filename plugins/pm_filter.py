@@ -125,9 +125,29 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
         selected_bot = query.data.replace("confirm_bot_", "")
-        # Add logic to save user subscription details and handle payment confirmation by admins
+        user_name = query.from_user.username
+        bot_name = selected_bot.capitalize()
+        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+    
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+    
+        admin_confirmation_message = (
+            f"Subscription Confirmed:\n\n"
+            f"User: {user_name}\n"
+            f"Bot: {bot_name}\n"
+            f"Date: {current_date_time}\n"
+            f"Validity: {validity_formatted}\n\n"
+            f"Please verify and handle the payment."
+        )
+    
+        # Notify admins
+        for admin_id in ADMINS:
+            await client.send_message(admin_id, admin_confirmation_message)
+    
+        # Notify user about successful subscription
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -189,10 +209,30 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
     elif query.data.startswith("confirm_db_"):
         # Handle user confirming bot subscription
-        selected_bot = query.data.replace("confirm_db_", "")
-        # Add logic to save user subscription details and handle payment confirmation by admins
-        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+        selected_db = query.data.replace("confirm_db_", "")
+        user_name = query.from_user.username
+        db_name = selected_db.capitalize()
+        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+    
+        confirmation_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+    
+        admin_confirmation_message = (
+            f"Subscription Confirmed:\n\n"
+            f"User: {user_name}\n"
+            f"Database: {db_name}\n"
+            f"Date: {current_date_time}\n"
+            f"Validity: {validity_formatted}\n\n"
+            f"Please verify and handle the payment."
+        )
+    
+        # Notify admins
+        for admin_id in ADMINS:
+            await client.send_message(admin_id, admin_confirmation_message)
+    
+        # Notify user about successful subscription
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
