@@ -156,6 +156,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit_text(
             text=confirmation_message
         )
+
+        # Wait for user to send a screenshot
+        await handle_payment_screenshot(client, query.from_user.id, bot_name, user_name)
+
     
     elif query.data.startswith("description_"):
         selected_bot_type = query.data.replace("description_", "")
@@ -262,4 +266,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=description_text,
             parse_mode=enums.ParseMode.MARKDOWN
         )
+
+async def handle_payment_screenshot(client: Client, user_id: int, bot_name: str, user_name: str):
+    # Wait for the user to send a screenshot
+    await client.send_message(user_id, "Please send a payment screenshot for verification.")
+
+    # Wait for the confirmation from the user
+    payment_confirmation_message = await client.listen(filters.photo & filters.private & filters.user(user_id))
+    
+    # Notify admins with the screenshot
+    for admin_id in ADMINS:
+        await client.copy_message(chat_id=admin_id, from_chat_id=user_id, message_id=payment_confirmation_message.message_id)
+        await client.send_message(admin_id, f"Payment Screenshot received for {bot_name} from {user_name}.")
 
