@@ -1,11 +1,9 @@
 class script(object):
     START_TXT = """Hello {user}! Welcome to the bot. Visit {bot} for more information."""
     
-    BOTS = """{mention}, choose a bot premium category:"""
+    BOTS = """{user}, choose a bot premium category:"""
     
-    DATABSE = """{mention}, choose a database premium category:"""
-    
-    ALL_FILTERS = """{mention}, choose a category:"""
+    DATABSE = """{user}, choose a database premium category:"""
     
     MOVIES_TEXT = """Here are the details about the Movies Bot premium plan:\n\n- Exclusive movie recommendations\n- High-speed streaming access"""
     
