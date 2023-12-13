@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 @Client.on_message(filters.photo & filters.private)
-async def handle_payment_screenshot(client: Client, user_id: int, bot_name: str, user_name: str):
+async def handle_payment_screenshot(client: Client, message: Message, user_id: int, bot_name: str, user_name: str):
     # Wait for the user to send a screenshot    
     if message.photo:
         # Send message to user and admin about payment screenshot received      
@@ -176,7 +176,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
         # Wait for user to send a screenshot
-        await handle_payment_screenshot(client, query.from_user.id, bot_name, user_name)
+        await handle_payment_screenshot(client, message, query.from_user.id, bot_name, user_name)
 
     
     elif query.data.startswith("description_"):
