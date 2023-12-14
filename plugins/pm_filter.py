@@ -132,18 +132,25 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=f"Thank you for choosing the {bot_name.capitalize()} Premium Plan. Please send the payment screenshot as a photo file to confirm your subscription."
         )
         # Wait for the user to send a photo file
-        photo = await client.get_messages(
-            chat_id=query.message.chat.id,
-            filters=filters.photo,
-            timeout=60,
-        )
+        photo = None
+        while not photo:
+            # Get new messages
+            new_messages = await client.get_updates()
         
-        if photo:
-            photo = photo[0]
-        else:
-            # Handle the case where no photo was received within the timeout
+            # Check for photo messages
+            for message in new_messages:
+                if message.photo:
+                    photo = message
+                    break
+        
+            # Wait for a few seconds before checking again
+            await asyncio.sleep(2)
+        
+        if not photo:
             await query.message.reply_text("You haven't sent a photo yet. Please send the payment screenshot to confirm your subscription.")
-
+        else:
+            await query.message.reply_text("You Payment Screenshot Received. Wait For Confirmation Your Payment by Admin.")
+       
         # Send the photo to the log channel with some details
         await client.send_photo(
             chat_id=LOG_CHANNEL,
