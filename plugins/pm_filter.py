@@ -17,25 +17,6 @@ from utils import temp
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-@Client.on_message(filters.photo & filters.private)
-async def handle_payment_screenshot(client: Client, message: Message, bot_name: str):
-    # Wait for the user to send a screenshot
-    user_id = message.from_user.id
-    user_name = message.from_user.username
-    if message.photo:
-        # Send message to user and admin about payment screenshot received      
-        admin_notification = f"{user_name}'s payment screenshot has been received for {bot_name}, Checking the payment..."
-        user_notification = "Payment screenshot received. ADMINS will check the payment."
-        for admin_id in ADMINS:
-            await client.send_photo(user_id=admin_id, photo=message.photo.file_id, caption=admin_notification)
-        await message.reply_text(user_notification)
-    else:
-        # If user sends anything other than a photo
-        for admin_id in ADMINS:
-            await client.send_message(admin_id, "Process cancelled for user who tried to buy a premium plan.")
-        await message.reply_text("Process cancelled!")
-        await message.reply_text("Process cancelled!")
-
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -142,43 +123,26 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.MARKDOWN
         )
 
+        # Add a new condition for when the user selects the confirmed button
     elif query.data.startswith("confirm_bot_"):
-        # Handle user confirming bot subscription
-        selected_bot = query.data.replace("confirm_bot_", "")
-        user_name = query.from_user.username
-        bot_name = selected_bot.capitalize()
-        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
-    
-        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
-        confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
-    
-        admin_confirmation_message = (
-            f"Subscription Confirmed:\n\n"
-            f"User: {user_name}\n"
-            f"Bot: {bot_name}\n"
-            f"Date: {current_date_time}\n"
-            f"Validity: {validity_formatted}\n\n"
-            f"Please verify and handle the payment."
+        # Extract the bot name from the callback data
+        bot_name = query.data.split("_")[-1]
+        # Display a message asking the user to send the payment screenshot
+        await query.message.reply_text(
+            text=f"Thank you for choosing the {bot_name.capitalize()} Premium Plan. Please send the payment screenshot as a photo file to confirm your subscription."
         )
-    
-        # Notify admins
-        for admin_id in ADMINS:
-            await client.send_message(admin_id, admin_confirmation_message)
-    
-        # Notify user about successful subscription
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
+        # Wait for the user to send a photo file
+        photo = await client.listen(query.message.chat, filters=filters.photo)
+        # Display a message acknowledging the receipt of the screenshot
+        await query.message.reply_text(
+            text="Your screenshot has been received. We will verify your payment and activate your subscription soon."
         )
-        await query.message.edit_text(
-            text=confirmation_message
+        # Send the photo to the log channel with some details
+        await client.send_photo(
+            chat_id=LOG_CHANNEL,
+            photo=photo.photo.file_id,
+            caption=f"User: {query.from_user.mention}\nBot: {bot_name.capitalize()}\nDate: {datetime.datetime.now().strftime('%Y-%m-%d')}\nTime: {datetime.datetime.now().strftime('%H:%M:%S')}\nValidity: {validity_formatted}"
         )
-        # Wait for user to send a screenshot
-        await handle_payment_screenshot(client, message, bot_name)
-
     
     elif query.data.startswith("description_"):
         selected_bot_type = query.data.replace("description_", "")
