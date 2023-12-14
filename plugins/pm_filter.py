@@ -132,7 +132,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=f"Thank you for choosing the {bot_name.capitalize()} Premium Plan. Please send the payment screenshot as a photo file to confirm your subscription."
         )
         # Wait for the user to send a photo file
-        photo = await client.listen(query.message.chat, filters=filters.photo)
+        photo = await client.wait_message(
+            chat_id=query.message.chat.id,
+            filters=filters.photo,
+            timeout=60  # Optional: Set a timeout for the user to send the photo
+        )
         # Display a message acknowledging the receipt of the screenshot
         await query.message.reply_text(
             text="Your screenshot has been received. We will verify your payment and activate your subscription soon."
