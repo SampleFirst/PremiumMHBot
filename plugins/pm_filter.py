@@ -142,39 +142,37 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.MARKDOWN
         )
 
-        # Add a new condition for when the user selects the confirmed button
     elif query.data.startswith("confirm_bot_"):
-        # Extract the bot name from the callback data
-        bot_name = query.data.split("_")[-1]
-        # Display a message asking the user to send the payment screenshot
-        await query.message.reply_text(
-            text=f"Thank you for choosing the {bot_name.capitalize()} Premium Plan. Please send the payment screenshot as a photo file to confirm your subscription."
+        # Handle user confirming bot subscription
+        selected_bot = query.data.replace("confirm_bot_", "")
+        user_name = query.from_user.username
+        bot_name = selected_bot.capitalize()
+        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+    
+        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+        confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+    
+        admin_confirmation_message = (
+            f"Subscription Confirmed:\n\n"
+            f"User: {user_name}\n"
+            f"Bot: {bot_name}\n"
+            f"Date: {current_date_time}\n"
+            f"Validity: {validity_formatted}\n\n"
+            f"Please verify and handle the payment."
         )
-        # Wait for the user to send a photo file
-        photo = None
-        while not photo:
-            # Get new messages
-            new_messages = await client.get_updates()
-        
-            # Check for photo messages
-            for message in new_messages:
-                if message.photo:
-                    photo = message
-                    break
-        
-            # Wait for a few seconds before checking again
-            await asyncio.sleep(2)
-        
-        if not photo:
-            await query.message.reply_text("You haven't sent a photo yet. Please send the payment screenshot to confirm your subscription.")
-        else:
-            await query.message.reply_text("You Payment Screenshot Received. Wait For Confirmation Your Payment by Admin.")
-       
-        # Send the photo to the log channel with some details
-        await client.send_photo(
-            chat_id=LOG_CHANNEL,
-            photo=photo.photo.file_id,
-            caption=f"User: {query.from_user.mention}\nBot: {bot_name.capitalize()}\nDate: {datetime.datetime.now().strftime('%Y-%m-%d')}\nTime: {datetime.datetime.now().strftime('%H:%M:%S')}\nValidity: {validity_formatted}"
+        # Send Log about successful subscription
+        await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
+    
+        # Notify user about successful subscription
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=confirmation_message
         )
     
     elif query.data.startswith("description_"):
@@ -247,10 +245,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"Validity: {validity_formatted}\n\n"
             f"Please verify and handle the payment."
         )
-    
-        # Notify admins
-        for admin_id in ADMINS:
-            await client.send_message(admin_id, admin_confirmation_message)
+        # Send Log about successful subscription
+        await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
     
         # Notify user about successful subscription
         await client.edit_message_media(
