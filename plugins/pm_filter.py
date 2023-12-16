@@ -8,7 +8,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified, PeerIdInvalid
 
-from info import ADMINS, PICS
+from info import ADMINS, PICS, LOG_CHANNEL 
 from database.users_chats_db import db
 
 from Script import script
