@@ -28,7 +28,7 @@ async def payment_screenshot_received(client, message):
     if user_id not in user_states or not user_states[user_id]:
         # If the user hasn't selected "Confirmed" button before sending a screenshot
         await message.reply_text("I don't understand. Please select 'Confirmed' button before sending the screenshot.")
-        await message.reply_text("{message.from_user.username} User Trying to send Screenshot Without Selecting 'Confirmed' Button.")
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption="{message.from_user.username} User Trying to send Screenshot Without Selecting 'Confirmed' Button.")
         return
 
     # Send message to user and admin about payment screenshot received
@@ -36,7 +36,7 @@ async def payment_screenshot_received(client, message):
         user_notification = "Payment screenshot received. ADMINS will check the payment."
         admin_notification = f"{message.from_user.username}'s payment screenshot has been received. Checking the payment..."
         # Send photo to ADMINS
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=admin_notification)
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption="{message.from_user.username} User Trying to send Screenshot Without Selecting 'Confirmed' Button.")
 
         await message.reply_text(user_notification)
         # Reset user state after successful payment screenshot
@@ -44,7 +44,6 @@ async def payment_screenshot_received(client, message):
     else:
         # If user sends anything other than a photo
         await message.reply_text("Process cancelled!")
-
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
