@@ -27,7 +27,7 @@ async def payment_screenshot_received(client, message):
         user_notification = "Payment screenshot received. ADMINS will check the payment."
         admin_notification = f"{user}'s payment screenshot has been received. Checking the payment..."
         # Send photo to ADMINS
-        await client.send_photo(chat_id="ADMINS", photo=file_id, caption=admin_notification)
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=admin_notification)
 
         await message.reply_text(user_notification)
     else:
