@@ -17,24 +17,33 @@ from utils import temp
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
+# Define a dictionary to store user states (locked or not)
+user_states = {}
+
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
-    user = message.from_user.username  # Get the username of the user
+    user_id = message.from_user.id
     file_id = str(message.photo.file_id)
+
+    if user_id not in user_states or not user_states[user_id]:
+        # If the user hasn't selected "Confirmed" button before sending a screenshot
+        await message.reply_text("I don't understand. Please select 'Confirmed' button before sending the screenshot.")
+        await message.reply_text("{message.from_user.username} User Trying to send Screenshot Without Selecting 'Confirmed' Button.")
+        return
 
     # Send message to user and admin about payment screenshot received
     if file_id:
         user_notification = "Payment screenshot received. ADMINS will check the payment."
-        admin_notification = f"{user}'s payment screenshot has been received. Checking the payment..."
+        admin_notification = f"{message.from_user.username}'s payment screenshot has been received. Checking the payment..."
         # Send photo to ADMINS
         await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=admin_notification)
 
         await message.reply_text(user_notification)
+        # Reset user state after successful payment screenshot
+        user_states[user_id] = False
     else:
         # If user sends anything other than a photo
         await message.reply_text("Process cancelled!")
-        await message.reply_text("Process cancelled!")
-        await client.send_message("ADMINS", "Process cancelled for user who tried to buy the premium plan.")
 
 
 @Client.on_callback_query()
@@ -174,6 +183,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit_text(
             text=confirmation_message
         )
+        user_states[user_id] = True
     
     elif query.data.startswith("description_"):
         selected_bot_type = query.data.replace("description_", "")
