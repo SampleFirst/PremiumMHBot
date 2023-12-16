@@ -17,6 +17,25 @@ from utils import temp
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
+@Client.on_message(filters.photo & filters.private)
+async def payment_screenshot_received(client, message):
+    user = message.from_user.username  # Get the username of the user
+    file_id = str(message.photo.file_id)
+
+    # Send message to user and admin about payment screenshot received
+    if file_id:
+        user_notification = "Payment screenshot received. ADMINS will check the payment."
+        admin_notification = f"{user}'s payment screenshot has been received. Checking the payment..."
+        # Send photo to ADMINS
+        await client.send_photo(chat_id="ADMINS", photo=file_id, caption=admin_notification)
+
+        await message.reply_text(user_notification)
+    else:
+        # If user sends anything other than a photo
+        await message.reply_text("Process cancelled!")
+        await message.reply_text("Process cancelled!")
+        await client.send_message("ADMINS", "Process cancelled for user who tried to buy the premium plan.")
+
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
