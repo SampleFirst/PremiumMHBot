@@ -169,20 +169,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
         user_name = query.from_user.username
         user_id = query.from_user.id
 
-        # Save user try for premium data in the database
-        await db.add_user_try_for_premium(user_id, user_name, selected_bot)
-
         bot_name = selected_bot.capitalize()
         current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-    
-        # Store bot name in user_states
-        user_states[user_id] = selected_bot
-    
+
+        await db.add_attempt(user_id, user_name, selected_bot, 1, validity_date)
+
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
-    
+
         admin_confirmation_message = (
             f"Subscription Confirmed:\n\n"
             f"User: {user_name}\n"
@@ -191,9 +187,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"Validity: {validity_formatted}\n\n"
             f"Please verify and handle the payment."
         )
+
         # Send Log about successful subscription
         await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
-    
+
         # Notify user about successful subscription
         await client.edit_message_media(
             query.message.chat.id,
