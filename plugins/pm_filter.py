@@ -1,7 +1,6 @@
 import random
 import logging
 import datetime
-from datetime import datetime, timedelta
 import pytz
 
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
