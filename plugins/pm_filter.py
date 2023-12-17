@@ -168,6 +168,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data.replace("confirm_bot_", "")
         user_name = query.from_user.username
         user_id = query.from_user.id
+
+        # Save user try for premium data in the database
+        await db.add_user_try_for_premium(user_id, user_name, selected_bot)
+
         bot_name = selected_bot.capitalize()
         current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
