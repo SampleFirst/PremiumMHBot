@@ -155,15 +155,9 @@ class Database:
 
         await self.col.insert_one(user_try_data)
 
-    async def get_user_try_data(self, user_id, user_name, selected_bot):
-        user_try_data = await self.col.find_one({
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_bot': selected_bot,
-            'date_time': current_date_time,
-            'validity_date': validity_formatted
-        })
-        return user_try_data
+    async def get_user_try_data(self, user_id):
+        user_data = await self.col.find_one({'user_id': user_id})
+        return user_data
     
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id': int(chat)})
