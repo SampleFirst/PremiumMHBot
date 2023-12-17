@@ -1492,6 +1492,29 @@ async def get_files_command_handler(client, message):
     await message.reply_text(
         reply_text, reply_markup=InlineKeyboardMarkup([keyboard_group1, keyboard_group2])
     )
+@Client.on_message(filters.command('settin') & filters.user(ADMINS))
+async def settings(client, message):
+    # Get current settings
+    bot_users_limit = db.get_bot_users_limit()
+    database_users_limit = db.get_database_users_limit()
+    
+
+    buttons = [
+        [
+            InlineKeyboardButton(f'Bot Users Limit', callback_data='bot_users_limit'),
+            InlineKeyboardButton(f'{bot_users_limit}', callback_data='toggle_bot_users_limit')
+        ],
+        [
+            InlineKeyboardButton(f'Database Users Limit', callback_data='database_users_limit'),
+            InlineKeyboardButton(f'{database_users_limit}', callback_data='toggle_database_users_limit')
+        ],
+        [
+            InlineKeyboardButton('Back', callback_data='start')
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(buttons)
+
+    await message.reply_text("Select an option to set User Limit:", reply_markup=reply_markup)
 
 @Client.on_callback_query(filters.regex(r"^prev_(\d+)$"))
 async def prev_page_callback_handler(client, callback_query):
