@@ -30,11 +30,9 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("I don't understand. Please select 'Confirmed' button before sending the screenshot.")
         return
 
-    # Check if the user state is confirmed
-    if user_states[user_id] is True:
-        # Extract bot information from the callback data
-        selected_bot = user_states[user_id].replace("confirm_bot_", "")
-        bot_name = selected_bot.capitalize()
+    # Extract bot information from the callback data
+    selected_bot = user_states[user_id].replace("confirm_bot_", "")
+    bot_name = selected_bot.capitalize()
 
     # Send message to LOG_CHANNEL with payment details
     if file_id:
@@ -174,6 +172,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
+    
+        # Store bot name in user_states
+        user_states[user_id] = selected_bot
     
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
