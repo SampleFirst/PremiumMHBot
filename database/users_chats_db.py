@@ -127,13 +127,13 @@ class Database:
         new_group_data = self.new_group(chat, title, username)
         await self.grp.insert_one(new_group_data)
 
-    async def add_attempt(self, user_id, user_name, selected_bot, attempt_number, validity_date):
+    async def add_attempt(self, user_id, user_name, selected_bot, attempt_number, datetime, validity_date):
         attempt_data = {
             'user_id': user_id,
             'user_name': user_name,
             'selected_bot': selected_bot,
             'attempt_number': attempt_number,
-            'datetime': datetime.datetime.now(),
+            'datetime': datetime,
             'validity_date': validity_date
         }
         await self.attempts_col.insert_one(attempt_data)
