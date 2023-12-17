@@ -36,16 +36,19 @@ async def payment_screenshot_received(client, message):
 
     # Send message to LOG_CHANNEL with payment details
     if file_id:
-        # Construct message details
-        user_name = message.from_user.username
-        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
-        caption = f"{user_name} Payment Screenshot for {bot_name}\n"
-        caption += f"Date: {current_date_time}\nValidity: {validity_formatted}"
-
+        # Send photo to ADMINS with caption using user data from the database
+        user_data = await db.get_user_try_data(user_id)
+        if user_data:
+            admin_caption = (
+                f"User Try For Premium\n\n"
+                f"User ID: {user_data['user_id']}\n"
+                f"User Name: {user_data['user_name']}\n"
+                f"Selected Bot: {user_data['selected_bot'].capitalize()}\n"
+                f"Date Time: {user_data['date_time']}\n"
+                f"Validity Date: {user_data['validity_date']}"
+            )
         # Send photo to LOG_CHANNEL
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption)
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=admin_caption)
 
         # Notify user about successful payment screenshot
         user_notification = f"Payment screenshot received for {bot_name}. ADMINS will check the payment."
@@ -56,6 +59,7 @@ async def payment_screenshot_received(client, message):
     else:
         # If the user sends anything other than a photo
         await message.reply_text("Process cancelled!")
+        
 
 
 @Client.on_callback_query()
