@@ -37,7 +37,7 @@ async def payment_screenshot_received(client, message):
         user_name = latest_attempt['user_name']
         selected_bot = latest_attempt['selected_bot']
         attempt_number = latest_attempt['attempt_number']
-        current_date_time = latest_attempt['datetime']
+        datetime = latest_attempt['datetime']
         validity_date = latest_attempt['validity_date']
 
         # Prepare caption for LOG_CHANNEL
@@ -46,7 +46,7 @@ async def payment_screenshot_received(client, message):
             f"User Name: {user_name}\n"
             f"Selected Bot: {selected_bot}\n"
             f"Attempt Number: {attempt_number}\n"
-            f"Date and Time: {current_date_time}\n"
+            f"Date and Time: {datetime}\n"
             f"Validity: {validity_date}\n"
         )
 
@@ -172,11 +172,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         user_id = query.from_user.id
 
         bot_name = selected_bot.capitalize()
-        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
-        await db.add_attempt(user_id, user_name, selected_bot, 1, validity_date)
+        await db.add_attempt(user_id, user_name, selected_bot, 1, datetime, validity_date)
 
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
@@ -185,7 +185,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"Subscription Confirmed:\n\n"
             f"User: {user_name}\n"
             f"Bot: {bot_name}\n"
-            f"Date: {current_date_time}\n"
+            f"Date: {datetime}\n"
             f"Validity: {validity_formatted}\n\n"
             f"Please verify and handle the payment."
         )
