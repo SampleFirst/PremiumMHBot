@@ -138,9 +138,12 @@ class Database:
         }
         await self.attempts_col.insert_one(attempt_data)
 
-    async def get_user_try_data(self, user_id):
-        user_data = await self.col.find_one({'user_id': user_id})
-        return user_data
+    async def get_latest_attempt(self, user_id):
+        latest_attempt = await self.attempts_col.find_one(
+            {'user_id': user_id},
+            sort=[('datetime', -1)]  # Sort by datetime in descending order
+        )
+        return latest_attempt
     
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id': int(chat)})
