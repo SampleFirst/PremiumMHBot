@@ -30,9 +30,11 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("I don't understand. Please select 'Confirmed' button before sending the screenshot.")
         return
 
-    # Extract bot information from the callback data
-    selected_bot = user_states[user_id].replace("confirm_bot_", "")
-    bot_name = selected_bot.capitalize()
+    # Check if the user state is confirmed
+    if user_states[user_id] is True:
+        # Extract bot information from the callback data
+        selected_bot = user_states[user_id].replace("confirm_bot_", "")
+        bot_name = selected_bot.capitalize()
 
     # Send message to LOG_CHANNEL with payment details
     if file_id:
