@@ -9,6 +9,7 @@ class Database:
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
         self.col = self.db.users
+        self.attempts_col = self.db.attempts
         self.grp = self.db.groups
 
 
@@ -126,34 +127,16 @@ class Database:
         new_group_data = self.new_group(chat, title, username)
         await self.grp.insert_one(new_group_data)
 
-    async def get_bot_users_limit(self):
-        bot_limit_data = await self.grp.find_one({'id': 1})
-        return bot_limit_data.get('bot_users_limit', BOT_LIMIT)
-
-    async def get_database_users_limit(self):
-        database_limit_data = await self.grp.find_one({'id': 1})
-        return database_limit_data.get('database_users_limit', DATABASE_LIMIT)
-
-    async def set_bot_users_limit(self, new_limit):
-        await self.grp.update_one({'id': 1}, {'$set': {'bot_users_limit': new_limit}})
-
-    async def set_database_users_limit(self, new_limit):
-        await self.grp.update_one({'id': 1}, {'$set': {'database_users_limit': new_limit}})
-
-    async def add_user_try_for_premium(self, user_id, user_name, selected_bot):
-        current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        validity_date = datetime.now() + timedelta(days=30)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
-
-        user_try_data = {
+    async def add_attempt(self, user_id, user_name, selected_bot, attempt_number, validity_date):
+        attempt_data = {
             'user_id': user_id,
             'user_name': user_name,
             'selected_bot': selected_bot,
-            'date_time': current_date_time,
-            'validity_date': validity_formatted
+            'attempt_number': attempt_number,
+            'datetime': datetime.datetime.now(),
+            'validity_date': validity_date
         }
-
-        await self.col.insert_one(user_try_data)
+        await self.attempts_col.insert_one(attempt_data)
 
     async def get_user_try_data(self, user_id):
         user_data = await self.col.find_one({'user_id': user_id})
