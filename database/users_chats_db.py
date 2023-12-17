@@ -1,5 +1,5 @@
 import motor.motor_asyncio
-from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT, AUTO_DELETE, MAX_BTN, AUTO_FFILTER, SHORTLINK_API, SHORTLINK_URL, IS_SHORTLINK
+from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT, AUTO_DELETE, MAX_BTN, AUTO_FFILTER, SHORTLINK_API, SHORTLINK_URL, DATABASE_LIMIT, BOT_LIMIT, IS_SHORTLINK
 import pytz
 from datetime import date, datetime
 
@@ -125,6 +125,20 @@ class Database:
     async def add_chat(self, chat, title, username):
         new_group_data = self.new_group(chat, title, username)
         await self.grp.insert_one(new_group_data)
+
+    async def get_bot_users_limit(self):
+        bot_limit_data = await self.grp.find_one({'id': 1})
+        return bot_limit_data.get('bot_users_limit', BOT_LIMIT)
+
+    async def get_database_users_limit(self):
+        database_limit_data = await self.grp.find_one({'id': 1})
+        return database_limit_data.get('database_users_limit', DATABASE_LIMIT)
+
+    async def set_bot_users_limit(self, new_limit):
+        await self.grp.update_one({'id': 1}, {'$set': {'bot_users_limit': new_limit}})
+
+    async def set_database_users_limit(self, new_limit):
+        await self.grp.update_one({'id': 1}, {'$set': {'database_users_limit': new_limit}})
 
     
     async def get_chat(self, chat):
