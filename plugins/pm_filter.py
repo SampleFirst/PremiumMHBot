@@ -28,22 +28,35 @@ async def payment_screenshot_received(client, message):
     if user_id not in user_states or not user_states[user_id]:
         # If the user hasn't selected "Confirmed" button before sending a screenshot
         await message.reply_text("I don't understand. Please select 'Confirmed' button before sending the screenshot.")
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption="{message.from_user.username} User Trying to send Screenshot Without Selecting 'Confirmed' Button.")
         return
 
-    # Send message to user and admin about payment screenshot received
-    if file_id:
-        user_notification = "Payment screenshot received. ADMINS will check the payment."
-        admin_notification = f"{message.from_user.username}'s payment screenshot has been received. Checking the payment..."
-        # Send photo to ADMINS
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption="{message.from_user.username} User Trying to send Screenshot Without Selecting 'Confirmed' Button.")
+    # Extract bot information from the callback data
+    selected_bot = user_states[user_id].replace("confirm_bot_", "")
+    bot_name = selected_bot.capitalize()
 
+    # Send message to LOG_CHANNEL with payment details
+    if file_id:
+        # Construct message details
+        user_name = message.from_user.username
+        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+        caption = f"{user_name} Payment Screenshot for {bot_name}\n"
+        caption += f"Date: {current_date_time}\nValidity: {validity_formatted}"
+
+        # Send photo to LOG_CHANNEL
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption)
+
+        # Notify user about successful payment screenshot
+        user_notification = f"Payment screenshot received for {bot_name}. ADMINS will check the payment."
         await message.reply_text(user_notification)
+
         # Reset user state after successful payment screenshot
         user_states[user_id] = False
     else:
-        # If user sends anything other than a photo
+        # If the user sends anything other than a photo
         await message.reply_text("Process cancelled!")
+
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
