@@ -26,36 +26,38 @@ async def payment_screenshot_received(client, message):
     file_id = str(message.photo.file_id)
 
     if user_id not in user_states or not user_states[user_id]:
-        # If the user hasn't selected "Confirmed" button before sending a screenshot
         await message.reply_text("I don't understand. Please select 'Confirmed' button before sending the screenshot.")
         return
 
-    # Send message to LOG_CHANNEL with payment details
-    if file_id:
-        # Send photo to ADMINS with caption using user data from the database
-        user_data = await db.get_user_try_data(user_id)
-        if user_data:
-            admin_caption = (
-                f"User Try For Premium\n\n"
-                f"User ID: {user_data['user_id']}\n"
-                f"User Name: {user_data['user_name']}\n"
-                f"Selected Bot: {user_data['selected_bot'].capitalize()}\n"
-                f"Date Time: {user_data['date_time']}\n"
-                f"Validity Date: {user_data['validity_date']}"
-            )
-        # Send photo to LOG_CHANNEL
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=admin_caption)
+    # Get the latest attempt data for the user
+    latest_attempt = await db.get_latest_attempt(user_id)
 
-        # Notify user about successful payment screenshot
-        user_notification = f"Payment screenshot received for {bot_name}. ADMINS will check the payment."
-        await message.reply_text(user_notification)
+    if latest_attempt:
+        # Extract attempt details
+        user_name = latest_attempt['user_name']
+        selected_bot = latest_attempt['selected_bot']
+        attempt_number = latest_attempt['attempt_number']
+        current_date_time = latest_attempt['datetime']
+        validity_date = latest_attempt['validity_date']
+
+        # Prepare caption for LOG_CHANNEL
+        caption = (
+            f"User ID: {user_id}\n"
+            f"User Name: {user_name}\n"
+            f"Selected Bot: {selected_bot}\n"
+            f"Attempt Number: {attempt_number}\n"
+            f"Date and Time: {current_date_time}\n"
+            f"Validity: {validity_date}\n"
+        )
+
+        # Send the photo to LOG_CHANNEL with the prepared caption
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption)
 
         # Reset user state after successful payment screenshot
         user_states[user_id] = False
     else:
-        # If the user sends anything other than a photo
         await message.reply_text("Process cancelled!")
-        
+
 
 
 @Client.on_callback_query()
