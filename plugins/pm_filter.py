@@ -289,3 +289,50 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.MARKDOWN
         )
 
+    elif query.data == "toggle_bot_users_limit":
+        current_limit = db.get_bot_users_limit()
+        new_limit = 250 if current_limit == 100 else 500  # Toggle between 100 and 500 (customize as needed)
+        db.set_bot_users_limit(new_limit)
+
+        # Update button text
+        buttons = [
+            [
+                InlineKeyboardButton(f'Bot Users Limit', callback_data='bot_users_limit'),
+                InlineKeyboardButton(f'{new_limit}', callback_data='toggle_bot_users_limit')
+            ],
+            [
+                InlineKeyboardButton(f'Database Users Limit', callback_data='database_users_limit'),
+                InlineKeyboardButton(f'{db.get_database_users_limit()}', callback_data='toggle_database_users_limit')
+            ],
+            [
+                InlineKeyboardButton('Back', callback_data='start')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+
+        await query.message.edit_reply_markup(reply_markup)
+
+    elif query.data == "toggle_database_users_limit":
+        current_limit = db.get_database_users_limit()
+        new_limit = 250 if current_limit == 100 else 500  # Toggle between 100 and 500 (customize as needed)
+        db.set_database_users_limit(new_limit)
+
+        # Update button text
+        buttons = [
+            [
+                InlineKeyboardButton(f'Bot Users Limit', callback_data='bot_users_limit'),
+                InlineKeyboardButton(f'{db.get_bot_users_limit()}', callback_data='toggle_bot_users_limit')
+            ],
+            [
+                InlineKeyboardButton(f'Database Users Limit', callback_data='database_users_limit'),
+                InlineKeyboardButton(f'{new_limit}', callback_data='toggle_database_users_limit')
+            ],
+            [
+                InlineKeyboardButton('Back', callback_data='start')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+
+        await query.message.edit_reply_markup(reply_markup)
+
+
