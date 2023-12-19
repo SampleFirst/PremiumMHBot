@@ -8,7 +8,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified, PeerIdInvalid
 
-from info import ADMINS, PICS, LOG_CHANNEL, MOVIE_BOT, ANIME_BOT, RENAME_BOT, DOWNLODER_BOT
+from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT
 from database.users_chats_db import db
 
 from Script import script
@@ -235,36 +235,24 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "payment_confirmed":
-        user_id = query.from_user.id
-        latest_attempt = await db.get_latest_attempt(user_id)
+        if is_admin:
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_bot = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt(user_id)
 
-        if latest_attempt:
-            selected_bot = latest_attempt['selected_bot']
-            bot_username = "iPepkorn_Bot"
-            log_channel_id = LOG_CHANNEL
+            if selected_bot == 'mbot':
+                await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
+            elif selected_bot == 'abot':
+                await client.send_message(PAYMENT_CHAT, f"/pre {user_id}")
+            elif selected_bot == 'rbot':
+                await client.send_message(PAYMENT_CHAT, f"/try {user_id}")
+            elif selected_bot == 'yibot':
+                await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
+            await show_message(latest_attempt)
+        else:
+            await query.answer('This Button Only For ADMINS', show_alert=True)
 
-            if selected_bot == "mbot":
-                try:
-                    # Check if 'iPepkorn_Bot' is an admin in LOG_CHANNEL
-                    bot_member = await client.get_chat_member(log_channel_id, bot_username)
-                    if bot_member and bot_member.status == "administrator":
-                        # Send message to 'iPepkorn_Bot'
-                        admin_message = f"Payment Confirmed for {selected_bot.capitalize()}!\n\n"
-                        admin_message += f"User: {latest_attempt['user_name']}\n"
-                        admin_message += f"Date: {latest_attempt['current_date_time']}\n"
-                        admin_message += f"Validity: {latest_attempt['validity_date'].strftime('%B %d, %Y')}\n"
-                        
-                        # Send message to 'iPepkorn_Bot'
-                        await client.send_message(bot_username, text=admin_message)
-
-                        # Notify user about successful payment confirmation
-                        await query.answer("Payment Confirmed! Notification sent to iPepkorn_Bot.")
-                    else:
-                        # Handle if 'iPepkorn_Bot' is not an admin in LOG_CHANNEL
-                        await query.answer("iPepkorn_Bot is not an admin in the LOG_CHANNEL.")
-                except Exception as e:
-                    # Handle other exceptions
-                    logger.error(f"Error while processing payment_confirmed: {e}")
 
     elif query.data == "payment_cancel":
         if is_admin:
