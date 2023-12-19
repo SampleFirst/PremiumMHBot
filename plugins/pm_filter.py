@@ -240,23 +240,28 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
         if latest_attempt:
             selected_bot = latest_attempt['selected_bot']
-            bot_username = "iPepkornBetaBot"
+            bot_username = "iPepkorn_Bot"
+            log_channel_id = LOG_CHANNEL
 
             if selected_bot == "mbot":
-                # Check if 'MoviesBot' username bot is in LOG_CHANNEL
                 try:
-                    movies_bot = await client.get_chat_member(LOG_CHANNEL, bot_username)
-                    if movies_bot:
-                        # Send message to ADMINS
+                    # Check if 'iPepkorn_Bot' is an admin in LOG_CHANNEL
+                    bot_member = await client.get_chat_member(log_channel_id, bot_username)
+                    if bot_member and bot_member.status == "administrator":
+                        # Send message to 'iPepkorn_Bot'
                         admin_message = f"Payment Confirmed for {selected_bot.capitalize()}!\n\n"
                         admin_message += f"User: {latest_attempt['user_name']}\n"
-                        admin_message += f"Bot: {bot_username}\n"
                         admin_message += f"Date: {latest_attempt['current_date_time']}\n"
                         admin_message += f"Validity: {latest_attempt['validity_date'].strftime('%B %d, %Y')}\n"
-                        await client.send_message(chat_id=movies_bot, text=admin_message)
-                except UserNotParticipant:
-                    # Handle if 'MoviesBot' is not in LOG_CHANNEL
-                    await query.answer("MoviesBot is not a participant in the LOG_CHANNEL. Please add the bot.")
+                        
+                        # Send message to 'iPepkorn_Bot'
+                        await client.send_message(bot_username, text=admin_message)
+
+                        # Notify user about successful payment confirmation
+                        await query.answer("Payment Confirmed! Notification sent to iPepkorn_Bot.")
+                    else:
+                        # Handle if 'iPepkorn_Bot' is not an admin in LOG_CHANNEL
+                        await query.answer("iPepkorn_Bot is not an admin in the LOG_CHANNEL.")
                 except Exception as e:
                     # Handle other exceptions
                     logger.error(f"Error while processing payment_confirmed: {e}")
