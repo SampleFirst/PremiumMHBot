@@ -50,6 +50,11 @@ DATABASE_URI = environ.get('DATABASE_URI', "")
 DATABASE_NAME = environ.get('DATABASE_NAME', "")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 
+MOVIE_BOT = environ.get('MOVIE_BOT', '@Movies_Hole_Robot')
+ANIME_BOT = environ.get('ANIME_BOT', '@iPepkornBot')
+RENAME_BOT = environ.get('RENAME_BOT', '@iPepkornAlphaBot')
+DOWNLODER_BOT = environ.get('DOWNLODER_BOT', '@iPepkornBetaBot')
+
 # Others
 IS_VERIFY = is_enabled((environ.get('IS_VERIFY', 'True')), True)
 HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', "https://t.me/How_To_Verify_PMH")
