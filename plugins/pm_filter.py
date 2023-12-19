@@ -50,14 +50,21 @@ async def payment_screenshot_received(client, message):
             f"Validity: {validity_date}\n"
         )
 
-        # Send the photo to LOG_CHANNEL with the prepared caption
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption)
+        # Add inline keyboard with payment confirmation and cancellation buttons
+        keyboard = InlineKeyboardMarkup(
+            [[
+                InlineKeyboardButton("Payment Confirmed", callback_data="payment_confirmed"),
+                InlineKeyboardButton("Payment Cancel", callback_data="payment_cancel")
+            ]]
+        )
+
+        # Send the photo to LOG_CHANNEL with the prepared caption and inline keyboard
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
 
         # Reset user state after successful payment screenshot
         user_states[user_id] = False
     else:
         await message.reply_text("Process cancelled!")
-
 
 
 @Client.on_callback_query()
