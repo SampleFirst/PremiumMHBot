@@ -249,9 +249,21 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await client.send_message(PAYMENT_CHAT, f"/try {user_id}")
             elif selected_bot == 'yibot':
                 await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
-            await show_message(latest_attempt)
+                
+            # Add user to premium database
+            await db.add_premium_user(user_id, user_name, selected_bot, current_date_time, validity_months)
+
+            # Display message for active premium plan
+            validity_formatted = validity_date.strftime("%B %d, %Y")
+            active_plan_message = f"🌟 **Active Premium Plan** 🌟\n\n"
+            active_plan_message += f"User: {latest_attempt['user_name']}\n"
+            active_plan_message += f"Bot: {selected_bot.capitalize()}\n"
+            active_plan_message += f"Valid Until: {validity_formatted}"
+
+            await query.answer(active_plan_message, show_alert=True)
         else:
             await query.answer('This Button Only For ADMINS', show_alert=True)
+
 
 
     elif query.data == "payment_cancel":
