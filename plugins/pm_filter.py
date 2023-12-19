@@ -235,34 +235,31 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "payment_confirmed":
-        if is_admin:
-            selected_bot = user_states.get(query.from_user.id)
-            if selected_bot:
-                assigned_bot = None
-                if selected_bot == "mbot":
-                    assigned_bot = MOVIE_BOT
-                elif selected_bot == "abot":
-                    assigned_bot = ANIME_BOT
-                elif selected_bot == "rbot":
-                    assigned_bot = RENAME_BOT
-                elif selected_bot == "yibot":
-                    assigned_bot = DOWNLODER_BOT
+        user_id = query.from_user.id
+        latest_attempt = await db.get_latest_attempt(user_id)
 
-                if assigned_bot:
-                    # Notify ADMINS about the payment confirmation
-                    admin_message = f"Payment Confirmed for {assigned_bot.capitalize()}! User ID: {query.from_user.id}"
-                    await client.send_message(chat_id=assigned_bot, text=admin_message)
+        if latest_attempt:
+            selected_bot = latest_attempt['selected_bot']
+            bot_username = "iPepkornBetaBot"
 
-                    # Notify the user about the payment confirmation
-                    user_message = "Your payment has been confirmed. Thank you!"
-                    await client.edit_message_media(
-                        query.message.chat.id,
-                        query.message.id,
-                        InputMediaPhoto(random.choice(PICS))
-                    )
-                    await query.message.edit_text(text=user_message)
-            else:
-                await query.answer("Error: No selected bot found.")
+            if selected_bot == "mbot":
+                # Check if 'MoviesBot' username bot is in LOG_CHANNEL
+                try:
+                    movies_bot = await client.get_chat_member(LOG_CHANNEL, bot_username)
+                    if movies_bot:
+                        # Send message to ADMINS
+                        admin_message = f"Payment Confirmed for {selected_bot.capitalize()}!\n\n"
+                        admin_message += f"User: {latest_attempt['user_name']}\n"
+                        admin_message += f"Bot: {bot_username}\n"
+                        admin_message += f"Date: {latest_attempt['current_date_time']}\n"
+                        admin_message += f"Validity: {latest_attempt['validity_date'].strftime('%B %d, %Y')}\n"
+                        await client.send_message(chat_id=LOG_CHANNEL, text=admin_message)
+                except UserNotParticipant:
+                    # Handle if 'MoviesBot' is not in LOG_CHANNEL
+                    await query.answer("MoviesBot is not a participant in the LOG_CHANNEL. Please add the bot.")
+                except Exception as e:
+                    # Handle other exceptions
+                    logger.error(f"Error while processing payment_confirmed: {e}")
 
     elif query.data == "payment_cancel":
         if is_admin:
