@@ -253,7 +253,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                         admin_message += f"Bot: {bot_username}\n"
                         admin_message += f"Date: {latest_attempt['current_date_time']}\n"
                         admin_message += f"Validity: {latest_attempt['validity_date'].strftime('%B %d, %Y')}\n"
-                        await client.send_message(chat_id=LOG_CHANNEL, text=admin_message)
+                        await client.send_message(chat_id=movies_bot, text=admin_message)
                 except UserNotParticipant:
                     # Handle if 'MoviesBot' is not in LOG_CHANNEL
                     await query.answer("MoviesBot is not a participant in the LOG_CHANNEL. Please add the bot.")
