@@ -11,6 +11,7 @@ class Database:
         self.col = self.db.users
         self.attempts_col = self.db.attempts
         self.grp = self.db.groups
+        self.pre = self.db.premium
 
 
     def new_user(self, id, name):
@@ -144,6 +145,19 @@ class Database:
             sort=[('current_date_time', -1)]  # Sort by datetime in descending order
         )
         return latest_attempt
+
+    async def add_premium_user(self, user_id, user_name, selected_bot, current_date_time, validity_months):
+        expiry_date = current_date_time + datetime.timedelta(days=validity_months * 30)
+        premium_data = {
+            'user_id': user_id,
+            'user_name': user_name,
+            'selected_bot': selected_bot,
+            'current_date_time': current_date_time,
+            'validity_months': validity_months,
+            'expiry_date': expiry_date
+        }
+        await self.pre.insert_one(premium_data)
+
     
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id': int(chat)})
