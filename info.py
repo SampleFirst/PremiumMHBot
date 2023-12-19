@@ -76,6 +76,7 @@ MSG_ALRT = environ.get('MSG_ALRT', 'Wʜᴀᴛ Aʀᴇ Yᴏᴜ Lᴏᴏᴋɪɴɢ A�
 MAIN_CHANNEL = environ.get('MAIN_CHANNEL',"https://t.me/+luqXeffLeIg2ZGZl")
 FILE_FORWARD = environ.get('FILE_FORWARD',"https://t.me/+3Ww2lFwVPvk5ZGE9")
 FILE_CHANNEL = int(environ.get('FILE_CHANNEL', 0))
+PAYMENT_CHAT = int(environ.get('PAYMENT_CHAT', 0))
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', 0))
 LOG_CHANNEL_PM = int(environ.get('LOG_CHANNEL_PM', 0))
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'PremiumMHSupport')
