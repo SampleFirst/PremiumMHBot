@@ -233,6 +233,53 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=description_text,
             parse_mode=enums.ParseMode.MARKDOWN
         )
+
+    elif query.data == "payment_confirmed":
+        if is_admin:
+            selected_bot = user_states.get(query.from_user.id)
+            if selected_bot:
+                assigned_bot = None
+                if selected_bot == "mbot":
+                    assigned_bot = MOVIE_BOT
+                elif selected_bot == "abot":
+                    assigned_bot = ANIME_BOT
+                elif selected_bot == "rbot":
+                    assigned_bot = RENAME_BOT
+                elif selected_bot == "yibot":
+                    assigned_bot = DOWNLODER_BOT
+
+                if assigned_bot:
+                    # Notify ADMINS about the payment confirmation
+                    admin_message = f"Payment Confirmed for {assigned_bot.capitalize()}! User ID: {query.from_user.id}"
+                    await client.send_message(chat_id=assigned_bot, text=admin_message)
+
+                    # Notify the user about the payment confirmation
+                    user_message = "Your payment has been confirmed. Thank you!"
+                    await client.edit_message_media(
+                        query.message.chat.id,
+                        query.message.id,
+                        InputMediaPhoto(random.choice(PICS))
+                    )
+                    await query.message.edit_text(text=user_message)
+            else:
+                await query.answer("Error: No selected bot found.")
+
+    elif query.data == "payment_cancel":
+        if is_admin:
+            # Notify ADMINS about the payment cancellation
+            admin_message = f"Payment Cancelled for user ID: {query.from_user.id}"
+            await client.send_message(chat_id=ADMINS, text=admin_message)
+
+            # Notify the user about the payment cancellation
+            user_message = "Your payment has been cancelled."
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(text=user_message)
+
+    
     elif query.data == "mdb" or query.data == "adb" or query.data == "tvsdb":
         # Display monthly plan message for selected bot
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
