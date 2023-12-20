@@ -14,7 +14,7 @@ import pytz
 
 logger = logging.getLogger(__name__)
 
-BATCH_FILES = {}
+PREMIUM_PRICE = 99
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
@@ -92,6 +92,57 @@ async def log_file(bot, message):
         await message.reply_document('Logs.txt')
     except Exception as e:
         await message.reply(str(e))
+
+@Client.on_message(filters.command('total_users') & filters.user(ADMINS))
+async def total_users(client, message):
+    total_users = await db.total_users_count()
+    total_attempts = await db.attempts_col.count_documents({})
+    total_cancel_attempts =  await db.total_cancel_count()
+    total_premium_users = await db.pre.count_documents({})
+
+    # Calculate total earnings
+    total_earnings = total_premium_users * PREMIUM_PRICE
+
+    reply_text = (
+        f"Total Users: {total_users}\n"
+        f"Total Attempts: {total_attempts}\n"
+        f"Total Cancel Attempts: {total_cancel_attempts}\n"
+        f"Total Premium Users: {total_premium_users}\n"
+        f"Total Earnings: {total_earnings} Rupees\n"
+    )
+
+    await message.reply_text(reply_text)
+
+@Client.on_message(filters.command('botstats') & filters.user(ADMINS))
+async def bot_stats(client, message):
+    total_mbot_premium_users = await db.pre.count_documents({'selected_bot': 'mbot'})
+    total_mbot_earnings = total_mbot_premium_users * PREMIUM_PRICE
+
+    total_abot_premium_users = await db.pre.count_documents({'selected_bot': 'abot'})
+    total_abot_earnings = total_abot_premium_users * PREMIUM_PRICE
+
+    total_rbot_premium_users = await db.pre.count_documents({'selected_bot': 'rbot'})
+    total_rbot_earnings = total_rbot_premium_users * PREMIUM_PRICE
+
+    total_ytbot_premium_users = await db.pre.count_documents({'selected_bot': 'ytbot'})
+    total_ytbot_earnings = total_ytbot_premium_users * PREMIUM_PRICE
+
+    reply_text = (
+        f"Total Mbot Premium Users: {total_mbot_premium_users}\n"
+        f"Total Mbot Earnings: {total_mbot_earnings} Rupees\n\n"
+        
+        f"Total Abot Premium Users: {total_abot_premium_users}\n"
+        f"Total Abot Earnings: {total_abot_earnings} Rupees\n\n"
+
+        f"Total Rbot Premium Users: {total_rbot_premium_users}\n"
+        f"Total Rbot Earnings: {total_rbot_earnings} Rupees\n\n"
+
+        f"Total Ytbot Premium Users: {total_ytbot_premium_users}\n"
+        f"Total Ytbot Earnings: {total_ytbot_earnings} Rupees\n"
+    )
+
+    await message.reply_text(reply_text)
+
 
 @Client.on_message(filters.command("send") & filters.user(ADMINS))
 async def send_msg(bot, message):
