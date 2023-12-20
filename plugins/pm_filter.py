@@ -26,16 +26,19 @@ async def payment_screenshot_received(client, message):
     file_id = str(message.photo.file_id)
 
     if user_id not in user_states or not user_states[user_id]:
-        await message.reply_text("I don't understand. Please select 'Confirmed' button before sending the screenshot.")
+        await message.reply_text("I don't understand. Please select Bot Type before sending the screenshot.")
+        await message.send_text(chat_id=ADMINS, photo=file_id, caption="{message.from_user.id} Trying to Send Photo Without Selecting Bot.")
         return
 
+    selected_type = "selected_bot" if "bot" in message.caption.lower() else "selected_db"
+
     # Get the latest attempt data for the user
-    latest_attempt = await db.get_latest_attempt(user_id)
+    latest_attempt = await db.get_latest_attempt_bot(user_id) if selected_type == "selected_bot" else await db.get_latest_attempt_db(user_id)
 
     if latest_attempt:
         # Extract attempt details
         user_name = latest_attempt['user_name']
-        selected_bot = latest_attempt['selected_bot']
+        selected_item = latest_attempt['selected_bot'] if selected_type == "selected_bot" else latest_attempt['selected_db']
         attempt_number = latest_attempt['attempt_number']
         current_date_time = latest_attempt['current_date_time']
         validity_date = latest_attempt['validity_date']
@@ -44,7 +47,7 @@ async def payment_screenshot_received(client, message):
         caption = (
             f"User ID: {user_id}\n"
             f"User Name: {user_name}\n"
-            f"Selected Bot: {selected_bot}\n"
+            f"Selected {selected_type.capitalize()}: {selected_item}\n"
             f"Attempt Number: {attempt_number}\n"
             f"Date and Time: {current_date_time}\n"
             f"Validity: {validity_date}\n"
@@ -53,8 +56,8 @@ async def payment_screenshot_received(client, message):
         # Add inline keyboard with payment confirmation and cancellation buttons
         keyboard = InlineKeyboardMarkup(
             [[
-                InlineKeyboardButton("Payment Confirmed", callback_data="payment_confirmed"),
-                InlineKeyboardButton("Payment Cancel", callback_data="payment_cancel")
+                InlineKeyboardButton("✅ Confirmed", callback_data="payment_confirmed"),
+                InlineKeyboardButton("❌ Cancel", callback_data="payment_cancel")
             ]]
         )
 
