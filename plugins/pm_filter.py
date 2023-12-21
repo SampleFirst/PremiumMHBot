@@ -4,11 +4,12 @@ import datetime
 import pytz
 
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
+from pyrogram.errors import ChatAdminRequired, FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Message
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified, PeerIdInvalid
 
-from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT
+from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT, TOTAL_MEMBERS, MOVIES_DB, ANIME_DB, SERIES_DB
 from database.users_chats_db import db
 
 from Script import script
@@ -33,7 +34,7 @@ async def payment_screenshot_received(client, message):
     selected_type = "selected_bot" if "bot" in message.caption.lower() else "selected_db"
 
     # Get the latest attempt data for the user
-    latest_attempt = await db.get_latest_attempt_bot(user_id) if selected_type == "selected_bot" else await db.get_latest_attempt_db(user_id)
+    latest_attempt = await db.get_latest_attempt_dot(user_id) if selected_type == "selected_bot" else await db.get_latest_attempt_db(user_id)
 
     if latest_attempt:
         # Extract attempt details
@@ -56,8 +57,8 @@ async def payment_screenshot_received(client, message):
         # Add inline keyboard with payment confirmation and cancellation buttons
         keyboard = InlineKeyboardMarkup(
             [[
-                InlineKeyboardButton("✅ Confirmed", callback_data="payment_confirmed"),
-                InlineKeyboardButton("❌ Cancel", callback_data="payment_cancel")
+                InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_{selected_type}"),
+                InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_{selected_type}")
             ]]
         )
 
@@ -81,6 +82,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             [
                     InlineKeyboardButton('Bots Premium', callback_data="bots"),
                     InlineKeyboardButton('Database Premium', callback_data="database")
+                ],
+                [
+                    InlineKeyboardButton('Cancel', callback_data="close_data")
                 ]
             ]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -105,7 +109,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],
             [
                 InlineKeyboardButton('Rename Bot', callback_data='rbot'),
-                InlineKeyboardButton('Yt & Insta Bot', callback_data='yibot')
+                InlineKeyboardButton('YT Downloader', callback_data='yibot')
             ],
             [
                 InlineKeyboardButton('Back', callback_data='start')
@@ -131,6 +135,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],
             [
                 InlineKeyboardButton('TV Show Database', callback_data='tvsdb'),
+                InlineKeyboardButton('Audio Books', callback_data='abdb')
+            ],
+            [
                 InlineKeyboardButton('Back', callback_data='start')
             ]
         ]
@@ -154,7 +161,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         buttons = [
             [
                 InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
-                InlineKeyboardButton('Description', callback_data=f'description_{query.data}')
+                InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')
             ],
             [
                 InlineKeyboardButton('Back', callback_data='bots')
@@ -186,7 +193,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
-        await db.add_attempt(user_id, user_name, selected_bot, 1, current_date_time, validity_date)
+        await db.add_attempt_dot(user_id, user_name, selected_bot, 1, current_date_time, validity_date)
 
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
@@ -214,8 +221,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         user_states[user_id] = True
     
-    elif query.data.startswith("description_"):
-        selected_bot_type = query.data.replace("description_", "")
+    elif query.data.startswith("description_bot_"):
+        selected_bot_type = query.data.replace("description_bot_", "")
         description_text = ""
 
         if selected_bot_type == "mbot":
@@ -242,7 +249,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             # Handle payment confirmation by admins
             user_id = query.message.caption.split('\n')[0].split(': ')[1]
             selected_bot = query.message.caption.split('\n')[2].split(': ')[1].lower()
-            latest_attempt = await db.get_latest_attempt(user_id)
+            latest_attempt = await db.get_latest_attempt_dot(user_id)
 
             if selected_bot == 'mbot':
                 await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
@@ -254,7 +261,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
                 
             # Add user to premium database
-            await db.add_premium_user(user_id, user_name, selected_bot, current_date_time, validity_months)
+            await db.add_premium_user_dot(user_id, user_name, selected_bot, current_date_time, validity_months)
 
             # Display message for active premium plan
             validity_formatted = validity_date.strftime("%B %d, %Y")
@@ -267,23 +274,31 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.answer('This Button Only For ADMINS', show_alert=True)
 
-
-
     elif query.data == "payment_cancel":
         if is_admin:
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_bot = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt_dot(user_id)
+
+            # Add user to premium database
+            await db.add_cancel_user_dot(user_id, user_name, selected_bot, current_date_time)
+            
             # Notify ADMINS about the payment cancellation
-            admin_message = f"Payment Cancelled for user ID: {query.from_user.id}"
+            admin_message = f"❌ Payment Cancelled for user ID: {user_id}"
+            admin_message += f"User: {latest_attempt['user_name']}\n"
+            admin_message += f"Bot: {selected_bot.capitalize()}"
+            
             await client.send_message(chat_id=ADMINS, text=admin_message)
 
             # Notify the user about the payment cancellation
-            user_message = "Your payment has been cancelled."
+            user_message = "Your payment Screenshot Not Valid Send Again Valid Payment Screenshot..."
             await client.edit_message_media(
                 query.message.chat.id,
                 query.message.id,
                 InputMediaPhoto(random.choice(PICS))
             )
             await query.message.edit_text(text=user_message)
-
     
     elif query.data == "mdb" or query.data == "adb" or query.data == "tvsdb":
         # Display monthly plan message for selected bot
@@ -313,6 +328,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.MARKDOWN
         )
+        
     elif query.data.startswith("confirm_db_"):
         # Handle user confirming bot subscription
         selected_db = query.data.replace("confirm_db_", "")
@@ -367,50 +383,94 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.MARKDOWN
         )
 
-    elif query.data == "toggle_bot_users_limit":
-        current_limit = db.get_bot_users_limit()
-        new_limit = 250 if current_limit == 100 else 500  # Toggle between 100 and 500 (customize as needed)
-        db.set_bot_users_limit(new_limit)
+    elif query.data == "payment_confirmed_selected_db":
+        if is_admin:
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt_db(user_id)
 
-        # Update button text
-        buttons = [
-            [
-                InlineKeyboardButton(f'Bot Users Limit', callback_data='bot_users_limit'),
-                InlineKeyboardButton(f'{new_limit}', callback_data='toggle_bot_users_limit')
-            ],
-            [
-                InlineKeyboardButton(f'Database Users Limit', callback_data='database_users_limit'),
-                InlineKeyboardButton(f'{db.get_database_users_limit()}', callback_data='toggle_database_users_limit')
-            ],
-            [
-                InlineKeyboardButton('Back', callback_data='start')
+            # Check which database is selected and send invite link to the appropriate channel
+            if selected_db == 'mdb':
+                channel_name = MOVIES_DB
+            elif selected_db == 'adb':
+                channel_name = ANIME_DB
+            elif selected_db == 'tvsdb':
+                channel_name = SERIES_DB
+            else:
+                # Handle invalid database selection
+                await query.answer('Invalid database selection', show_alert=True)
+                return
+
+            # Get the current total members of the channel
+            current_members = await client.get_chat_members_count(channel_name)
+
+            # Check if the channel is almost full (last 5 seats)
+            if TOTAL_MEMBERS - current_members <= 5:
+                admin_notification = f"Attention! {selected_db.capitalize()} channel has only 5 seats left."
+                await client.send_message(chat_id=ADMINS, text=admin_notification)
+
+            # Check if the channel is full, if yes, find the next available channel
+            while current_members >= TOTAL_MEMBERS:
+                channel_name = get_next_channel(channel_name)  # Implement a function to get the next channel
+                current_members = await client.get_chat_members_count(channel_name)
+
+            # Create a temporary invite link with the user ID as a parameter
+            invite_link = await client.create_chat_invite_link(
+                chat_id=int(channel_name),
+                member_id=user_id,
+                expire_date=int((datetime.datetime.now() + datetime.timedelta(days=1)).timestamp())
+            )
+            except ChatAdminRequired:
+                logger.error("Make sure Bot is admin in Forcesub channel")
+                return
+
+            btn = [
+                [
+                    InlineKeyboardButton("Join Channel", url=invite_link.invite_link)
+                ]
             ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
 
-        await query.message.edit_reply_markup(reply_markup)
+            await client.send_message(
+                chat_id=message.from_user.id,
+                text=f"**Hello {message.from_user.mention}, Join {selected_db.capitalize()}",
+                reply_markup=InlineKeyboardMarkup(btn),
+                parse_mode=enums.ParseMode.MARKDOWN,
+            )
 
-    elif query.data == "toggle_database_users_limit":
-        current_limit = db.get_database_users_limit()
-        new_limit = 250 if current_limit == 100 else 500  # Toggle between 100 and 500 (customize as needed)
-        db.set_database_users_limit(new_limit)
+            # Save data in users_chats_db
+            await db.add_premium_user_db(user_id, latest_attempt['user_name'], selected_db, current_date_time)
 
-        # Update button text
-        buttons = [
-            [
-                InlineKeyboardButton(f'Bot Users Limit', callback_data='bot_users_limit'),
-                InlineKeyboardButton(f'{db.get_bot_users_limit()}', callback_data='toggle_bot_users_limit')
-            ],
-            [
-                InlineKeyboardButton(f'Database Users Limit', callback_data='database_users_limit'),
-                InlineKeyboardButton(f'{new_limit}', callback_data='toggle_database_users_limit')
-            ],
-            [
-                InlineKeyboardButton('Back', callback_data='start')
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
+            # Notify the user about successful subscription and provide the invite link
+            user_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n{invite_message}"
+            await client.send_message(user_id, user_message)
 
-        await query.message.edit_reply_markup(reply_markup)
+            # Send Log about successful subscription
+            admin_message = f"Subscription Confirmed for user ID: {user_id}\nUser: {latest_attempt['user_name']}\nDatabase: {selected_db.capitalize()}"
+            await client.send_message(chat_id=ADMINS, text=admin_message)
 
+    elif query.data == "payment_cancel":
+        if is_admin:
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt_db(user_id)
 
+            # Add user to premium database
+            await db.add_cancel_user_db(user_id, user_name, selected_db, current_date_time)
+            
+            # Notify ADMINS about the payment cancellation
+            admin_message = f"❌ Payment Cancelled for user ID: {user_id}"
+            admin_message += f"User: {latest_attempt['user_name']}\n"
+            admin_message += f"Bot: {selected_db.capitalize()}"
+            
+            await client.send_message(chat_id=ADMINS, text=admin_message)
+
+            # Notify the user about the payment cancellation
+            user_message = "Your payment Screenshot Not Valid Send Again Valid Payment Screenshot..."
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(text=user_message)
