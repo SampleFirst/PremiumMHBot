@@ -157,7 +157,7 @@ class Database:
         }
         await self.pre.insert_one(premium_data)
 
-    async def add_cancel_user_bot(self, user_id, user_name, selected_bot, current_date_time):
+    async def add_cancel_user_dot(self, user_id, user_name, selected_bot, current_date_time):
         cancel_data = {
             'user_id': user_id,
             'user_name': user_name,
