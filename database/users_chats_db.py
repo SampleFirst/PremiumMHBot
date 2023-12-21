@@ -4,12 +4,11 @@ import pytz
 from datetime import date, datetime, timedelta
 
 class Database:
-    
+
     def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
         self.col = self.db.users
-        self.attempts_col = self.db.attempts
         self.grp = self.db.groups
         self.pre = self.db.premium
 
@@ -128,7 +127,7 @@ class Database:
         new_group_data = self.new_group(chat, title, username)
         await self.grp.insert_one(new_group_data)
 
-    async def add_attempt(self, user_id, user_name, selected_bot, attempt_number, current_date_time, validity_date):
+    async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, current_date_time, validity_date):
         attempt_data = {
             'user_id': user_id,
             'user_name': user_name,
@@ -137,17 +136,17 @@ class Database:
             'current_date_time': current_date_time,
             'validity_date': validity_date
         }
-        await self.attempts_col.insert_one(attempt_data)
+        await self.col.insert_one(attempt_data)
 
-    async def get_latest_attempt(self, user_id):
-        latest_attempt = await self.attempts_col.find_one(
+    async def get_latest_attempt_dot(self, user_id):
+        latest_attempt = await self.col.find_one(
             {'user_id': user_id},
             sort=[('current_date_time', -1)]  # Sort by datetime in descending order
         )
         return latest_attempt
 
-    async def add_premium_user(self, user_id, user_name, selected_bot, current_date_time, validity_months):
-        expiry_date = current_date_time + datetime.timedelta(days=validity_months * 30)
+    async def add_premium_user_dot(self, user_id, user_name, selected_bot, current_date_time, validity_months):
+        expiry_date = current_date_time + timedelta(days=validity_months * 30)
         premium_data = {
             'user_id': user_id,
             'user_name': user_name,
@@ -158,6 +157,53 @@ class Database:
         }
         await self.pre.insert_one(premium_data)
 
+    async def add_cancel_user_bot(self, user_id, user_name, selected_bot, current_date_time):
+        cancel_data = {
+            'user_id': user_id,
+            'user_name': user_name,
+            'selected_bot': selected_bot,
+            'current_date_time': current_date_time,
+        }
+        await self.col.insert_one(cancel_data)
+
+    async def add_attempt_db(self, user_id, user_name, selected_db, attempt_number, current_date_time, validity_date):
+        attempt_data = {
+            'user_id': user_id,
+            'user_name': user_name,
+            'selected_db': selected_db,
+            'attempt_number': attempt_number,
+            'current_date_time': current_date_time,
+            'validity_date': validity_date
+        }
+        await self.col.insert_one(attempt_data)
+
+    async def get_latest_attempt_db(self, user_id, selected_db):
+        latest_attempt = await self.col.find_one(
+            {'user_id': user_id, 'selected_db': selected_db},
+            sort=[('current_date_time', -1)]  # Sort by datetime in descending order
+        )
+        return latest_attempt
+
+    async def add_premium_user_db(self, user_id, user_name, selected_db, current_date_time, validity_months):
+        expiry_date = current_date_time + timedelta(days=validity_months * 30)
+        premium_data = {
+            'user_id': user_id,
+            'user_name': user_name,
+            'selected_db': selected_db,
+            'current_date_time': current_date_time,
+            'validity_months': validity_months,
+            'expiry_date': expiry_date
+        }
+        await self.pre.insert_one(premium_data)
+
+    async def add_cancel_user_db(self, user_id, user_name, selected_db, current_date_time):
+        cancel_data = {
+            'user_id': user_id,
+            'user_name': user_name,
+            'selected_db': selected_db,
+            'current_date_time': current_date_time,
+        }
+        await self.col.insert_one(cancel_data)
     
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id': int(chat)})
