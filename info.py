@@ -50,10 +50,11 @@ DATABASE_URI = environ.get('DATABASE_URI', "")
 DATABASE_NAME = environ.get('DATABASE_NAME', "")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 
-MOVIE_BOT = environ.get('MOVIE_BOT', '@Movies_Hole_Robot')
-ANIME_BOT = environ.get('ANIME_BOT', '@iPepkornBot')
-RENAME_BOT = environ.get('RENAME_BOT', '@iPepkornAlphaBot')
-DOWNLODER_BOT = environ.get('DOWNLODER_BOT', '@iPepkornBetaBot')
+TOTAL_MEMBERS = environ.get("TOTAL_MEMBERS", "49")
+MOVIES_DB = int(environ.get('MOVIES_DB', 0))
+ANIME_DB = int(environ.get('ANIME_DB', 0))
+SERIES_DB = int(environ.get('SERIES_DB', 0))
+
 
 # Others
 IS_VERIFY = is_enabled((environ.get('IS_VERIFY', 'True')), True)
