@@ -415,12 +415,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 channel_name = get_next_channel(channel_name)  # Implement a function to get the next channel
                 current_members = await client.get_chat_members_count(channel_name)
 
-            # Create a temporary invite link with the user ID as a parameter
-            invite_link = await client.create_chat_invite_link(
-                chat_id=int(channel_name),
-                member_id=user_id,
-                expire_date=int((datetime.datetime.now() + datetime.timedelta(days=1)).timestamp())
-            )
+            try:
+                # Create a temporary invite link with the user ID as a parameter
+                invite_link = await client.create_chat_invite_link(
+                    chat_id=int(channel_name),
+                    member_id=user_id,
+                    expire_date=int((datetime.datetime.now() + datetime.timedelta(days=1)).timestamp())
+                )
             except ChatAdminRequired:
                 logger.error("Make sure Bot is admin in Forcesub channel")
                 return
