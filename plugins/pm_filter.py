@@ -38,7 +38,7 @@ async def payment_screenshot_received(client, message):
     if latest_attempt:
         # Extract attempt details
         user_name = latest_attempt['user_name']
-        selected_item = latest_attempt['selected_bot'] if selected_type == "selected_bot" else latest_attempt['selected_db']
+        selected_item = latest_attempt.get('selected_bot') if selected_type == "selected_bot" else latest_attempt.get('selected_db')
         attempt_number = latest_attempt['attempt_number']
         current_date_time = latest_attempt['current_date_time']
         validity_date = latest_attempt['validity_date']
