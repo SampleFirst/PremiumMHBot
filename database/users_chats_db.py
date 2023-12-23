@@ -138,9 +138,9 @@ class Database:
         }
         await self.col.insert_one(attempt_data)
 
-    async def get_latest_attempt_dot(self, user_id):
+    async def get_latest_attempt_dot(self, user_id, selected_bot):
         latest_attempt = await self.col.find_one(
-            {'user_id': user_id},
+            {'user_id': user_id, 'selected_bot': selected_bot},
             sort=[('current_date_time', -1)]  # Sort by datetime in descending order
         )
         return latest_attempt
