@@ -360,6 +360,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit_text(
             text=confirmation_message
         )
+        user_states[user_id] = True
     
     elif query.data.startswith("description_db_"):
         selected_bot_type = query.data.replace("description_", "")
