@@ -28,7 +28,6 @@ async def payment_screenshot_received(client, message):
 
     if user_id not in user_states or not user_states[user_id]:
         await message.reply_text("I don't understand. Please select Bot Type before sending the screenshot.")
-        await message.send_text(chat_id=ADMINS, photo=file_id, caption="{message.from_user.id} Trying to Send Photo Without Selecting Bot.")
         return
 
     selected_type = "selected_bot" if "bot" in message.caption.lower() else "selected_db"
