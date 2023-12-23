@@ -33,7 +33,7 @@ async def payment_screenshot_received(client, message):
     selected_type = "selected_bot" if message.caption and "bot" in message.caption.lower() else "selected_db"
 
     # Get the latest attempt data for the user
-    latest_attempt = await db.get_latest_attempt_dot(user_id, selected_bot) if selected_type == "selected_bot" else await db.get_latest_attempt_db(user_id, selected_db)
+    latest_attempt = await db.get_latest_attempt_dot(user_id) if selected_type == "selected_bot" else await db.get_latest_attempt_db(user_id)
 
     if latest_attempt:
         # Extract attempt details
