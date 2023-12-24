@@ -241,7 +241,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         admin_confirmation_message = (
             f"Subscription Confirmed:\n\n"
             f"User: {user_name}\n"
-            f"Bot: {bot_name}\n"
+            f"Bot: {selected_bot.capitalize()}\n"
             f"Date: {current_date_time}\n"
             f"Validity: {validity_formatted}\n\n"
             f"Please verify and handle the payment."
@@ -327,8 +327,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
-        user_selected[user_id] = selected_bot
-    
         confirmation_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
     
@@ -353,6 +351,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
+        user_selected[user_id] = selected_db
+    
         
     
     elif query.data.startswith("description_db_"):
