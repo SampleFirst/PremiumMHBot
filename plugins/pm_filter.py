@@ -20,6 +20,7 @@ logger.setLevel(logging.ERROR)
 
 # Define a dictionary to store user states (locked or not)
 user_states = {}
+user_selected = {}
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
@@ -30,7 +31,11 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("I don't understand. Please select Bot Type before sending the screenshot.")
         return
 
-    selected_type = "selected_bot" if message.caption and "bot" in message.caption.lower() else "selected_db"
+    selected_type = user_selected.get(user_id, "")
+
+    if not selected_type:
+        await message.reply_text("Invalid selection. Please start the process again.")
+        return
 
     # Get the latest attempt data for the user
     latest_attempt = await db.get_latest_attempt_dot(user_id) if selected_type == "selected_bot" else await db.get_latest_attempt_db(user_id)
@@ -219,6 +224,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
+        user_selected[user_id] = selected_bot
     
     elif query.data.startswith("description_bot_"):
         selected_bot_type = query.data.replace("description_bot_", "")
@@ -363,6 +369,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
+        user_selected[user_id] = selected_db
     
     elif query.data.startswith("description_db_"):
         selected_bot_type = query.data.replace("description_", "")
