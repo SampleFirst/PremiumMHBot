@@ -27,76 +27,85 @@ async def payment_screenshot_received(client, message):
     user_id = message.from_user.id
     file_id = str(message.photo.file_id)
 
+    # Check if the user has made a selection before sending the screenshot
     if user_id not in user_states or not user_states[user_id]:
-        await message.reply_text("I don't understand. Please select Bot Type or Database before sending the screenshot.")
-        await client.send_photo(chat_id=ADMINS, photo=file_id, caption="hey! Admin {user_id} Sended Payment Screenshot Without Selecting Confirmed Button. pls Check...")
+        await message.reply_text("Please select Bot or Database before sending the screenshot.")
         return
 
     selected_type = user_selected.get(user_id, "")
-    
-    # Create separate inline keyboards for bot and database confirmation
+
     if selected_type == "selected_bot":
-        # Get the latest attempt data for the user
-        latest_attempt = await db.get_latest_attempt_dot(user_id)
-
-        if latest_attempt:
-            # Extract attempt details
-            user_name = latest_attempt['user_name']
-            selected_bot = latest_attempt['selected_bot']
-            attempt_number = latest_attempt['attempt_number']
-            current_date_time = latest_attempt['current_date_time']
-            validity_date = latest_attempt['validity_date']
-
-            # Prepare caption for LOG_CHANNEL
-            caption = f"User ID: {user_id}\n" \
-                      f"User Name: {user_name}\n" \
-                      f"Selected Bot: {selected_bot}\n" \
-                      f"Attempt Number: {attempt_number}\n" \
-                      f"Date and Time: {current_date_time}\n" \
-                      f"Validity: {validity_date}\n"
-
-            keyboard = InlineKeyboardMarkup(
-                [[
-                    InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_bot"),
-                    InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_bot")
-                ]]
-            )
+        await handle_bot_screenshot(client, message, user_id, file_id)
     elif selected_type == "selected_db":
-        # Get the latest attempt data for the user
-        latest_attempt = await db.get_latest_attempt_db(user_id)
-
-        if latest_attempt:
-            # Extract attempt details
-            user_name = latest_attempt['user_name']
-            selected_db = latest_attempt['selected_db']
-            attempt_number = latest_attempt['attempt_number']
-            current_date_time = latest_attempt['current_date_time']
-            validity_date = latest_attempt['validity_date']
-
-            # Prepare caption for LOG_CHANNEL
-            caption = f"User ID: {user_id}\n" \
-                      f"User Name: {user_name}\n" \
-                      f"Selected DB: {selected_db}\n" \
-                      f"Attempt Number: {attempt_number}\n" \
-                      f"Date and Time: {current_date_time}\n" \
-                      f"Validity: {validity_date}\n"
-
-            keyboard = InlineKeyboardMarkup(
-                [[
-                    InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_db"),
-                    InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_db")
-                ]]
-            )
-
-        # Send the photo to LOG_CHANNEL with the prepared caption and inline keyboard
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
-
-        # Reset user state after successful payment screenshot
-        user_states[user_id] = False
+        await handle_db_screenshot(client, message, user_id, file_id)
     else:
         await message.reply_text("Invalid selection. Please start the process again.")
 
-    
+
+async def handle_bot_screenshot(client, message, user_id, file_id):
+    latest_attempt = await db.get_latest_attempt_dot(user_id)
+
+    if not latest_attempt:
+        await message.reply_text("Unable to retrieve latest attempt details. Please try again.")
+        return
+
+    user_name = latest_attempt['user_name']
+    selected_bot = latest_attempt['selected_bot']
+    attempt_number = latest_attempt['attempt_number']
+    current_date_time = latest_attempt['current_date_time']
+    validity_date = latest_attempt['validity_date']
+
+    caption = f"User ID: {user_id}\n" \
+              f"User Name: {user_name}\n" \
+              f"Selected Bot: {selected_bot}\n" \
+              f"Attempt Number: {attempt_number}\n" \
+              f"Date and Time: {current_date_time}\n" \
+              f"Validity: {validity_date}\n"
+
+    keyboard = InlineKeyboardMarkup(
+        [[
+            InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_bot"),
+            InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_bot")
+        ]]
+    )
+
+    await send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard)
+
+
+async def handle_db_screenshot(client, message, user_id, file_id):
+    latest_attempt = await db.get_latest_attempt_db(user_id)
+
+    if not latest_attempt:
+        await message.reply_text("Unable to retrieve latest attempt details. Please try again.")
+        return
+
+    user_name = latest_attempt['user_name']
+    selected_db = latest_attempt['selected_db']
+    attempt_number = latest_attempt['attempt_number']
+    current_date_time = latest_attempt['current_date_time']
+    validity_date = latest_attempt['validity_date']
+
+    caption = f"User ID: {user_id}\n" \
+              f"User Name: {user_name}\n" \
+              f"Selected DB: {selected_db}\n" \
+              f"Attempt Number: {attempt_number}\n" \
+              f"Date and Time: {current_date_time}\n" \
+              f"Validity: {validity_date}\n"
+
+    keyboard = InlineKeyboardMarkup(
+        [[
+            InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_db"),
+            InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_db")
+        ]]
+    )
+
+    await send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard)
+
+
+async def send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard):
+    await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
+    user_states[user_id] = False
+
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
