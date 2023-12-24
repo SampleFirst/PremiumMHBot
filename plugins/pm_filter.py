@@ -369,7 +369,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 active_plan_message += f"Valid Until: {validity_formatted}"
     
                 await query.answer(active_plan_message, show_alert=True)
-            elif selected_type == "selected_db":
+            else:
                 # Handle payment confirmation by admins
                 user_id = query.message.caption.split('\n')[0].split(': ')[1]
                 selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
