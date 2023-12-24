@@ -28,7 +28,8 @@ async def payment_screenshot_received(client, message):
     file_id = str(message.photo.file_id)
 
     if user_id not in user_states or not user_states[user_id]:
-        await message.reply_text("I don't understand. Please select Bot Type before sending the screenshot.")
+        await message.reply_text("I don't understand. Please select Bot Type or Database before sending the screenshot.")
+        await client.send_photo(chat_id=ADMINS, photo=file_id, text="hey! Admin {user_id} Sended Payment Screenshot Without Selecting Confirmed Button\npls Check...")
         return
 
     selected_type = user_selected.get(user_id, "")
@@ -37,42 +38,75 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("Invalid selection. Please start the process again.")
         return
 
-    # Get the latest attempt data for the user
-    latest_attempt = await db.get_latest_attempt_dot(user_id) if selected_type == "selected_bot" else await db.get_latest_attempt_db(user_id)
+    # Create separate inline keyboards for bot and database confirmation
+    if selected_type == "selected_bot":
+        # Get the latest attempt data for the user
+        latest_attempt = await db.get_latest_attempt_dot(user_id)
 
-    if latest_attempt:
-        # Extract attempt details
-        user_name = latest_attempt['user_name']
-        selected_item = latest_attempt.get('selected_bot') if selected_type == "selected_bot" else latest_attempt.get('selected_db')
-        attempt_number = latest_attempt['attempt_number']
-        current_date_time = latest_attempt['current_date_time']
-        validity_date = latest_attempt['validity_date']
+        if latest_attempt:
+            # Extract attempt details
+            user_name = latest_attempt['user_name']
+            selected_bot = latest_attempt['selected_bot']
+            attempt_number = latest_attempt['attempt_number']
+            current_date_time = latest_attempt['current_date_time']
+            validity_date = latest_attempt['validity_date']
 
-        # Prepare caption for LOG_CHANNEL
-        caption = (
-            f"User ID: {user_id}\n"
-            f"User Name: {user_name}\n"
-            f"Selected {selected_type.capitalize()}: {selected_item}\n"
-            f"Attempt Number: {attempt_number}\n"
-            f"Date and Time: {current_date_time}\n"
-            f"Validity: {validity_date}\n"
-        )
+            # Prepare caption for LOG_CHANNEL
+            caption = f"User ID: {user_id}\n" \
+                      f"User Name: {user_name}\n" \
+                      f"Selected Bot: {selected_bot}\n" \
+                      f"Attempt Number: {attempt_number}\n" \
+                      f"Date and Time: {current_date_time}\n" \
+                      f"Validity: {validity_date}\n"
 
-        # Add inline keyboard with payment confirmation and cancellation buttons
-        keyboard = InlineKeyboardMarkup(
-            [[
-                InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_{selected_type}"),
-                InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_{selected_type}")
-            ]]
-        )
+            keyboard = InlineKeyboardMarkup(
+                [[
+                    InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_bot"),
+                    InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_bot")
+                ]]
+            )
+    else:
+        # Get the latest attempt data for the user
+        latest_attempt = await db.get_latest_attempt_db(user_id)
+
+        if latest_attempt:
+            # Extract attempt details
+            user_name = latest_attempt['user_name']
+            selected_db = latest_attempt['selected_db']
+            attempt_number = latest_attempt['attempt_number']
+            current_date_time = latest_attempt['current_date_time']
+            validity_date = latest_attempt['validity_date']
+
+            # Prepare caption for LOG_CHANNEL
+            caption = f"User ID: {user_id}\n" \
+                      f"User Name: {user_name}\n" \
+                      f"Selected DB: {selected_db}\n" \
+                      f"Attempt Number: {attempt_number}\n" \
+                      f"Date and Time: {current_date_time}\n" \
+                      f"Validity: {validity_date}\n"
+
+            keyboard = InlineKeyboardMarkup(
+                [[
+                    InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_db"),
+                    InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_db")
+                ]]
+            )
 
         # Send the photo to LOG_CHANNEL with the prepared caption and inline keyboard
-        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
+        try:
+            await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
+        except PeerIdInvalid:
+            logger.error("Invalid channel ID for LOG_CHANNEL")
+            return
 
         # Reset user state after successful payment screenshot
         user_states[user_id] = False
     else:
-        await message.reply_text("Process cancelled!")
+        try:
+            await message.reply_text("Process cancelled!")
+        except MessageNotModified:
+            await message.edit_text("Process cancelled!")
+
 
 
 @Client.on_callback_query()
