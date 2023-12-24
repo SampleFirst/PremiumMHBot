@@ -33,11 +33,7 @@ async def payment_screenshot_received(client, message):
         return
 
     selected_type = user_selected.get(user_id, "")
-
-    if not selected_type:
-        await message.reply_text("Invalid selection. Please start the process again.")
-        return
-
+    
     # Create separate inline keyboards for bot and database confirmation
     if selected_type == "selected_bot":
         # Get the latest attempt data for the user
@@ -65,7 +61,7 @@ async def payment_screenshot_received(client, message):
                     InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_bot")
                 ]]
             )
-    else:
+    elif selected_type == "selected_db":
         # Get the latest attempt data for the user
         latest_attempt = await db.get_latest_attempt_db(user_id)
 
@@ -98,8 +94,12 @@ async def payment_screenshot_received(client, message):
         except PeerIdInvalid:
             logger.error("Invalid channel ID for LOG_CHANNEL")
             return
+
         # Reset user state after successful payment screenshot
         user_states[user_id] = False
+    else:
+        await message.reply_text("Invalid selection. Please start the process again.")
+
     
 
 @Client.on_callback_query()
