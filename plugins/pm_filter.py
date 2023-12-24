@@ -34,12 +34,16 @@ async def payment_screenshot_received(client, message):
 
     selected_type = user_selected.get(user_id, "")
 
+    if not selected_type:
+        await message.reply_text("Invalid selection. Please start the process again.")
+        return
+        
     if selected_type == "selected_bot":
         await handle_bot_screenshot(client, message, user_id, file_id)
     elif selected_type == "selected_db":
         await handle_db_screenshot(client, message, user_id, file_id)
     else:
-        await message.reply_text("Invalid selection. Please start the process again.")
+        await message.reply_text("Invalid selection. start the process again.")
 
 
 async def handle_bot_screenshot(client, message, user_id, file_id):
@@ -230,8 +234,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
         await db.add_attempt_dot(user_id, user_name, selected_bot, 1, current_date_time, validity_date)
-
-        user_selected[user_id] = selected_bot
         
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
@@ -258,6 +260,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
+        user_selected[user_id] = selected_bot
+    
         
     
     elif query.data.startswith("description_bot_"):
