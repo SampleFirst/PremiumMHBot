@@ -98,16 +98,9 @@ async def payment_screenshot_received(client, message):
         except PeerIdInvalid:
             logger.error("Invalid channel ID for LOG_CHANNEL")
             return
-
         # Reset user state after successful payment screenshot
         user_states[user_id] = False
-    else:
-        try:
-            await message.reply_text("Process cancelled!")
-        except MessageNotModified:
-            await message.edit_text("Process cancelled!")
-
-
+    
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
