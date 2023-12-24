@@ -372,153 +372,154 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.MARKDOWN
         )
 
-    elif query.data.startswith("payment_confirmed_"):
+    elif query.data == "payment_confirmed_bot":
         if is_admin:
-            # Extract selected_type from the callback data
-            selected_type = query.data.replace("payment_confirmed_", "")
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_bot = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt_dot(user_id)
+
+            if selected_bot == 'mbot':
+                await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
+            elif selected_bot == 'abot':
+                await client.send_message(PAYMENT_CHAT, f"/pre {user_id}")
+            elif selected_bot == 'rbot':
+                await client.send_message(PAYMENT_CHAT, f"/try {user_id}")
+            elif selected_bot == 'yibot':
+                await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
+                
+            # Add user to premium database
+            await db.add_premium_user_dot(user_id, user_name, selected_bot, current_date_time, validity_months)
+
+            # Display message for active premium plan
+            validity_formatted = validity_date.strftime("%B %d, %Y")
+            active_plan_message = f"🌟 **Active Premium Plan** 🌟\n\n"
+            active_plan_message += f"User: {latest_attempt['user_name']}\n"
+            active_plan_message += f"Bot: {selected_bot.capitalize()}\n"
+            active_plan_message += f"Valid Until: {validity_formatted}"
+
+            await query.answer(active_plan_message, show_alert=True)
+        else:
+            await query.answer('This Button Only For ADMINS', show_alert=True)
+
+    elif query.data == "payment_cancel_bot":
+        if is_admin:
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_bot = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt_dot(user_id)
+
+            # Add user to premium database
+            await db.add_cancel_user_dot(user_id, user_name, selected_bot, current_date_time)
             
-            if selected_type == "selected_bot":
-                # Handle payment confirmation by admins
-                user_id = query.message.caption.split('\n')[0].split(': ')[1]
-                selected_bot = query.message.caption.split('\n')[2].split(': ')[1].lower()
-                latest_attempt = await db.get_latest_attempt_dot(user_id)
+            # Notify ADMINS about the payment cancellation
+            admin_message = f"❌ Payment Cancelled for user ID: {user_id}"
+            admin_message += f"User: {latest_attempt['user_name']}\n"
+            admin_message += f"Bot: {selected_bot.capitalize()}"
+            
+            await client.send_message(chat_id=ADMINS, text=admin_message)
+
+            # Notify the user about the payment cancellation
+            user_message = "Your payment Screenshot Not Valid Send Again Valid Payment Screenshot..."
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(text=user_message)
     
-                if selected_bot == 'mbot':
-                    await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
-                elif selected_bot == 'abot':
-                    await client.send_message(PAYMENT_CHAT, f"/pre {user_id}")
-                elif selected_bot == 'rbot':
-                    await client.send_message(PAYMENT_CHAT, f"/try {user_id}")
-                elif selected_bot == 'yibot':
-                    await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
-                    
-                # Add user to the premium database
-                await db.add_premium_user_dot(user_id, latest_attempt['user_name'], selected_bot, latest_attempt['current_date_time'], latest_attempt['validity_date'])
     
-                # Display a message for an active premium plan
-                validity_formatted = latest_attempt['validity_date'].strftime("%B %d, %Y")
-                active_plan_message = f"🌟 **Active Premium Plan** 🌟\n\n"
-                active_plan_message += f"User: {latest_attempt['user_name']}\n"
-                active_plan_message += f"Bot: {selected_bot.capitalize()}\n"
-                active_plan_message += f"Valid Until: {validity_formatted}"
-    
-                await query.answer(active_plan_message, show_alert=True)
+
+    elif query.data == "payment_confirmed_db":
+        if is_admin:
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt_db(user_id)
+
+            # Check which database is selected and send invite link to the appropriate channel
+            if selected_db == 'mdb':
+                channel_name = MOVIES_DB
+            elif selected_db == 'adb':
+                channel_name = ANIME_DB
+            elif selected_db == 'tvsdb':
+                channel_name = SERIES_DB
             else:
-                # Handle payment confirmation by admins
-                user_id = query.message.caption.split('\n')[0].split(': ')[1]
-                selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
-                latest_attempt = await db.get_latest_attempt_db(user_id)
-    
-                # Check which database is selected and send an invite link to the appropriate channel
-                if selected_db == 'mdb':
-                    channel_name = MOVIES_DB
-                elif selected_db == 'adb':
-                    channel_name = ANIME_DB
-                elif selected_db == 'tvsdb':
-                    channel_name = SERIES_DB
-                else:
-                    # Handle an invalid database selection
-                    await query.answer('Invalid database selection', show_alert=True)
-                    return
-    
-                # Get the current total members of the channel
+                # Handle invalid database selection
+                await query.answer('Invalid database selection', show_alert=True)
+                return
+
+            # Get the current total members of the channel
+            current_members = await client.get_chat_members_count(channel_name)
+
+            # Check if the channel is almost full (last 5 seats)
+            if TOTAL_MEMBERS - current_members <= 5:
+                admin_notification = f"Attention! {selected_db.capitalize()} channel has only 5 seats left."
+                await client.send_message(chat_id=ADMINS, text=admin_notification)
+
+            # Check if the channel is full, if yes, find the next available channel
+            while current_members >= TOTAL_MEMBERS:
+                channel_name = get_next_channel(channel_name)  # Implement a function to get the next channel
                 current_members = await client.get_chat_members_count(channel_name)
-    
-                # Check if the channel is almost full (last 5 seats)
-                if TOTAL_MEMBERS - current_members <= 5:
-                    admin_notification = f"Attention! {selected_db.capitalize()} channel has only 5 seats left."
-                    await client.send_message(chat_id=ADMINS, text=admin_notification)
-    
-                # Check if the channel is full, if yes, find the next available channel
-                while current_members >= TOTAL_MEMBERS:
-                    channel_name = get_next_channel(channel_name)  # Implement a function to get the next channel
-                    current_members = await client.get_chat_members_count(channel_name)
-    
-                try:
-                    # Create a temporary invite link with the user ID as a parameter
-                    invite_link = await client.create_chat_invite_link(
-                        chat_id=int(channel_name),
-                        member_id=user_id,
-                        expire_date=int((datetime.datetime.now() + datetime.timedelta(days=1)).timestamp())
-                    )
-                except ChatAdminRequired:
-                    logger.error("Make sure Bot is admin in Forcesub channel")
-                    return
-    
-                btn = [
-                    [
-                        InlineKeyboardButton("Join Channel", url=invite_link.invite_link)
-                    ]
+
+            try:
+                # Create a temporary invite link with the user ID as a parameter
+                invite_link = await client.create_chat_invite_link(
+                    chat_id=int(channel_name),
+                    member_id=user_id,
+                    expire_date=int((datetime.datetime.now() + datetime.timedelta(days=1)).timestamp())
+                )
+            except ChatAdminRequired:
+                logger.error("Make sure Bot is admin in Forcesub channel")
+                return
+
+            btn = [
+                [
+                    InlineKeyboardButton("Join Channel", url=invite_link.invite_link)
                 ]
-    
-                await client.send_message(
-                    chat_id=message.from_user.id,
-                    text=f"**Hello {message.from_user.mention}, Join {selected_db.capitalize()}",
-                    reply_markup=InlineKeyboardMarkup(btn),
-                    parse_mode=enums.ParseMode.MARKDOWN,
-                )
-    
-                # Save data in users_chats_db
-                await db.add_premium_user_db(user_id, latest_attempt['user_name'], selected_db, latest_attempt['current_date_time'])
-    
-                # Notify the user about a successful subscription and provide the invite link
-                user_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n{invite_message}"
-                await client.send_message(user_id, user_message)
-    
-                # Send a log about a successful subscription
-                admin_message = f"Subscription Confirmed for user ID: {user_id}\nUser: {latest_attempt['user_name']}\nDatabase: {selected_db.capitalize()}"
-                await client.send_message(chat_id=ADMINS, text=admin_message)
-        else:
-            await query.answer('This Button Only For ADMINS', show_alert=True)
+            ]
 
-    elif query.data.startswith("payment_cancel_"):
+            await client.send_message(
+                chat_id=message.from_user.id,
+                text=f"**Hello {message.from_user.mention}, Join {selected_db.capitalize()}",
+                reply_markup=InlineKeyboardMarkup(btn),
+                parse_mode=enums.ParseMode.MARKDOWN,
+            )
+
+            # Save data in users_chats_db
+            await db.add_premium_user_db(user_id, latest_attempt['user_name'], selected_db, current_date_time)
+
+            # Notify the user about successful subscription and provide the invite link
+            user_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n{invite_message}"
+            await client.send_message(user_id, user_message)
+
+            # Send Log about successful subscription
+            admin_message = f"Subscription Confirmed for user ID: {user_id}\nUser: {latest_attempt['user_name']}\nDatabase: {selected_db.capitalize()}"
+            await client.send_message(chat_id=ADMINS, text=admin_message)
+
+    elif query.data == "payment_cancel_db":
         if is_admin:
-            # Extract selected_type from the callback data
-            selected_type = query.data.replace("payment_cancel_", "")
-            
-            if selected_type == "selected_bot":
-                # Handle payment cancellation by admins
-                user_id = query.message.caption.split('\n')[0].split(': ')[1]
-                selected_item = query.message.caption.split('\n')[2].split(': ')[1].lower()
-                latest_attempt = await db.get_latest_attempt_dot(user_id) 
-    
-                # Add the user to the premium database
-                await db.add_cancel_user_dot(user_id, latest_attempt['user_name'], selected_item, latest_attempt['current_date_time'])
-                
-                # Notify ADMINS about the payment cancellation
-                admin_message = f"❌ Payment Cancelled for user ID: {user_id}\nUser: {latest_attempt['user_name']}\n{selected_type.capitalize()}: {selected_item}"
-                await client.send_message(chat_id=ADMINS, text=admin_message)
-    
-                # Notify the user about the payment cancellation
-                user_message = "Your payment Screenshot is not valid. Send another valid payment screenshot..."
-                await client.edit_message_media(
-                    query.message.chat.id,
-                    query.message.id,
-                    InputMediaPhoto(random.choice(PICS))
-                )
-                await query.message.edit_text(text=user_message)
-            elif selected_type == "selected_db":
-                # Handle payment cancellation by admins
-                user_id = query.message.caption.split('\n')[0].split(': ')[1]
-                selected_item = query.message.caption.split('\n')[2].split(': ')[1].lower()
-                latest_attempt = await db.get_latest_attempt_db(user_id) 
-    
-                # Add the user to the premium database
-                await db.add_cancel_user_db(user_id, latest_attempt['user_name'], selected_item, latest_attempt['current_date_time'])
-                
-                # Notify ADMINS about the payment cancellation
-                admin_message = f"❌ Payment Cancelled for user ID: {user_id}\nUser: {latest_attempt['user_name']}\n{selected_type.capitalize()}: {selected_item}"
-                await client.send_message(chat_id=ADMINS, text=admin_message)
-    
-                # Notify the user about the payment cancellation
-                user_message = "Your payment Screenshot is not valid. Send another valid payment screenshot..."
-                await client.edit_message_media(
-                    query.message.chat.id,
-                    query.message.id,
-                    InputMediaPhoto(random.choice(PICS))
-                )
-                await query.message.edit_text(text=user_message)
-        else:
-            await query.answer('This Button Only For ADMINS', show_alert=True)
+            # Handle payment confirmation by admins
+            user_id = query.message.caption.split('\n')[0].split(': ')[1]
+            selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_attempt = await db.get_latest_attempt_db(user_id)
 
-    
+            # Add user to premium database
+            await db.add_cancel_user_db(user_id, user_name, selected_db, current_date_time)
+            
+            # Notify ADMINS about the payment cancellation
+            admin_message = f"❌ Payment Cancelled for user ID: {user_id}"
+            admin_message += f"User: {latest_attempt['user_name']}\n"
+            admin_message += f"Bot: {selected_db.capitalize()}"
+            
+            await client.send_message(chat_id=ADMINS, text=admin_message)
+
+            # Notify the user about the payment cancellation
+            user_message = "Your payment Screenshot Not Valid Send Again Valid Payment Screenshot..."
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(text=user_message)
+
