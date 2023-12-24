@@ -29,7 +29,7 @@ async def payment_screenshot_received(client, message):
 
     if user_id not in user_states or not user_states[user_id]:
         await message.reply_text("I don't understand. Please select Bot Type or Database before sending the screenshot.")
-        await client.send_photo(chat_id=ADMINS, photo=file_id, text="hey! Admin {user_id} Sended Payment Screenshot Without Selecting Confirmed Button\npls Check...")
+        await client.send_photo(chat_id=ADMINS, photo=file_id, caption="hey! Admin {user_id} Sended Payment Screenshot Without Selecting Confirmed Button. pls Check...")
         return
 
     selected_type = user_selected.get(user_id, "")
@@ -89,11 +89,7 @@ async def payment_screenshot_received(client, message):
             )
 
         # Send the photo to LOG_CHANNEL with the prepared caption and inline keyboard
-        try:
-            await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
-        except PeerIdInvalid:
-            logger.error("Invalid channel ID for LOG_CHANNEL")
-            return
+        await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
 
         # Reset user state after successful payment screenshot
         user_states[user_id] = False
