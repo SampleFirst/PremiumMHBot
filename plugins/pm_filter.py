@@ -234,6 +234,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
         await db.add_attempt_dot(user_id, user_name, selected_bot, 1, current_date_time, validity_date)
+        user_selected[user_id] = selected_bot
         
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
@@ -260,8 +261,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
-        user_selected[user_id] = selected_bot
-    
+        
         
     
     elif query.data.startswith("description_bot_"):
@@ -327,6 +327,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
+        await db.add_attempt_db(user_id, user_name, selected_db, 1, current_date_time, validity_date)
+        user_selected[user_id] = selected_db
+
         confirmation_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
     
@@ -351,8 +354,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
-        user_selected[user_id] = selected_db
-    
         
     
     elif query.data.startswith("description_db_"):
