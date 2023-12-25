@@ -73,7 +73,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
         ]]
     )
 
-    await send_screenshot_to_log_channel(client, user_id, file_id, user_name, caption, keyboard)
+    await send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard)
 
 
 async def handle_db_screenshot(client, message, user_id, file_id):
@@ -103,12 +103,12 @@ async def handle_db_screenshot(client, message, user_id, file_id):
         ]]
     )
 
-    await send_screenshot_to_log_channel(client, user_id, user_name, file_id, caption, keyboard)
+    await send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard)
 
 
-async def send_screenshot_to_log_channel(client, user_id, user_name, file_id, caption, keyboard):
+async def send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard):
     await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
-    await message.reply_text("Hey! {User_name}\n\your Payment Screenshot Received Wait For Confirmation by Admin\n\nI Send Confirmation Message Soon...")
+    await message.reply_text("Hey! Buddy\n\your Payment Screenshot Received Wait For Confirmation by Admin\n\nI Send Confirmation Message Soon...")
     user_states[user_id] = False
 
 
