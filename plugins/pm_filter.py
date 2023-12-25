@@ -61,7 +61,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
 
     caption_bot = f"User ID: {user_id}\n" \
               f"User Name: {user_name}\n" \
-              f"Selected Bot: {selected_bot}\n" \
+              f"Selected Bot: {selected_bot.capitalize()}\n" \
               f"Attempt Number: {attempt_number}\n" \
               f"Date and Time: {current_date_time}\n" \
               f"Validity: {validity_date}\n"
@@ -92,7 +92,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
 
     caption_db = f"User ID: {user_id}\n" \
               f"User Name: {user_name}\n" \
-              f"Selected DB: {selected_db}\n" \
+              f"Selected DB: {selected_db.capitalize()}\n" \
               f"Attempt Number: {attempt_number}\n" \
               f"Date and Time: {current_date_time}\n" \
               f"Validity: {validity_date}\n"
@@ -105,7 +105,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     )
 
     await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_db, reply_markup=keyboard)
-    await message.reply_text("Hey! {user_name} \n\nyour Payment Screenshot Received Wait For Confirmation by Admin\n\nSending Confirmation Message Soon...")
+    await message.reply_text("Hey! Buddy \n\nyour Payment Screenshot Received Wait For Confirmation by Admin\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
 @Client.on_callback_query()
@@ -333,7 +333,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         admin_confirmation_message = (
             f"Subscription Confirmed:\n\n"
             f"User: {user_name}\n"
-            f"Database: {db_name}\n"
+            f"Database: {selected_db.capitalize()}\n"
             f"Date: {current_date_time}\n"
             f"Validity: {validity_formatted}\n\n"
             f"Please verify and handle the payment."
