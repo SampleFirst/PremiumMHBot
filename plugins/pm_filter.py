@@ -20,7 +20,7 @@ logger.setLevel(logging.ERROR)
 
 # Define a dictionary to store user states (locked or not)
 user_states = {}
-user_selected = {}
+USER_SELECTED = {}
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
@@ -32,7 +32,7 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("Please select Bot or Database before sending the screenshot.")
         return
 
-    selected_type = user_selected.get(user_id, "")
+    selected_type = USER_SELECTED.get(user_id, "")
 
     if not selected_type:
         await message.reply_text("Invalid selection. Please start the process again.")
@@ -234,7 +234,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
         await db.add_attempt_dot(user_id, user_name, selected_bot, 1, current_date_time, validity_date)
-        user_selected[user_id] = selected_bot
+        USER_SELECTED[user_id] = selected_bot
         
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
@@ -328,7 +328,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
         await db.add_attempt_db(user_id, user_name, selected_db, 1, current_date_time, validity_date)
-        user_selected[user_id] = selected_db
+        USER_SELECTED[user_id] = selected_db
 
         confirmation_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
