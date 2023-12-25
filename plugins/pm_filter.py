@@ -106,8 +106,9 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     await send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard)
 
 
-async def send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard):
+async def send_screenshot_to_log_channel(client, user_id, user_name, file_id, caption, keyboard):
     await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
+    await message.reply_text("Hey! {User_name}\n\your Payment Screenshot Received Wait For Confirmation by Admin\n\nI Send Confirmation Message Soon...")
     user_states[user_id] = False
 
 
@@ -394,7 +395,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
                 
             # Add user to premium database
-            await db.add_premium_user_dot(user_id, user_name, selected_bot, current_date_time, validity_months)
+            await db.add_premium_user_dot(user_id, latest_attempt['user_name'], selected_bot, current_date_time, latest_attempt['validity_months'])
 
             # Display message for active premium plan
             validity_formatted = validity_date.strftime("%B %d, %Y")
@@ -492,7 +493,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
 
             # Save data in users_chats_db
-            await db.add_premium_user_db(user_id, latest_attempt['user_name'], selected_db, current_date_time)
+            await db.add_premium_user_db(user_id, latest_attempt['user_name'], selected_db, current_date_time, latest_attempt['validity_months'])
 
             # Notify the user about successful subscription and provide the invite link
             user_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n{invite_message}"
