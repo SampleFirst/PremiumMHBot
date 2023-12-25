@@ -59,7 +59,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
     current_date_time = latest_attempt['current_date_time']
     validity_date = latest_attempt['validity_date']
 
-    caption = f"User ID: {user_id}\n" \
+    caption_bot = f"User ID: {user_id}\n" \
               f"User Name: {user_name}\n" \
               f"Selected Bot: {selected_bot}\n" \
               f"Attempt Number: {attempt_number}\n" \
@@ -73,7 +73,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
         ]]
     )
 
-    await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
+    await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_bot, reply_markup=keyboard)
     await message.reply_text("Hey! {user_name} \n\nyour Payment Screenshot Received Wait For Confirmation by Admin\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
@@ -90,7 +90,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     current_date_time = latest_attempt['current_date_time']
     validity_date = latest_attempt['validity_date']
 
-    caption = f"User ID: {user_id}\n" \
+    caption_db = f"User ID: {user_id}\n" \
               f"User Name: {user_name}\n" \
               f"Selected DB: {selected_db}\n" \
               f"Attempt Number: {attempt_number}\n" \
@@ -104,7 +104,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
         ]]
     )
 
-    await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption, reply_markup=keyboard)
+    await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_db, reply_markup=keyboard)
     await message.reply_text("Hey! {user_name} \n\nyour Payment Screenshot Received Wait For Confirmation by Admin\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
