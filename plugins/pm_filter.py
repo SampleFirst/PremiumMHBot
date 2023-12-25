@@ -73,7 +73,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
         ]]
     )
 
-    await send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard)
+    await send_screenshot_to_log_channel(client, user_id, file_id, user_name, caption, keyboard)
 
 
 async def handle_db_screenshot(client, message, user_id, file_id):
@@ -103,7 +103,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
         ]]
     )
 
-    await send_screenshot_to_log_channel(client, user_id, file_id, caption, keyboard)
+    await send_screenshot_to_log_channel(client, user_id, user_name, file_id, caption, keyboard)
 
 
 async def send_screenshot_to_log_channel(client, user_id, user_name, file_id, caption, keyboard):
