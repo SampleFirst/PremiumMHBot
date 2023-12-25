@@ -38,9 +38,9 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("Invalid selection. Please start the process again.")
         return
         
-    if selected_type == "selected_bot":
+    if selected_type == "mbot" or "abot" or "rbot" or "yibot":
         await handle_bot_screenshot(client, message, user_id, file_id)
-    elif selected_type == "selected_db":
+    elif selected_type == "mdb" or "adb" or "tvsdb":
         await handle_db_screenshot(client, message, user_id, file_id)
     else:
         await message.reply_text("Invalid selection. start the process again.")
