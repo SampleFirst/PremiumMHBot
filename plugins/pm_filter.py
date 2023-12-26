@@ -75,7 +75,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
     )
 
     await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_bot, reply_markup=keyboard)
-    await message.reply_text("Hey! {user_name} \n\nyour Payment Screenshot Received Wait For Confirmation by Admin\n\nSending Confirmation Message Soon...")
+    await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
 async def handle_db_screenshot(client, message, user_id, file_id):
@@ -106,7 +106,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     )
 
     await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_db, reply_markup=keyboard)
-    await message.reply_text("Hey! Buddy \n\nyour Payment Screenshot Received Wait For Confirmation by Admin\n\nSending Confirmation Message Soon...")
+    await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
 @Client.on_callback_query()
