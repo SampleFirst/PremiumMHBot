@@ -143,6 +143,7 @@ async def bot_stats(client, message):
 
     await message.reply_text(reply_text)
 
+
 @Client.on_message(filters.command("user_info") & filters.user(ADMINS))
 async def user_info_cmd(client, message):
     if len(message.command) != 2:
@@ -198,6 +199,37 @@ async def user_info_cmd(client, message):
         )
 
     await message.reply_text(user_info_text, parse_mode=enums.ParseMode.HTML)
+
+@Client.on_message(filters.command('totalstats') & filters.user(ADMINS))
+async def total_stats(client, message):
+    total_users = await db.total_users_count()
+    
+    total_attempts_bot = await db.get_total_attempts_dot()   
+    total_cancel_bot = await db.get_total_cancel_dot()    
+    total_premium_bot = await db.get_total_premium_dot()
+    total_earnings_bot = await db.get_total_earnings_dot()
+    
+    total_attempts_db = await db.get_total_attempts_db()
+    total_cancel_db = await db.get_total_cancel_db()
+    total_premium_db = await db.get_total_premium_db()
+    total_earnings_db = await db.get_total_earnings_db()
+
+    stats_text = (
+        f"#TOTAL_STATS\n\n"
+        f"Total Bots Users\n"
+        f"Total Attempts (Bot): {total_attempts_bot}\n"  
+        f"Total Cancelled Users (Bot): {total_cancel_bot}\n"
+        f"Total Premium Users (Bot): {total_premium_bot}\n"
+        f"Total Earnings (Bot): {total_earnings_bot}\n"
+        f"Total Database Users\n"
+        f"Total Attempts (DB): {total_attempts_db}\n"
+        f"Total Cancelled Users (DB): {total_cancel_db}\n"
+        f"Total Premium Users (DB): {total_premium_db}\n"
+        f"Total Earnings (DB): {total_earnings_db}\n"
+    )
+
+    await message.reply_text(stats_text)
+
 
 
 @Client.on_message(filters.command("myplan"))
