@@ -143,6 +143,111 @@ async def bot_stats(client, message):
 
     await message.reply_text(reply_text)
 
+@Client.on_message(filters.command("user_info") & filters.user(ADMINS))
+async def user_info_cmd(client, message):
+    if len(message.command) != 2:
+        await message.reply_text("<b>Use this command as follows: /user_info user_id</b>")
+        return
+
+    user_id = int(message.command[1])
+
+    user_data = await db.get_verified(user_id)
+    ban_status = await db.get_ban_status(user_id)
+    latest_attempt_bot = await db.get_latest_attempt_dot(user_id)
+    latest_attempt_db = await db.get_latest_attempt_db(user_id)
+    premium_bot = await db.pre.find_one({'user_id': user_id})
+    premium_db = await db.pre.find_one({'user_id': user_id})
+    
+    if not user_data:
+        await message.reply_text("<b>User not found in the database.</b>")
+        return
+
+    user_info_text = (
+        f"<b>User ID:</b> {user_data['id']}\n"
+        f"<b>User Name:</b> {user_data['name']}\n\n"
+        f"<b>Verification Status:</b>\n"
+        f"Date: {user_data['verification_status']['date']}\n"
+        f"Time: {user_data['verification_status']['time']}\n\n"
+        f"<b>Ban Status:</b> {ban_status['is_banned']} ({ban_status['ban_reason']})\n\n"
+    )
+
+    if latest_attempt_bot:
+        user_info_text += (
+            f"<b>Latest Attempt:</b>\n"
+            f"Bot: {latest_attempt['selected_bot']}\n"
+            f"Attempt Number: {latest_attempt['attempt_number']}\n"
+            f"Date Time: {latest_attempt['current_date_time']}\n"
+            f"Validity Date: {latest_attempt['validity_date']}\n\n"
+        )
+
+    if latest_attempt_db:
+        user_info_text += (
+            f"<b>Latest Attempt:</b>\n"
+            f"Database: {latest_attempt['selected_db']}\n"
+            f"Attempt Number: {latest_attempt['attempt_number']}\n"
+            f"Date Time: {latest_attempt['current_date_time']}\n"
+            f"Validity Date: {latest_attempt['validity_date']}\n\n"
+        )
+        
+    if premium_info:
+        user_info_text += (
+            f"<b>Premium Info:</b>\n"
+            f"Bot: {premium_info['selected_bot']}\n"
+            f"Validity Months: {premium_info['validity_months']}\n"
+            f"Expiry Date: {premium_info['expiry_date']}\n\n"
+        )
+
+    await message.reply_text(user_info_text, parse_mode=enums.ParseMode.HTML)
+
+
+@Client.on_message(filters.command("myplan"))
+async def my_plan(client, message):
+    user_id = message.from_user.id
+
+    user_data = await db.get_verified(user_id)
+    ban_status = await db.get_ban_status(user_id)
+    latest_attempt_bot = await db.get_latest_attempt_dot(user_id)
+    latest_attempt_db = await db.get_latest_attempt_db(user_id)
+    premium_info = await db.pre.find_one({'user_id': user_id})
+
+    if not user_data:
+        await message.reply_text("<b>User not found in the database.</b>")
+        return
+
+    user_info_text = (
+        f"<b>Your Info:</b>\n"
+        f"Verification Status: {user_data['verification_status']['date']} {user_data['verification_status']['time']}\n"
+        f"Ban Status: {ban_status['is_banned']} ({ban_status['ban_reason']})\n\n"
+    )
+
+    if latest_attempt_bot:
+        user_info_text += (
+            f"Latest Attempt:\n"
+            f"Bot: {latest_attempt['selected_bot']}\n"
+            f"Attempt Number: {latest_attempt['attempt_number']}\n"
+            f"Date Time: {latest_attempt['current_date_time']}\n"
+            f"Validity Date: {latest_attempt['validity_date']}\n\n"
+        )
+
+    if latest_attempt_db:
+        user_info_text += (
+            f"Latest Attempt:\n"
+            f"Bot: {latest_attempt['selected_bot']}\n"
+            f"Attempt Number: {latest_attempt['attempt_number']}\n"
+            f"Date Time: {latest_attempt['current_date_time']}\n"
+            f"Validity Date: {latest_attempt['validity_date']}\n\n"
+        )
+        
+    if premium_info:
+        user_info_text += (
+            f"Premium Info:\n"
+            f"Bot: {premium_info['selected_bot']}\n"
+            f"Validity Months: {premium_info['validity_months']}\n"
+            f"Expiry Date: {premium_info['expiry_date']}\n\n"
+        )
+
+    await message.reply_text(user_info_text, parse_mode=enums.ParseMode.HTML)
+
 
 @Client.on_message(filters.command("send") & filters.user(ADMINS))
 async def send_msg(bot, message):
