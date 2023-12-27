@@ -6,7 +6,7 @@ from pyrogram import Client, filters, enums
 from pyrogram.errors import ChatAdminRequired
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from database.users_chats_db import db
-from info import ADMINS, AUTH_CHANNEL, LOG_CHANNEL, PICS
+from info import ADMINS, AUTH_CHANNEL, LOG_CHANNEL, PICS, PREMIUM_PRICE
 from utils import is_subscribed, temp
 from datetime import date, datetime 
 from Script import script
@@ -14,7 +14,6 @@ import pytz
 
 logger = logging.getLogger(__name__)
 
-PREMIUM_PRICE = 99
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
@@ -93,216 +92,183 @@ async def log_file(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
-@Client.on_message(filters.command('total_users') & filters.user(ADMINS))
+@Client.on_message(filters.command('total') & filters.user(ADMINS))
 async def total_users(client, message):
-    total_users = await db.total_users_count()
-    total_attempts = await db.attempts_col.count_documents({})
-    total_cancel_attempts =  await db.total_cancel_count()
-    total_premium_users = await db.pre.count_documents({})
+    total_users_count = await db.total_users_count()
+    total_attempts_bot = await db.get_total_attempts_dot()
+    total_cancel_bot = await db.get_total_cancels_dot()
+    total_premium_users_bot = await db.get_total_premium_dot()
+    total_earnings_bot = await db.get_total_earnings_dot()
 
-    # Calculate total earnings
-    total_earnings = total_premium_users * PREMIUM_PRICE
+    total_attempts_db = await db.get_total_attempts_db()
+    total_cancel_db = await db.get_total_cancels_db()
+    total_premium_users_db = await db.get_total_premium_db()
+    total_earnings_db = await db.get_total_earnings_db()
 
     reply_text = (
-        f"Total Users: {total_users}\n"
-        f"Total Attempts: {total_attempts}\n"
-        f"Total Cancel Attempts: {total_cancel_attempts}\n"
-        f"Total Premium Users: {total_premium_users}\n"
-        f"Total Earnings: {total_earnings} Rupees\n"
+        f"#TOTAL_STATS\n\n"
+        f"Total Bot Stats\n"
+        f"Total Users: {total_users_count}\n"
+        f"Total Attempts (Bot): {total_attempts_bot}\n"
+        f"Total Cancel (Bot): {total_cancel_bot}\n"
+        f"Total Premium Users (Bot): {total_premium_users_bot}\n"
+        f"Total Earnings From (Bot): {total_earnings_bot} Rupees\n\n"
+        f"Total DB Stats\n"
+        f"Total Attempts (DB): {total_attempts_db}\n"
+        f"Total Cancel (DB): {total_cancel_db}\n"
+        f"Total Premium Users (DB): {total_premium_users_db}\n"
+        f"Total Earnings From (DB): {total_earnings_db} Rupees"
     )
 
     await message.reply_text(reply_text)
 
-@Client.on_message(filters.command('botstats') & filters.user(ADMINS))
-async def bot_stats(client, message):
-    total_mbot_premium_users = await db.pre.count_documents({'selected_bot': 'mbot'})
-    total_mbot_earnings = total_mbot_premium_users * PREMIUM_PRICE
+@Client.on_message(filters.command("user_id") & filters.user(ADMINS))
+async def user_info(client, message: Message):
+    user_id = message.from_user.id
 
-    total_abot_premium_users = await db.pre.count_documents({'selected_bot': 'abot'})
-    total_abot_earnings = total_abot_premium_users * PREMIUM_PRICE
+    # Check if the sender is an admin
+    if user_id not in ADMINS:
+        await message.reply_text("You are not authorized to use this command.")
+        return
 
-    total_rbot_premium_users = await db.pre.count_documents({'selected_bot': 'rbot'})
-    total_rbot_earnings = total_rbot_premium_users * PREMIUM_PRICE
+    # Get user information
+    user_info = await db.get_verified(user_id)
+    ban_status = await db.get_ban_status(user_id)
+    total_bot_premium = await db.get_user_total_premium_dot(user_id)
+    total_db_premium = await db.get_user_total_premium_db(user_id)
 
-    total_ytbot_premium_users = await db.pre.count_documents({'selected_bot': 'ytbot'})
-    total_ytbot_earnings = total_ytbot_premium_users * PREMIUM_PRICE
+    # Prepare the response message
+    response_message = f"User Information for {user_id}:\n\n"
+    
+    response_message += f"Verification Status: {user_info['date']} {user_info['time']}\n"
+    
+    if ban_status['is_banned']:
+        response_message += f"Banned: Yes\nReason: {ban_status['ban_reason']}\n"
+    else:
+        response_message += "Banned: No\n"
 
-    reply_text = (
-        f"Total Mbot Premium Users: {total_mbot_premium_users}\n"
-        f"Total Mbot Earnings: {total_mbot_earnings} Rupees\n\n"
-        
-        f"Total Abot Premium Users: {total_abot_premium_users}\n"
-        f"Total Abot Earnings: {total_abot_earnings} Rupees\n\n"
+    # Display information about bot premium plans
+    if total_bot_premium > 0:
+        response_message += "\nBot Premium Plans:\n"
+        bot_premium_info = await db.get_user_premium_active_dot(user_id)
+        for plan in bot_premium_info:
+            response_message += f"- Bot: {plan['selected_bot']}, Expires on {plan['expiry_date']}\n"
+        response_message += f"Total Bot Premium Plans: {total_bot_premium}\n"
+        response_message += f"Total Payment User For (Bot):{}\n"
 
-        f"Total Rbot Premium Users: {total_rbot_premium_users}\n"
-        f"Total Rbot Earnings: {total_rbot_earnings} Rupees\n\n"
+    # Display information about database premium plans
+    if total_db_premium > 0:
+        response_message += "\nDB Premium Plans:\n"
+        db_premium_info = await db.get_user_premium_active_db(user_id)
+        for plan in db_premium_info:
+            response_message += f"- DB: {plan['selected_db']}, Expires on {plan['expiry_date']}\n"
+        response_message += f"Total DB Premium Plans: {total_db_premium}\n"
+        response_message += f"Total Payment User For (DB):{}\n"
 
-        f"Total Ytbot Premium Users: {total_ytbot_premium_users}\n"
-        f"Total Ytbot Earnings: {total_ytbot_earnings} Rupees\n"
-    )
-
-    await message.reply_text(reply_text)
-
+    # Send the response message
+    await message.reply_text(response_message)
 
 @Client.on_message(filters.command("user_info") & filters.user(ADMINS))
 async def user_info_cmd(client, message):
     if len(message.command) != 2:
-        await message.reply_text("<b>Use this command as follows: /user_info user_id</b>")
+        await message.reply_text("<b>Use this command as follows: /user_info user_id</b>", parse_mode="html")
         return
 
     user_id = int(message.command[1])
 
-    user_data = await db.get_verified(user_id)
-    ban_status = await db.get_ban_status(user_id)
-    latest_attempt_bot = await db.get_latest_attempt_dot(user_id)
-    latest_attempt_db = await db.get_latest_attempt_db(user_id)
-    premium_bot = await db.pre.find_one({'user_id': user_id})
-    premium_db = await db.pre.find_one({'user_id': user_id})
-    
+    user_data = await db.col.find_one({'id': user_id})
     if not user_data:
         await message.reply_text("<b>User not found in the database.</b>")
         return
 
+    ban_status = await db.get_ban_status(user_id)
+    latest_attempt_bot = await db.get_latest_attempt_dot(user_id)
+    premium_info_bot = await db.get_user_premium_active_dot(user_id)
+    total_payment_bot = await db.get_user_total_payments_dot(user_id)
+    
+    latest_attempt_db = await db.get_latest_attempt_db(user_id)
+    premium_info_db = await db.get_user_premium_active_db(user_id)
+    total_payment_db = await db.get_user_total_payments_db(user_id)
+
     user_info_text = (
         f"<b>User ID:</b> {user_data['id']}\n"
         f"<b>User Name:</b> {user_data['name']}\n\n"
-        f"<b>Verification Status:</b>\n"
-        f"Date: {user_data['verification_status']['date']}\n"
-        f"Time: {user_data['verification_status']['time']}\n\n"
         f"<b>Ban Status:</b> {ban_status['is_banned']} ({ban_status['ban_reason']})\n\n"
     )
 
     if latest_attempt_bot:
         user_info_text += (
-            f"<b>Latest Attempt:</b>\n"
-            f"Bot: {latest_attempt['selected_bot']}\n"
-            f"Attempt Number: {latest_attempt['attempt_number']}\n"
-            f"Date Time: {latest_attempt['current_date_time']}\n"
-            f"Validity Date: {latest_attempt['validity_date']}\n\n"
+            f"<b>Latest Attempt (Bot):</b>\n"
+            f"Bot: {latest_attempt_bot['selected_bot']}\n"
+            f"Attempt Number: {latest_attempt_bot['attempt_number']}\n"
+            f"Date Time: {latest_attempt_bot['current_date_time']}\n"
+            f"Validity Date: {latest_attempt_bot['validity_date']}\n\n"
         )
 
     if latest_attempt_db:
         user_info_text += (
-            f"<b>Latest Attempt:</b>\n"
-            f"Database: {latest_attempt['selected_db']}\n"
-            f"Attempt Number: {latest_attempt['attempt_number']}\n"
-            f"Date Time: {latest_attempt['current_date_time']}\n"
-            f"Validity Date: {latest_attempt['validity_date']}\n\n"
+            f"<b>Latest Attempt (DB):</b>\n"
+            f"Database: {latest_attempt_db['selected_db']}\n"
+            f"Attempt Number: {latest_attempt_db['attempt_number']}\n"
+            f"Date Time: {latest_attempt_db['current_date_time']}\n"
+            f"Validity Date: {latest_attempt_db['validity_date']}\n\n"
         )
-        
-    if premium_info:
+
+    if premium_info_bot:
         user_info_text += (
-            f"<b>Premium Info:</b>\n"
-            f"Bot: {premium_info['selected_bot']}\n"
-            f"Validity Months: {premium_info['validity_months']}\n"
-            f"Expiry Date: {premium_info['expiry_date']}\n\n"
+            f"<b>Premium Info (Bot):</b>\n"
+            f"Bot: {premium_info_bot['selected_bot']}\n"
+            f"Validity Months: {premium_info_bot['validity_months']}\n"
+            f"Expiry Date: {premium_info_bot['expiry_date']}\n"
+            f"Total Pay For Premium: {total_payment_bot}\n\n"
+        )
+    
+    if premium_info_db:
+        user_info_text += (
+            f"<b>Premium Info (DB):</b>\n"
+            f"Database: {premium_info_db['selected_db']}\n"
+            f"Validity Months: {premium_info_db['validity_months']}\n"
+            f"Expiry Date: {premium_info_db['expiry_date']}\n"
+            f"Total Pay For Premium: {total_payment_db}\n\n"
         )
 
-    await message.reply_text(user_info_text, parse_mode=enums.ParseMode.HTML)
+    await message.reply_text(user_info_text)
 
-@Client.on_message(filters.command('totalstats') & filters.user(ADMINS))
-async def total_stats(client, message):
-    total_users = await db.total_users_count()
-    
-    total_attempts_bot = await db.get_total_attempts_dot()   
-    total_cancel_bot = await db.get_total_cancel_dot()    
-    total_premium_bot = await db.get_total_premium_dot()
-    total_earnings_bot = await db.get_total_earnings_dot()
-    
-    total_attempts_db = await db.get_total_attempts_db()
-    total_cancel_db = await db.get_total_cancel_db()
-    total_premium_db = await db.get_total_premium_db()
-    total_earnings_db = await db.get_total_earnings_db()
-
-    stats_text = (
-        f"#TOTAL_STATS\n\n"
-        f"Total Bots Users\n"
-        f"Total Attempts (Bot): {total_attempts_bot}\n"  
-        f"Total Cancelled Users (Bot): {total_cancel_bot}\n"
-        f"Total Premium Users (Bot): {total_premium_bot}\n"
-        f"Total Earnings (Bot): {total_earnings_bot}\n"
-        f"Total Database Users\n"
-        f"Total Attempts (DB): {total_attempts_db}\n"
-        f"Total Cancelled Users (DB): {total_cancel_db}\n"
-        f"Total Premium Users (DB): {total_premium_db}\n"
-        f"Total Earnings (DB): {total_earnings_db}\n"
-    )
-
-    await message.reply_text(stats_text)
-
-
-
-@Client.on_message(filters.command("myplan"))
+@Client.on_message(filters.command("my_plan"))
 async def my_plan(client, message):
     user_id = message.from_user.id
 
-    user_data = await db.get_verified(user_id)
-    ban_status = await db.get_ban_status(user_id)
-    latest_attempt_bot = await db.get_latest_attempt_dot(user_id)
-    latest_attempt_db = await db.get_latest_attempt_db(user_id)
-    premium_info = await db.pre.find_one({'user_id': user_id})
+    # Get premium plan details for bots
+    bot_premium_info = await db.get_user_premium_active_dot(user_id)
+    bot_premium_count = await db.get_user_total_premium_dot(user_id)
+    bot_total_payments = await db.get_user_total_payments_dot(user_id)
 
-    if not user_data:
-        await message.reply_text("<b>User not found in the database.</b>")
-        return
+    # Get premium plan details for databases
+    db_premium_info = await db.get_user_premium_active_db(user_id)
+    db_premium_count = await db.get_user_total_premium_db(user_id)
+    db_total_payments = await db.get_user_total_payments_db(user_id)
 
-    user_info_text = (
-        f"<b>Your Info:</b>\n"
-        f"Verification Status: {user_data['verification_status']['date']} {user_data['verification_status']['time']}\n"
-        f"Ban Status: {ban_status['is_banned']} ({ban_status['ban_reason']})\n\n"
-    )
+    # Format the expiry dates
+    bot_expiry_dates = [datetime.strftime(plan['expiry_date'], "%Y-%m-%d %H:%M:%S") for plan in bot_premium_info]
+    db_expiry_dates = [datetime.strftime(plan['expiry_date'], "%Y-%m-%d %H:%M:%S") for plan in db_premium_info]
 
-    if latest_attempt_bot:
-        user_info_text += (
-            f"Latest Attempt:\n"
-            f"Bot: {latest_attempt['selected_bot']}\n"
-            f"Attempt Number: {latest_attempt['attempt_number']}\n"
-            f"Date Time: {latest_attempt['current_date_time']}\n"
-            f"Validity Date: {latest_attempt['validity_date']}\n\n"
-        )
+    # Prepare the response message
+    response_message = f"Your Premium Plans:\n\n"
 
-    if latest_attempt_db:
-        user_info_text += (
-            f"Latest Attempt:\n"
-            f"Bot: {latest_attempt['selected_bot']}\n"
-            f"Attempt Number: {latest_attempt['attempt_number']}\n"
-            f"Date Time: {latest_attempt['current_date_time']}\n"
-            f"Validity Date: {latest_attempt['validity_date']}\n\n"
-        )
-        
-    if premium_info:
-        user_info_text += (
-            f"Premium Info:\n"
-            f"Bot: {premium_info['selected_bot']}\n"
-            f"Validity Months: {premium_info['validity_months']}\n"
-            f"Expiry Date: {premium_info['expiry_date']}\n\n"
-        )
+    if bot_premium_count > 0:
+        response_message += "Bot Premium Plans:\n"
+        for i in range(bot_premium_count):
+            response_message += f"- Plan {i + 1}: Expires on {bot_expiry_dates[i]}\n"
+        response_message += f"Total Payments for Bot Premium Plans: {bot_total_payments}\n\n"
 
-    await message.reply_text(user_info_text, parse_mode=enums.ParseMode.HTML)
+    if db_premium_count > 0:
+        response_message += "DB Premium Plans:\n"
+        for i in range(db_premium_count):
+            response_message += f"- Plan {i + 1}: Expires on {db_expiry_dates[i]}\n"
+        response_message += f"Total Payments for DB Premium Plans: {db_total_payments}\n\n"
 
+    if bot_premium_count == 0 and db_premium_count == 0:
+        response_message += "You don't have any active premium plans."
 
-@Client.on_message(filters.command("send") & filters.user(ADMINS))
-async def send_msg(bot, message):
-    if message.reply_to_message:
-        target_id = message.text.split(" ", 1)[1]
-        out = "Users Saved In DB Are:\n\n"
-        success = False
-        try:
-            user = await bot.get_users(target_id)
-            users = await db.get_all_users()
-            async for usr in users:
-                out += f"{usr['id']}"
-                out += '\n'
-            if str(user.id) in str(out):
-                await message.reply_to_message.copy(int(user.id))
-                success = True
-            else:
-                success = False
-            if success:
-                await message.reply_text(f"<b>Your message has been successfully sent to {user.mention}.</b>")
-            else:
-                await message.reply_text("<b>This user didn't start this bot yet!</b>")
-        except Exception as e:
-            await message.reply_text(f"<b>Error: {e}</b>")
-    else:
-        await message.reply_text("<b>Use this command as a reply to any message using the target chat ID. For example: /send user_id</b>")
+    # Send the response message
+    await message.reply_text(response_message)
