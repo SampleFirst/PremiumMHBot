@@ -54,6 +54,7 @@ TOTAL_MEMBERS = environ.get("TOTAL_MEMBERS", "49")
 MOVIES_DB = int(environ.get('MOVIES_DB', 0))
 ANIME_DB = int(environ.get('ANIME_DB', 0))
 SERIES_DB = int(environ.get('SERIES_DB', 0))
+PREMIUM_PRICE = environ.get("PREMIUM_PRICE", "99")
 
 
 # Others
