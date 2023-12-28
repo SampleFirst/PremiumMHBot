@@ -154,7 +154,7 @@ async def user_info(client, message: Message):
         for plan in bot_premium_info:
             response_message += f"- Bot: {plan['selected_bot']}, Expires on {plan['expiry_date']}\n"
         response_message += f"Total Bot Premium Plans: {total_bot_premium}\n"
-        response_message += f"Total Payment User For (Bot):{}\n"
+        response_message += "Total Payment User For (Bot):{}\n"
 
     # Display information about database premium plans
     if total_db_premium > 0:
@@ -163,7 +163,7 @@ async def user_info(client, message: Message):
         for plan in db_premium_info:
             response_message += f"- DB: {plan['selected_db']}, Expires on {plan['expiry_date']}\n"
         response_message += f"Total DB Premium Plans: {total_db_premium}\n"
-        response_message += f"Total Payment User For (DB):{}\n"
+        response_message += "Total Payment User For (DB):{}\n"
 
     # Send the response message
     await message.reply_text(response_message)
