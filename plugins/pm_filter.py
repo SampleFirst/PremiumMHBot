@@ -21,6 +21,8 @@ logger.setLevel(logging.ERROR)
 # Define a dictionary to store user states (locked or not)
 user_states = {}
 USER_SELECTED = {}
+TOTAL_SEAT_BOT = 500
+DAILY_SEAT_BOT = 1
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
@@ -193,6 +195,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
         # Display monthly plan message for selected bot
+        
+        selected_bot = query.data
+        
+        month_attempts = await db.get_total_attempts_dot(selected_bot)
+        if month_attempts >= TOTAL_SEAT_BOT:
+            await query.answer(f"Sorry, the maximum monthly attempts for {selected_bot} have been reached. Please try again later.")
+            return
+    
+        daily_attempts = await db.get_total_attempts_dot(selected_bot)
+        if daily_attempts >= DAILY_SEAT_BOT:
+            await query.answer(f"Sorry, the maximum daily attempts for {selected_bot} have been reached. Please try again tomorrow.")
+            return
+
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
@@ -287,6 +302,18 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "mdb" or query.data == "adb" or query.data == "tvsdb":
         # Display monthly plan message for selected bot
+        selected_db = query.data
+        
+        month_attempts = await db.get_total_attempts_db(selected_db)
+        if month_attempts >= TOTAL_SEAT_BOT:
+            await query.answer(f"Sorry, the maximum monthly attempts for {selected_db} have been reached. Please try again later.")
+            return
+    
+        daily_attempts = await db.get_total_attempts_db(selected_db)
+        if daily_attempts >= DAILY_SEAT_BOT:
+            await query.answer(f"Sorry, the maximum daily attempts for {selected_db} have been reached. Please try again tomorrow.")
+            return
+            
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
