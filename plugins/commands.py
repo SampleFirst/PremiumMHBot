@@ -123,7 +123,7 @@ async def total_users(client, message):
     await message.reply_text(reply_text)
 
 @Client.on_message(filters.command("user_id") & filters.user(ADMINS))
-async def user_info(client, message: Message):
+async def user_info(client, message):
     user_id = message.from_user.id
 
     # Check if the sender is an admin
