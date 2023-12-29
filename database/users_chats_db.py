@@ -117,19 +117,21 @@ class Database:
         await self.grp.delete_many({'id': int(chat_id)})
         
     # all dot related functions
-    async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, current_date_time, validity_date):
+    async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date):
         attempt_data = {
             'user_id': user_id,
             'user_name': user_name,
             'selected_bot': selected_bot,
             'attempt_number': attempt_number,
+            'attempt_number_selected_bot': attempt_number_selected_bot,
             'current_date_time': current_date_time,
             'validity_date': validity_date
         }
         await self.dot.insert_one(attempt_data)
+    
 
-    async def get_user_attempts_dot(self, user_id):
-        attempts = await self.dot.count_documents({'user_id': user_id})
+    async def get_user_attempts_dot(self, user_id, selected_bot):
+        attempts = await self.dot.count_documents({'user_id': user_id, 'selected_bot': selected_bot})
         return attempts
         
     async def get_latest_attempt_dot(self, user_id):
