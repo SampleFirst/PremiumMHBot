@@ -145,6 +145,45 @@ class Database:
         total_attempts = await self.dot.count_documents({'selected_bot': selected_bot})
         return total_attempts
 
+    async def get_daily_attempts_dot(self, today):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        daily_count = await self.dot.count_documents({
+            'current_date_time': {'$gte': start, '$lt': end}
+        })
+        return daily_count
+    
+    async def get_single_daily_attempts_dot(self, today, selected_bot):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        daily_bot_count = await self.dot.count_documents({
+            'selected_bot': selected_bot,
+            'current_date_time': {'$gte': start, '$lt': end}
+        })
+        return daily_bot_count
+        
+    async def get_monthly_attempts_dot(self, year, month):
+        tz = pytz.timezone('Asia/Kolkata')
+        first_day_of_month = tz.localize(datetime(year, month, 1, 0, 0, 0))
+        last_day_of_month = tz.localize(datetime(year, month + 1, 1, 0, 0, 0)) - timedelta(microseconds=1)        
+        monthly_count = await self.dot.count_documents({
+            'current_date_time': {'$gte': first_day_of_month, '$lt': last_day_of_month}
+        })
+        return monthly_count
+
+    async def get_monthly_attempts_dot(self, year, month, selected_bot):
+        tz = pytz.timezone('Asia/Kolkata')
+        first_day_of_month = tz.localize(datetime(year, month, 1, 0, 0, 0))
+        last_day_of_month = tz.localize(datetime(year, month + 1, 1, 0, 0, 0)) - timedelta(microseconds=1)
+        
+        monthly_bot_count = await self.dot.count_documents({
+            'selected_bot': selected_bot,
+            'current_date_time': {'$gte': first_day_of_month, '$lt': last_day_of_month}
+        })
+        return monthly_bot_count
+        
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
         cancel_data = {
             'user_id': user_id,
