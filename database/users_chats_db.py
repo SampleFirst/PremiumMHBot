@@ -139,8 +139,8 @@ class Database:
         )
         return latest_attempt
 
-    async def get_total_attempts_dot(self):
-        total_attempts = await self.dot.count_documents({})
+    async def get_total_attempts_dot(self, selected_bot):
+        total_attempts = await self.dot.count_documents({'selected_bot': selected_bot})
         return total_attempts
 
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
@@ -218,8 +218,8 @@ class Database:
         )
         return latest_attempt
 
-    async def get_total_attempts_db(self):
-        total_attempts = await self.udb.count_documents({})
+    async def get_total_attempts_db(self, selected_db):
+        total_attempts = await self.udb.count_documents({'selected_db': selected_db})
         return total_attempts
 
     async def add_user_cancel_db(self, user_id, user_name, selected_db, current_date_time):
