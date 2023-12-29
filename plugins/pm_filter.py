@@ -21,8 +21,8 @@ logger.setLevel(logging.ERROR)
 # Define a dictionary to store user states (locked or not)
 user_states = {}
 USER_SELECTED = {}
-TOTAL_SEAT_BOT = 1
-DAILY_SEAT_BOT = 2
+TOTAL_SEAT_BOT = 1000
+DAILY_SEAT_BOT = 1000
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
