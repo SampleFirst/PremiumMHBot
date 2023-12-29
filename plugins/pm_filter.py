@@ -262,7 +262,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"User: {user_name}\n"
             f"Bot: {selected_bot.capitalize()}\n"
             f"Date: {current_date_time}\n"
-            f"Validity: {validity_formatted}\n\n"
+            f"Validity: {validity_formatted}\n"
+            f"Total Attempts: {attempt_number}\n"
+            f"Total {selected_bot.capitalize()} Attempts: {attempt_number_selected_bot}\n\n"
             f"Please verify and handle the payment."
         )
     
