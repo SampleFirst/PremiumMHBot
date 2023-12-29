@@ -173,7 +173,7 @@ class Database:
         })
         return monthly_count
 
-    async def get_monthly_attempts_dot(self, year, month, selected_bot):
+    async def get_single_monthly_attempts_dot(self, year, month, selected_bot):
         tz = pytz.timezone('Asia/Kolkata')
         first_day_of_month = tz.localize(datetime(year, month, 1, 0, 0, 0))
         last_day_of_month = tz.localize(datetime(year, month + 1, 1, 0, 0, 0)) - timedelta(microseconds=1)
