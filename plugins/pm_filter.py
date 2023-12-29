@@ -240,18 +240,23 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data.replace("confirm_bot_", "")
         user_name = query.from_user.username
         user_id = query.from_user.id
-
+    
         bot_name = selected_bot.capitalize()
         current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-
-        await db.add_attempt_dot(user_id, user_name, selected_bot, 1, current_date_time, validity_date)
-        USER_SELECTED[user_id] = selected_bot
+    
+        # Add the attempt information to the database
+        attempt_number = await db.get_user_attempts_dot(user_id) + 1
+        attempt_number_selected_bot = await db.get_user_attempts_dot(user_id, selected_bot) + 1
         
+        await db.add_attempt_dot(user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date)
+    
+        USER_SELECTED[user_id] = selected_bot
+    
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
-
+    
         admin_confirmation_message = (
             f"Subscription Confirmed:\n\n"
             f"User: {user_name}\n"
@@ -260,10 +265,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"Validity: {validity_formatted}\n\n"
             f"Please verify and handle the payment."
         )
-
+    
         # Send Log about successful subscription
         await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
-
+    
         # Notify user about successful subscription
         await client.edit_message_media(
             query.message.chat.id,
@@ -274,7 +279,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
-        
+    
         
     
     elif query.data.startswith("description_bot_"):
