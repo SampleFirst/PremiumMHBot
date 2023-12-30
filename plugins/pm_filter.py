@@ -1,6 +1,7 @@
 import random
 import logging
 import datetime
+from datetime import date
 import pytz
 
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
@@ -118,6 +119,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
+    today = date.today()
     is_admin = query.from_user.id in ADMINS
     if query.data == "close_data":
         await query.message.delete()
