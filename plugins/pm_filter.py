@@ -163,7 +163,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         reply_markup = InlineKeyboardMarkup(buttons)
 
         tz = pytz.timezone('Asia/Kolkata')
-        today = datetime.now(tz)
+        now = datetime.now(tz)
+        today = now.date()
         year = today.year
         month = today.month
 
