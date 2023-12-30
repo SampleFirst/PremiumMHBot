@@ -164,8 +164,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         total_monthly_limit = TOTAL_MONTHLY_SEAT_BOT
         total_daily_limit = TOTAL_DAILY_SEAT_BOT
         
-        total_monthly_attempts = await get_monthly_attempts_dot()
-        total_daily_attempts = await get_daily_attempts_dot()
+        total_monthly_attempts = await db.get_monthly_attempts_dot()
+        total_daily_attempts = await db.get_daily_attempts_dot()
         
         available_monthly = total_monthly_limit - total_monthly_attempts
         available_daily = total_daily_limit - total_daily_attempts
