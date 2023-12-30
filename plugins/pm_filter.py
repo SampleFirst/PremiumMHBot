@@ -161,21 +161,27 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
+        tz = pytz.timezone('Asia/Kolkata')
+        today = datetime.now(tz)
+        year = today.year
+        month = today.month
+
         total_monthly_limit = TOTAL_MONTHLY_SEAT_BOT
         total_daily_limit = TOTAL_DAILY_SEAT_BOT
-        
-        total_monthly_attempts = await db.get_monthly_attempts_dot()
-        total_daily_attempts = await db.get_daily_attempts_dot()
-        
+
+        total_monthly_attempts = await db.get_monthly_attempts_dot(year, month)
+        total_daily_attempts = await db.get_daily_attempts_dot(today)
+
         available_monthly = total_monthly_limit - total_monthly_attempts
         available_daily = total_daily_limit - total_daily_attempts
-        
+
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
-        
+
         updated_text = (
             f"Total Monthly Limit: {total_monthly_limit}\n"
             f"Total Daily Limit: {total_daily_limit}\n"
@@ -184,13 +190,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"Available Monthly: {available_monthly}\n"
             f"Available Daily: {available_daily}\n"
         )
-        
+
         await query.message.edit_text(
             text=updated_text,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-    
+
 
     elif query.data == "database":
         buttons = [
