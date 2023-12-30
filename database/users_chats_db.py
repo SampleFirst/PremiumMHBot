@@ -130,9 +130,15 @@ class Database:
         await self.dot.insert_one(attempt_data)
     
 
-    async def get_user_attempts_dot(self, user_id, selected_bot):
-        attempts = await self.dot.count_documents({'user_id': user_id, 'selected_bot': selected_bot})
+    async def get_user_attempts_dot(self, user_id, selected_bot=None):
+        if selected_bot:
+            filter_params = {'user_id': user_id, 'selected_bot': selected_bot}
+        else:
+            filter_params = {'user_id': user_id}
+    
+        attempts = await self.dot.count_documents(filter_params)
         return attempts
+
         
     async def get_latest_attempt_dot(self, user_id):
         latest_attempt = await self.dot.find_one(
