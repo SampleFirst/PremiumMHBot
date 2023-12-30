@@ -21,12 +21,12 @@ logger.setLevel(logging.ERROR)
 # Define a dictionary to store user states (locked or not)
 user_states = {}
 USER_SELECTED = {}
-MONTHLY_BOT_LIMIT = True 
-TOTAL_BOT_COUNT = True 
-TOTAL_MONTHLY_SEAT_BOT = 100
-SINGAL_MONTHLY_SEAT_BOT = 100
-TOTAL_DAILY_SEAT_BOT = 20
-SINGAL_DAILY_SEAT_BOT = 20
+MONTHLY_BOT_LIMIT = False 
+TOTAL_BOT_COUNT = False 
+TOTAL_MONTHLY_SEAT_BOT = 6
+SINGAL_MONTHLY_SEAT_BOT = 3
+TOTAL_DAILY_SEAT_BOT = 5
+SINGAL_DAILY_SEAT_BOT = 3
 
 
 @Client.on_message(filters.photo & filters.private)
@@ -161,16 +161,36 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        total_monthly_limit = TOTAL_MONTHLY_SEAT_BOT
+        total_daily_limit = TOTAL_DAILY_SEAT_BOT
+        
+        total_monthly_attempts = await get_monthly_attempts_dot()
+        total_daily_attempts = await get_daily_attempts_dot()
+        
+        available_monthly = total_monthly_limit - total_monthly_attempts
+        available_daily = total_daily_limit - total_daily_attempts
+        
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
+        
+        updated_text = (
+            f"Total Monthly Limit: {total_monthly_limit}\n"
+            f"Total Daily Limit: {total_daily_limit}\n"
+            f"Total Monthly Attempts: {total_monthly_attempts}\n"
+            f"Total Daily Attempts: {total_daily_attempts}\n"
+            f"Available Monthly: {available_monthly}\n"
+            f"Available Daily: {available_daily}\n"
+        )
+        
         await query.message.edit_text(
-            text=script.BOTS.format(user=query.from_user.mention),
+            text=updated_text,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+    
 
     elif query.data == "database":
         buttons = [
