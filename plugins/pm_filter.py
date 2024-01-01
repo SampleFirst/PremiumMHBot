@@ -201,12 +201,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
         if MONTHLY_BOT_LIMIT:
             total_attempts = await db.get_monthly_attempts_dot(year, month) if TOTAL_BOT_COUNT else await db.get_single_monthly_attempts_dot(year, month, selected_bot)
-            if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
+            if total_attempts >= int(TOTAL_MONTHLY_SEAT_BOT):
                 await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
                 return
         else:
             total_attempts = await db.get_daily_attempts_dot(today) if TOTAL_BOT_COUNT else await db.get_single_daily_attempts_dot(today, selected_bot)
-            if total_attempts >= TOTAL_DAILY_SEAT_BOT:
+            if total_attempts >= int(TOTAL_DAILY_SEAT_BOT):
                 await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
                 return
     
