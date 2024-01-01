@@ -23,7 +23,11 @@ logger.setLevel(logging.ERROR)
 user_states = {}
 USER_SELECTED = {}
 
-
+def get_indian_datetime():
+    indian_timezone = pytz.timezone('Asia/Kolkata')
+    utc_now = datetime.datetime.utcnow()
+    indian_time = utc_now.replace(tzinfo=pytz.utc).astimezone(indian_timezone)
+    return indian_time
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
@@ -200,13 +204,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-        indian_timezone = pytz.timezone('Asia/Kolkata')
-        utc_now = datetime.datetime.utcnow()
-        indian_time = utc_now.replace(tzinfo=pytz.utc).astimezone(indian_timezone)
-        current_time = get_indian_datetime()
-        day = current_time.day
-        month = current_time.month
-        year = current_time.year
+        indian_time = get_indian_datetime()
+        day = indian_time.day
+        month = indian_time.month
+        year = indian_time.year
         today = day
         
         if MONTHLY_BOT_LIMIT:
@@ -261,6 +262,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.MARKDOWN
         )
+
         
 
     elif query.data.startswith("confirm_bot_"):
