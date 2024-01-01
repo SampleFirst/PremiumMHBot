@@ -10,7 +10,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified, PeerIdInvalid
 
-from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT, TOTAL_MEMBERS, MOVIES_DB, ANIME_DB, SERIES_DB
+from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT, TOTAL_MEMBERS, MOVIES_DB, ANIME_DB, SERIES_DB, MONTHLY_BOT_LIMIT, TOTAL_BOT_COUNT, TOTAL_MONTHLY_SEAT_BOT, SINGAL_MONTHLY_SEAT_BOT, TOTAL_DAILY_SEAT_BOT, SINGAL_DAILY_SEAT_BOT
 from database.users_chats_db import db
 
 from Script import script
@@ -22,12 +22,7 @@ logger.setLevel(logging.ERROR)
 # Define a dictionary to store user states (locked or not)
 user_states = {}
 USER_SELECTED = {}
-MONTHLY_BOT_LIMIT = False 
-TOTAL_BOT_COUNT = False 
-TOTAL_MONTHLY_SEAT_BOT = 6
-SINGAL_MONTHLY_SEAT_BOT = 3
-TOTAL_DAILY_SEAT_BOT = 5
-SINGAL_DAILY_SEAT_BOT = 3
+
 
 
 @Client.on_message(filters.photo & filters.private)
