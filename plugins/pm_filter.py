@@ -200,18 +200,37 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-    
+        indian_timezone = pytz.timezone('Asia/Kolkata')
+        utc_now = datetime.datetime.utcnow()
+        indian_time = utc_now.replace(tzinfo=pytz.utc).astimezone(indian_timezone)
+        current_time = get_indian_datetime()
+        day = current_time.day
+        month = current_time.month
+        year = current_time.year
+        today = day
+        
         if MONTHLY_BOT_LIMIT:
-            total_attempts = await db.get_monthly_attempts_dot(year, month) if TOTAL_BOT_COUNT else await db.get_single_monthly_attempts_dot(year, month, selected_bot)
-            if total_attempts >= int(TOTAL_MONTHLY_SEAT_BOT):
-                await query.message.edit_text("Monthly attempts exceeded. Please contact support.", show_alert=True)
-                return
+            if TOTAL_BOT_COUNT:
+                total_attempts = await db.get_monthly_attempts_dot(year, month)
+                if total_attempts >= int(TOTAL_MONTHLY_SEAT_BOT):
+                    await query.message.edit_text("Monthly attempts exceeded. Please contact support.", show_alert=True)
+                    return
+            else:
+                total_attempts = await db.get_single_monthly_attempts_dot(year, month, selected_bot)
+                if total_attempts >= int(SINGAL_MONTHLY_SEAT_BOT):
+                    await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.", show_alert=True)
+                    return
         else:
-            total_attempts = await db.get_daily_attempts_dot(today) if TOTAL_BOT_COUNT else await db.get_single_daily_attempts_dot(today, selected_bot)
-            if total_attempts >= int(TOTAL_DAILY_SEAT_BOT):
-                await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.", show_alert=True)
-                return
-                
+            if TOTAL_BOT_COUNT:
+                total_attempts = await db.get_daily_attempts_dot(today)
+                if total_attempts >= int(TOTAL_DAILY_SEAT_BOT):
+                    await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.", show_alert=True)
+                    return
+            else:
+                total_attempts = await db.get_single_daily_attempts_dot(today, selected_bot)
+                if total_attempts >= int(SINGAL_DAILY_SEAT_BOT):
+                    await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.", show_alert=True)
+                    return
         
         buttons = [
             [
@@ -223,10 +242,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        message_text = f"🍿 **{query.data.capitalize()} Premium Plan** 🍿\n\n"
-        message_text += f"{total_attempts} >= {int(TOTAL_DAILY_SEAT_BOT)}\n\n"
-        message_text += f"This plan is valid until {validity_date}.\n\n"
-        message_text += "Make payments and then select **Confirmed** button:"
+        message_text = (
+            f"🍿 **{query.data.capitalize()} Premium Plan** 🍿\n\n"
+            f"{total_attempts} == {int(TOTAL_DAILY_SEAT_BOT)}\n\n"
+            f"Selected Bot: {selected_db.capitalize()}\n"
+            f"Validity: {validity_formatted}\n"
+            f"Date and Time: {current_date_time}\n"
+            "Make payments and then select **Confirmed** button:"
+        )
+        
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -237,7 +261,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.MARKDOWN
         )
-    
+        
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
