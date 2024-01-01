@@ -198,22 +198,21 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
         # Check if total bot limit is enabled
         selected_bot = query.data
-    
-        if MONTHLY_BOT_LIMIT:
-            total_attempts = await db.get_monthly_attempts_dot(year, month) if TOTAL_BOT_COUNT else await db.get_single_monthly_attempts_dot(year, month, selected_bot)
-            if total_attempts >= int(TOTAL_MONTHLY_SEAT_BOT):
-                await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
-                return
-        else:
-            total_attempts = await db.get_daily_attempts_dot(today) if TOTAL_BOT_COUNT else await db.get_single_daily_attempts_dot(today, selected_bot)
-            if total_attempts >= int(TOTAL_DAILY_SEAT_BOT):
-                await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
-                return
-    
-    
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
     
+        if MONTHLY_BOT_LIMIT:
+            total_attempts = await db.get_monthly_attempts_dot(year, month) if TOTAL_BOT_COUNT else await db.get_single_monthly_attempts_dot(year, month, selected_bot)
+            if total_attempts == int(TOTAL_MONTHLY_SEAT_BOT):
+                await query.message.edit_text("Monthly attempts exceeded. Please contact support." show_alert=True)
+                return
+        else:
+            total_attempts = await db.get_daily_attempts_dot(today) if TOTAL_BOT_COUNT else await db.get_single_daily_attempts_dot(today, selected_bot)
+            if total_attempts == int(TOTAL_DAILY_SEAT_BOT):
+                await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support." show_alert=True)
+                return
+                
+        
         buttons = [
             [
                 InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
@@ -225,6 +224,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         message_text = f"🍿 **{query.data.capitalize()} Premium Plan** 🍿\n\n"
+        message_text = f"{total_attempts} == {int(TOTAL_MONTHLY_SEAT_BOT)}"
         message_text += f"This plan is valid until {validity_date}.\n\n"
         message_text += "Make payments and then select **Confirmed** button:"
         await client.edit_message_media(
