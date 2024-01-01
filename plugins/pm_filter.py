@@ -202,8 +202,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
         # Check if total bot limit is enabled
         selected_bot = query.data
+        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
+
         indian_time = get_indian_datetime()
         day = indian_time.day
         month = indian_time.month
