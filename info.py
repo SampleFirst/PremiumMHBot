@@ -59,6 +59,13 @@ PREMIUM_PRICE = environ.get("PREMIUM_PRICE", "99")
 
 # Others
 IS_VERIFY = is_enabled((environ.get('IS_VERIFY', 'True')), True)
+MONTHLY_BOT_LIMIT = is_enabled((environ.get('MONTHLY_BOT_LIMIT', 'False')), False)
+TOTAL_BOT_COUNT = is_enabled((environ.get('TOTAL_BOT_COUNT', 'False')), False)
+TOTAL_MONTHLY_SEAT_BOT = environ.get("TOTAL_MONTHLY_SEAT_BOT", "5")
+SINGAL_MONTHLY_SEAT_BOT = environ.get("SINGAL_MONTHLY_SEAT_BOT", "4")
+TOTAL_DAILY_SEAT_BOT = environ.get("TOTAL_DAILY_SEAT_BOT", "3")
+SINGAL_DAILY_SEAT_BOT = environ.get("SINGAL_DAILY_SEAT_BOT", "2")
+
 HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', "https://t.me/How_To_Verify_PMH")
 VERIFY2_URL = environ.get('VERIFY2_URL', "mdisklink.link")
 VERIFY2_API = environ.get('VERIFY2_API', "a9710a537139aae48410ec2d414acf3f29d52345")
