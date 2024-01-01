@@ -244,9 +244,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         message_text = (
-            f"🍿 **{query.data.capitalize()} Premium Plan** 🍿\n\n"
+            f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
             f"{total_attempts} == {int(TOTAL_DAILY_SEAT_BOT)}\n\n"
-            f"Selected Bot: {selected_db.capitalize()}\n"
+            f"Selected Bot: {selected_bot.capitalize()}\n"
             f"Validity: {validity_formatted}\n"
             f"Date and Time: {current_date_time}\n"
             "Make payments and then select **Confirmed** button:"
