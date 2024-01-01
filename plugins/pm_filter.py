@@ -205,27 +205,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data
     
         if MONTHLY_BOT_LIMIT:
-            if TOTAL_BOT_COUNT:
-                total_attempts = await db.get_monthly_attempts_dot(year, month)
-                if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
-                    await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
-                    return
-            else:
-                total_attempts = await db.get_single_monthly_attempts_dot(year, month, selected_bot)
-                if total_attempts >= SINGAL_MONTHLY_SEAT_BOT:
-                    await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
-                    return
+            total_attempts = await db.get_monthly_attempts_dot(year, month) if TOTAL_BOT_COUNT else await db.get_single_monthly_attempts_dot(year, month, selected_bot)
+            if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
+                await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
+                return
         else:
-            if TOTAL_BOT_COUNT:
-                total_attempts = await db.get_daily_attempts_dot(today)
-                if total_attempts >= TOTAL_DAILY_SEAT_BOT:
-                    await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
-                    return
-            else:
-                total_attempts = await db.get_single_daily_attempts_dot(today, selected_bot)
-                if total_attempts >= SINGAL_DAILY_SEAT_BOT:
-                    await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.")
-                    return
+            total_attempts = await db.get_daily_attempts_dot(today) if TOTAL_BOT_COUNT else await db.get_single_daily_attempts_dot(today, selected_bot)
+            if total_attempts >= TOTAL_DAILY_SEAT_BOT:
+                await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
+                return
+    
     
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
