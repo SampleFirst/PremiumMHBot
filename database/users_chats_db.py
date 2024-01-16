@@ -151,67 +151,20 @@ class Database:
         total_attempts = await self.dot.count_documents({'selected_bot': selected_bot})
         return total_attempts
 
-    async def get_daily_attempts_dot(self, today):
-        tz = pytz.timezone('Asia/Kolkata')
-        start_date = date.today()
-        start = tz.localize(datetime.combine(start_date, datetime.min.time()))
-        end = tz.localize(datetime.combine(start_date, datetime.max.time()))
-        daily_count = await self.dot.count_documents({
-            'current_date_time': {'$gte': start, '$lt': end}
-        })
-        return daily_count
     
-    async def get_single_daily_attempts_dot(self, today, selected_bot):
-        tz = pytz.timezone('Asia/Kolkata')
-        start_date = date.today()
-        start = tz.localize(datetime.combine(start_date, datetime.min.time()))
-        end = tz.localize(datetime.combine(start_date, datetime.max.time()))
-        
-        daily_bot_count = await self.dot.count_documents({
-            'selected_bot': selected_bot,
-            'current_date_time': {'$gte': start, '$lt': end}
-        })
-        return daily_bot_count
-        
-    async def get_monthly_attempts_dot(self, year, month):
-        tz = pytz.timezone('Asia/Kolkata')
-        first_day_of_month = tz.localize(datetime(year, month, 1, 0, 0, 0))
-        last_day_of_month = tz.localize(datetime(year, month + 1, 1, 0, 0, 0)) - timedelta(microseconds=1)        
-        monthly_count = await self.dot.count_documents({
-            'current_date_time': {'$gte': first_day_of_month, '$lt': last_day_of_month}
-        })
-        return monthly_count
+    async def get_total_limit_attempts_dot(self, selected_bot=False, daily_limit=False, monthly_limit=False):
+        filter_params = {}
     
-    async def get_single_monthly_attempts_dot(self, year, month, selected_bot):
-        tz = pytz.timezone('Asia/Kolkata')
-        first_day_of_month = tz.localize(datetime(year, month, 1, 0, 0, 0))
-        last_day_of_month = tz.localise(datetime(year, month + 1, 1, 0, 0, 0)) - timedelta(microseconds=1)
-        
-        monthly_bot_count = await self.dot.count_documents({
-            'selected_bot': selected_bot,
-            'current_date_time': {'$gte': first_day_of_month, '$lt': last_day_of_month}
-        })
-        return monthly_bot_count
-        
-    async def get_yearly_attempts_dot(self, year):
-        tz = pytz.timezone('Asia/Kolkata')
-        first_day_of_year = tz.localize(datetime(year, 1, 1, 0, 0, 0))
-        last_day_of_year = tz.localize(datetime(year + 1, 1, 1, 0, 0, 0)) - timedelta(microseconds=1)        
-        yearly_count = await self.dot.count_documents({
-            'current_date_time': {'$gte': first_day_of_year, '$lt': last_day_of_year}
-        })
-        return yearly_count
+        if selected_bot:
+            filter_params['selected_bot'] = selected_bot
     
-    async def get_single_yearly_attempts_dot(self, year, selected_bot):
-        tz = pytz.timezone('Asia/Kolkata')
-        first_day_of_year = tz.localize(datetime(year, 1, 1, 0, 0, 0))
-        last_day_of_year = tz.localize(datetime(year + 1, 1, 1, 0, 0, 0)) - timedelta(microseconds=1)
-        
-        yearly_bot_count = await self.dot.count_documents({
-            'selected_bot': selected_bot,
-            'current_date_time': {'$gte': first_day_of_year, '$lt': last_day_of_year}
-        })
-        return yearly_bot_count
+        if daily_limit:
+            filter_params['current_date_time'] = {'$gte': datetime.now() - timedelta(days=1)}
+        elif monthly_limit:
+            filter_params['current_date_time'] = {'$gte': datetime.now() - timedelta(days=30)}
+    
+        total_attempts = await self.dot.count_documents(filter_params)
+        return total_attempts
     
         
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
