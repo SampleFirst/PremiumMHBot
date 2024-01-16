@@ -10,7 +10,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified, PeerIdInvalid
 
-from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT, TOTAL_MEMBERS, MOVIES_DB, ANIME_DB, SERIES_DB, MONTHLY_BOT_LIMIT, TOTAL_BOT_COUNT, TOTAL_MONTHLY_SEAT_BOT, SINGAL_MONTHLY_SEAT_BOT, TOTAL_DAILY_SEAT_BOT, SINGAL_DAILY_SEAT_BOT
+from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT, TOTAL_MEMBERS, MOVIES_DB, ANIME_DB, SERIES_DB, MONTHLY_BOT_LIMIT, TOTAL_BOT_COUNT
 from database.users_chats_db import db
 
 from Script import script
@@ -22,6 +22,11 @@ logger.setLevel(logging.ERROR)
 # Define a dictionary to store user states (locked or not)
 user_states = {}
 USER_SELECTED = {}
+
+TOTAL_MONTHLY_SEAT_BOT = 4
+SINGAL_MONTHLY_SEAT_BOT = 4
+TOTAL_DAILY_SEAT_BOT = 4
+SINGAL_DAILY_SEAT_BOT = 4
 
 def get_indian_datetime():
     indian_timezone = pytz.timezone('Asia/Kolkata')
@@ -211,14 +216,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 total_attempts = await db.get_total_limit_attempts_dot(
                     daily_limit=False, monthly_limit=True
                 )
-                if total_attempts >= int(TOTAL_MONTHLY_SEAT_BOT):
+                if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
                     return
             else:  # Check for specific bot limit
                 total_attempts = await db.get_total_limit_attempts_dot(
                     selected_bot=selected_bot, daily_limit=False, monthly_limit=True
                 )
-                if total_attempts >= int(SINGAL_MONTHLY_SEAT_BOT):
+                if total_attempts >= SINGAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
                     return
         else:  # Daily limit logic
@@ -226,14 +231,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 total_attempts = await db.get_total_limit_attempts_dot(
                     daily_limit=True, monthly_limit=False
                 )
-                if total_attempts >= int(TOTAL_DAILY_SEAT_BOT):
+                if total_attempts >= TOTAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
                     return
             else:  # Check for specific bot limit
                 total_attempts = await db.get_total_limit_attempts_dot(
                     selected_bot=selected_bot, daily_limit=True, monthly_limit=False
                 )
-                if total_attempts >= int(SINGAL_DAILY_SEAT_BOT):
+                if total_attempts >= SINGAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.")
                     return
         
