@@ -202,6 +202,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
         # Check if total bot limit is enabled
         selected_bot = query.data
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+
 
         if MONTHLY_BOT_LIMIT:
             if TOTAL_BOT_COUNT:  # Check for total bot limit
@@ -249,7 +252,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"{total_attempts} == {int(TOTAL_DAILY_SEAT_BOT)}\n\n"
             f"Selected Bot: {selected_bot.capitalize()}\n"
             f"Validity: {validity_formatted}\n"
-            f"Date and Time: {current_date_time}\n"
             "Make payments and then select **Confirmed** button:"
         )
         
