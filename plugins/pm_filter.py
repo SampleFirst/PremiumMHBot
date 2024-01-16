@@ -202,37 +202,36 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
         # Check if total bot limit is enabled
         selected_bot = query.data
-        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
 
-        indian_time = get_indian_datetime()
-        day = indian_time.day
-        month = indian_time.month
-        year = indian_time.year
-        today = day
-        
         if MONTHLY_BOT_LIMIT:
-            if TOTAL_BOT_COUNT:
-                total_attempts = await db.get_monthly_attempts_dot(year, month)
-                if total_attempts >= int(TOTAL_MONTHLY_SEAT_BOT):
-                    await query.message.edit_text("Monthly attempts exceeded. Please contact support.", show_alert=True)
+            if TOTAL_BOT_COUNT:  # Check for total bot limit
+                total_attempts = await db.get_total_limit_attempts_dot(
+                    daily_limit=False, monthly_limit=True
+                )
+                if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
+                    await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
                     return
-            else:
-                total_attempts = await db.get_single_monthly_attempts_dot(year, month, selected_bot)
-                if total_attempts >= int(SINGAL_MONTHLY_SEAT_BOT):
-                    await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.", show_alert=True)
+            else:  # Check for specific bot limit
+                total_attempts = await db.get_total_limit_attempts_dot(
+                    selected_bot=selected_bot, daily_limit=False, monthly_limit=True
+                )
+                if total_attempts >= SINGAL_MONTHLY_SEAT_BOT:
+                    await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
                     return
-        else:
-            if TOTAL_BOT_COUNT:
-                total_attempts = await db.get_daily_attempts_dot(today)
-                if total_attempts >= int(TOTAL_DAILY_SEAT_BOT):
-                    await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.", show_alert=True)
+        else:  # Daily limit logic
+            if TOTAL_BOT_COUNT:  # Check for total bot limit
+                total_attempts = await db.get_total_limit_attempts_dot(
+                    daily_limit=True, monthly_limit=False
+                )
+                if total_attempts >= TOTAL_DAILY_SEAT_BOT:
+                    await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
                     return
-            else:
-                total_attempts = await db.get_single_daily_attempts_dot(today, selected_bot)
-                if total_attempts >= int(SINGAL_DAILY_SEAT_BOT):
-                    await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.", show_alert=True)
+            else:  # Check for specific bot limit
+                total_attempts = await db.get_total_limit_attempts_dot(
+                    selected_bot=selected_bot, daily_limit=True, monthly_limit=False
+                )
+                if total_attempts >= SINGAL_DAILY_SEAT_BOT:
+                    await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.")
                     return
         
         buttons = [
