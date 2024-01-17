@@ -151,6 +151,47 @@ class Database:
         total_attempts = await self.dot.count_documents({'selected_bot': selected_bot})
         return total_attempts
 
+    async def count_total_attempts(self, selected_bot=None):
+        """Counts total attempts by selected bot or all bots."""
+        filter_params = {'selected_bot': selected_bot} if selected_bot else {}
+        total_attempts = await self.dot.count_documents(filter_params)
+        return total_attempts
+
+    async def count_daily_attempts(self, selected_bot=None):
+        """Counts daily attempts by selected bot or all bots in Indian timezone."""
+        tz = pytz.timezone('Asia/Kolkata')
+        today = datetime.now(tz).date()
+        start_of_day = datetime.combine(today, datetime.min.time())
+        end_of_day = datetime.combine(today, datetime.max.time())
+        filter_params = {'current_date_time': {'$gte': start_of_day, '$lt': end_of_day}}
+        if selected_bot:
+            filter_params['selected_bot'] = selected_bot
+        daily_attempts = await self.dot.count_documents(filter_params)
+        return daily_attempts
+
+    async def count_monthly_attempts(self, selected_bot=None):
+        """Counts monthly attempts by selected bot or all bots."""
+        tz = pytz.timezone('Asia/Kolkata')
+        today = datetime.now(tz).date()
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+        filter_params = {'current_date_time': {'$gte': first_day_of_month, '$lt': last_day_of_month}}
+        if selected_bot:
+            filter_params['selected_bot'] = selected_bot
+        monthly_attempts = await self.dot.count_documents(filter_params)
+        return monthly_attempts
+
+    async def count_yearly_attempts(self, selected_bot=None):
+        """Counts yearly attempts by selected bot or all bots."""
+        tz = pytz.timezone('Asia/Kolkata')
+        today = datetime.now(tz).date()
+        start_of_year = today.replace(month=1, day=1)
+        end_of_year = today.replace(month=12, day=31)
+        filter_params = {'current_date_time': {'$gte': start_of_year, '$lt': end_of_year}}
+        if selected_bot:
+            filter_params['selected_bot'] = selected_bot
+        yearly_attempts = await self.dot.count_documents(filter_params)
+        return yearly_attempts
     
     async def get_total_limit_attempts_dot(self, selected_bot=False, daily_limit=False, monthly_limit=False):
         filter_params = {}
