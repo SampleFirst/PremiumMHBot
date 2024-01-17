@@ -28,219 +28,6 @@ SINGAL_MONTHLY_SEAT_BOT = 4
 TOTAL_DAILY_SEAT_BOT = 4
 SINGAL_DAILY_SEAT_BOT = 4
 
-def get_indian_datetime():
-    indian_timezone = pytz.timezone('Asia/Kolkata')
-    utc_now = datetime.datetime.utcnow()
-    indian_time = utc_now.replace(tzinfo=pytz.utc).astimezone(indian_timezone)
-    return indian_time
-
-@Client.on_message(filters.photo & filters.private)
-async def payment_screenshot_received(client, message):
-    user_id = message.from_user.id
-    file_id = str(message.photo.file_id)
-
-    # Check if the user has made a selection before sending the screenshot
-    if user_id not in user_states or not user_states[user_id]:
-        await message.reply_text("Please select Bot or Database before sending the screenshot.")
-        return
-
-    selected_type = USER_SELECTED.get(user_id, "")
-
-    if not selected_type:
-        await message.reply_text("Invalid selection. Please start the process again.")
-        return
-
-    # Update if and elif conditions for selected_type
-    if selected_type in {"mbot", "abot", "rbot", "yibot"}:
-        await handle_bot_screenshot(client, message, user_id, file_id)
-    elif selected_type in {"mdb", "adb", "tvsdb"}:
-        await handle_db_screenshot(client, message, user_id, file_id)
-    else:
-        await message.reply_text("Invalid selection. Start the process again.")
-
-
-async def handle_bot_screenshot(client, message, user_id, file_id):
-    latest_attempt = await db.get_latest_attempt_dot(user_id)
-
-    if not latest_attempt:
-        await message.reply_text("Unable to retrieve latest attempt details. Please try again.")
-        return
-
-    user_name = latest_attempt['user_name']
-    selected_bot = latest_attempt.get('selected_bot', '')
-    attempt_number = latest_attempt['attempt_number']
-    current_date_time = latest_attempt['current_date_time']
-    validity_date = latest_attempt['validity_date']
-
-    caption_bot = f"User ID: {user_id}\n" \
-              f"User Name: {user_name}\n" \
-              f"Selected Bot: {selected_bot.capitalize()}\n" \
-              f"Attempt Number: {attempt_number}\n" \
-              f"Date and Time: {current_date_time}\n" \
-              f"Validity: {validity_date}\n"
-
-    keyboard = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_bot"),
-            InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_bot")
-        ]]
-    )
-
-    await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_bot, reply_markup=keyboard)
-    await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
-    user_states[user_id] = False
-
-async def handle_db_screenshot(client, message, user_id, file_id):
-    latest_attempt = await db.get_latest_attempt_db(user_id)
-
-    if not latest_attempt:
-        await message.reply_text("Unable to retrieve latest attempt details. Please try again.")
-        return
-
-    user_name = latest_attempt['user_name']
-    selected_db = latest_attempt.get('selected_db', '')
-    attempt_number = latest_attempt['attempt_number']
-    current_date_time = latest_attempt['current_date_time']
-    validity_date = latest_attempt['validity_date']
-
-    caption_db = f"User ID: {user_id}\n" \
-              f"User Name: {user_name}\n" \
-              f"Selected DB: {selected_db.capitalize()}\n" \
-              f"Attempt Number: {attempt_number}\n" \
-              f"Date and Time: {current_date_time}\n" \
-              f"Validity: {validity_date}\n"
-
-    keyboard = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_db"),
-            InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_db")
-        ]]
-    )
-
-    await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_db, reply_markup=keyboard)
-    await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
-    user_states[user_id] = False
-
-@Client.on_callback_query()
-async def cb_handler(client: Client, query: CallbackQuery):
-    today = date.today()
-    is_admin = query.from_user.id in ADMINS
-    if query.data == "close_data":
-        await query.message.delete()
-
-    elif query.data == "start":
-        buttons = [
-            [
-                    InlineKeyboardButton('Bots Premium', callback_data="bots"),
-                    InlineKeyboardButton('Database Premium', callback_data="database")
-                ],
-                [
-                    InlineKeyboardButton('Cancel', callback_data="close_data")
-                ]
-            ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        caption = script.START_TXT.format(user=query.from_user.mention, bot=temp.B_LINK)
-
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=caption,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-
-    elif query.data == "bots":
-        buttons = [
-            [
-                InlineKeyboardButton('Movies Bot', callback_data='mbot'),
-                InlineKeyboardButton('Anime Bot', callback_data='abot')
-            ],
-            [
-                InlineKeyboardButton('Rename Bot', callback_data='rbot'),
-                InlineKeyboardButton('YT Downloader', callback_data='yibot')
-            ],
-            [
-                InlineKeyboardButton('Back', callback_data='start')
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.BOTS.format(user=query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        
-    elif query.data == "database":
-        buttons = [
-            [
-                InlineKeyboardButton('Movies Database', callback_data='mdb'),
-                InlineKeyboardButton('Anime Database', callback_data='adb')
-            ],
-            [
-                InlineKeyboardButton('TV Show Database', callback_data='tvsdb'),
-                InlineKeyboardButton('Audio Books', callback_data='abdb')
-            ],
-            [
-                InlineKeyboardButton('Back', callback_data='start')
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.DATABSE.format(user=query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-
-    elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
-        # Check if total bot limit is enabled
-        selected_bot = query.data
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
-
-
-        import random
-import logging
-import datetime
-from datetime import date
-import pytz
-
-from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
-from pyrogram.errors import ChatAdminRequired, FloodWait
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Message
-from pyrogram import Client, filters, enums
-from pyrogram.errors import MessageNotModified, PeerIdInvalid
-
-from info import ADMINS, PICS, LOG_CHANNEL, PAYMENT_CHAT, TOTAL_MEMBERS, MOVIES_DB, ANIME_DB, SERIES_DB, MONTHLY_BOT_LIMIT, TOTAL_BOT_COUNT
-from database.users_chats_db import db
-
-from Script import script
-from utils import temp
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
-
-# Define a dictionary to store user states (locked or not)
-user_states = {}
-USER_SELECTED = {}
-
-TOTAL_MONTHLY_SEAT_BOT = 4
-SINGAL_MONTHLY_SEAT_BOT = 4
-TOTAL_DAILY_SEAT_BOT = 4
-SINGAL_DAILY_SEAT_BOT = 4
-
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
@@ -431,7 +218,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
                     return
         else:  # Daily limit logic
-            if TOTAL_BOT_COUNT:  # Check for total bot limit
+            if TOTAL_BOT_COUNT == True:  # Check for total bot limit
                 total_attempts = await db.count_daily_attempts()
                 if total_attempts >= TOTAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
@@ -470,8 +257,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.MARKDOWN
         )
-
-        
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
@@ -519,9 +304,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
-    
         
-    
     elif query.data.startswith("description_bot_"):
         selected_bot_type = query.data.replace("description_bot_", "")
         description_text = ""
@@ -624,8 +407,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=confirmation_message
         )
         user_states[user_id] = True
-        
-    
+            
     elif query.data.startswith("description_db_"):
         selected_bot_type = query.data.replace("description_", "")
         description_text = ""
@@ -703,8 +485,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
             await query.message.edit_text(text=user_message)
     
-    
-
     elif query.data == "payment_confirmed_db":
         if is_admin:
             # Handle payment confirmation by admins
