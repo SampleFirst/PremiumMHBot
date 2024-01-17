@@ -213,31 +213,23 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
         if MONTHLY_BOT_LIMIT:
             if TOTAL_BOT_COUNT:  # Check for total bot limit
-                total_attempts = await db.get_total_limit_attempts_dot(
-                    daily_limit=False, monthly_limit=True
-                )
+                total_attempts = await db.get_total_limit_attempts_dot(monthly_limit)
                 if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
                     return
             else:  # Check for specific bot limit
-                total_attempts = await db.get_total_limit_attempts_dot(
-                    selected_bot=selected_bot, daily_limit=False, monthly_limit=True
-                )
+                total_attempts = await db.get_total_limit_attempts_dot(selected_bot, monthly_limit)
                 if total_attempts >= SINGAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
                     return
         else:  # Daily limit logic
             if TOTAL_BOT_COUNT:  # Check for total bot limit
-                total_attempts = await db.get_total_limit_attempts_dot(
-                    daily_limit=True, monthly_limit=False
-                )
+                total_attempts = await db.get_total_limit_attempts_dot(daily_limit)
                 if total_attempts >= TOTAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
                     return
             else:  # Check for specific bot limit
-                total_attempts = await db.get_total_limit_attempts_dot(
-                    selected_bot=selected_bot, daily_limit=True, monthly_limit=False
-                )
+                total_attempts = await db.get_total_limit_attempts_dot(selected_bot, daily_limit)
                 if total_attempts >= SINGAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.")
                     return
