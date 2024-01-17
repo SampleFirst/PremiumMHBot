@@ -116,7 +116,7 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
-async def handle_attempts_limit(client, message, query_data, selected_bot, total_attempts, validity_formatted):
+async def handle_attempts_limit(client, message, selected_bot, total_attempts, validity_formatted):
     # rest of the function code...
     buttons = [
         [
@@ -243,26 +243,26 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
                 else:
-                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
+                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
             else:  # Check for specific bot limit
                 total_attempts = await db.count_monthly_attempts(selected_bot=selected_bot)
                 if total_attempts >= SINGAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
                 else:
-                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
+                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
         else:  # Daily limit logic
             if TOTAL_BOT_COUNT:  # Check for total bot limit
                 total_attempts = await db.count_daily_attempts()
                 if total_attempts >= TOTAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
                 else:
-                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
+                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
             else:  # Check for specific bot limit
                 total_attempts = await db.count_daily_attempts(selected_bot=selected_bot)
                 if total_attempts >= SINGAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.")
                 else:
-                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
+                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
 
 
     elif query.data.startswith("confirm_bot_"):
