@@ -166,6 +166,40 @@ class Database:
         total_attempts = await self.dot.count_documents(filter_params)
         return total_attempts
     
+
+    async def get_total_attempts_selected_bots(self, selected_bots):
+        """Gets the total attempts count for the specified selected bots."""
+        query = {'selected_bot': {'$in': selected_bots}}
+        total_attempts = await self.dot.count_documents(query)
+        return total_attempts
+
+    async def get_attempts_count_by_bot_and_date_range(self, selected_bot, start_date, end_date):
+        """Gets the attempts count for a specific bot within a date range."""
+        query = {
+            'selected_bot': selected_bot,
+            'current_date_time': {'$gte': start_date, '$lt': end_date}
+        }
+        attempts_count = await self.dot.count_documents(query)
+        return attempts_count
+
+    async def get_daily_attempts_count(self, selected_bot=None):
+        """Gets the attempts count for today."""
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        query = {'current_date_time': {'$gte': today}}
+        if selected_bot:
+            query['selected_bot'] = selected_bot
+        daily_attempts = await self.dot.count_documents(query)
+        return daily_attempts
+
+    async def get_monthly_attempts_count(self, selected_bot=None):
+        """Gets the attempts count for the current month."""
+        today = datetime.now(pytz.timezone('Asia/Kolkata'))
+        first_day_of_month = today.replace(day=1)
+        query = {'current_date_time': {'$gte': first_day_of_month}}
+        if selected_bot:
+            query['selected_bot'] = selected_bot
+        monthly_attempts = await self.dot.count_documents(query)
+        return monthly_attempts
         
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
         cancel_data = {
