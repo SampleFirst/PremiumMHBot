@@ -116,7 +116,8 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
-async def handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted):
+async def handle_attempts_limit(client, message, query_data, selected_bot, total_attempts, validity_formatted):
+    # rest of the function code...
     buttons = [
         [
             InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
