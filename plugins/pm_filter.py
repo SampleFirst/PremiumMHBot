@@ -116,6 +116,36 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
+async def handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted):
+    buttons = [
+        [
+            InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
+            InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')
+        ],
+        [
+            InlineKeyboardButton('Back', callback_data='bots')
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(buttons)
+    message_text = (
+        f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
+        f"{total_attempts} == {int(TOTAL_DAILY_SEAT_BOT)}\n\n"
+        f"Selected Bot: {selected_bot.capitalize()}\n"
+        f"Validity: {validity_formatted}\n"
+        "Make payments and then select **Confirmed** button:"
+    )
+    
+    await client.edit_message_media(
+        message.chat.id,
+        message.message_id,
+        InputMediaPhoto(random.choice(PICS))
+    )
+    await message.edit_text(
+        text=message_text,
+        reply_markup=reply_markup,
+        parse_mode=enums.ParseMode.MARKDOWN
+    )
+    
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     today = date.today()
@@ -206,57 +236,33 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
 
-        if MONTHLY_BOT_LIMIT == True:
-            if TOTAL_BOT_COUNT == True: # Check for total bot limit
+        if MONTHLY_BOT_LIMIT:
+            if TOTAL_BOT_COUNT:  # Check for total bot limit
                 total_attempts = await db.count_monthly_attempts()
                 if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
-                    return
+                else:
+                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
             else:  # Check for specific bot limit
                 total_attempts = await db.count_monthly_attempts(selected_bot=selected_bot)
                 if total_attempts >= SINGAL_MONTHLY_SEAT_BOT:
                     await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
-                    return
+                else:
+                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
         else:  # Daily limit logic
-            if TOTAL_BOT_COUNT == True:  # Check for total bot limit
+            if TOTAL_BOT_COUNT:  # Check for total bot limit
                 total_attempts = await db.count_daily_attempts()
                 if total_attempts >= TOTAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
-                    return
+                else:
+                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
             else:  # Check for specific bot limit
                 total_attempts = await db.count_daily_attempts(selected_bot=selected_bot)
                 if total_attempts >= SINGAL_DAILY_SEAT_BOT:
                     await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.")
-                    return
-        
-        buttons = [
-            [
-                InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
-                InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')
-            ],
-            [
-                InlineKeyboardButton('Back', callback_data='bots')
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        message_text = (
-            f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
-            f"{total_attempts} == {int(TOTAL_DAILY_SEAT_BOT)}\n\n"
-            f"Selected Bot: {selected_bot.capitalize()}\n"
-            f"Validity: {validity_formatted}\n"
-            "Make payments and then select **Confirmed** button:"
-        )
-        
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=message_text,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.MARKDOWN
-        )
+                else:
+                    await handle_attempts_limit(client, message, query.data, selected_bot, total_attempts, validity_formatted)
+
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
