@@ -183,14 +183,16 @@ class Database:
         return attempts_count
 
     async def get_daily_attempts_count(self, selected_bot=None):
-        """Gets the attempts count for today."""
         today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
-        query = {'current_date_time': {'$gte': today}}
+        
+        query = {'current_date_time': {'$gte': datetime.combine(today, datetime.min.time())}}
+    
         if selected_bot:
             query['selected_bot'] = selected_bot
+    
         daily_attempts = await self.dot.count_documents(query)
         return daily_attempts
-
+        
     async def get_monthly_attempts_count(self, selected_bot=None):
         """Gets the attempts count for the current month."""
         today = datetime.now(pytz.timezone('Asia/Kolkata'))
