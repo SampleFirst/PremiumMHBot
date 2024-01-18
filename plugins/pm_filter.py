@@ -153,7 +153,7 @@ async def handle_attempts_limit(client, selected_bot, total_attempts, validity_f
     )
     
 @Client.on_callback_query()
-async def cb_handler(client: Client, query: CallbackQuery):
+async def cb_handler(client: Client, query: CallbackQuery, message: Message):  # Add `message` as an argument
     today = date.today()
     is_admin = query.from_user.id in ADMINS
     if query.data == "close_data":
