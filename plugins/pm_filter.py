@@ -241,13 +241,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
             validity_formatted = validity_date.strftime("%B %d, %Y")
     
-            month_total = db.get_total_attempts_monthly()
-            month_specific = db.get_total_attempts_monthly(selected_bot=selected_bot)
-            day_total = db.get_total_attempts_daily()
-            day_specific = db.get_total_attempts_daily(selected_bot=selected_bot)
-    
             if MONTHLY_ATTEMPTS_COUNT:
                 if TOTAL_ATTEMPTS_COUNT:
+                    month_total = db.get_total_attempts_monthly()
                     if month_total >= MONTHLY_TOTAL_COUNT:
                         await query.message.edit_text(
                             f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin."
@@ -255,6 +251,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     else:
                         return
                 else:
+                    month_specific = db.get_total_attempts_monthly(selected_bot=selected_bot)
                     if month_specific >= MONTHLY_SPECIFIC_COUNT:
                         await query.message.edit_text(
                             f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin."
@@ -263,6 +260,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                         return
             else:
                 if TOTAL_ATTEMPTS_COUNT:
+                    day_total = db.get_total_attempts_daily()
                     if day_total >= DAILY_TOTAL_COUNT:
                         await query.message.edit_text(
                             f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin."
@@ -270,14 +268,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     else:
                         return
                 else:
+                    day_specific = db.get_total_attempts_daily(selected_bot=selected_bot)
                     if day_specific >= DAILY_SPECIFIC_COUNT:
                         await query.message.edit_text(
                             f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin."
                         )
                     else:
                         return
-        except Exception as e:
-            await query.answer(f'Error - {e}')
+        
             buttons = [
                 [InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
                  InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')],
@@ -305,6 +303,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.MARKDOWN
             )
+        except Exception as e:
+            await query.answer(f'Error - {e}')
     
 
     elif query.data.startswith("confirm_bot_"):
