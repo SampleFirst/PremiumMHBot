@@ -118,12 +118,10 @@ async def handle_db_screenshot(client, message, user_id, file_id):
 
 async def handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted):
     # rest of the function code...
-    selected_bot = query.data
-    
     buttons = [
         [
-            InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
-            InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')
+            InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{selected_bot}'),
+            InlineKeyboardButton('Description', callback_data=f'description_bot_{selected_bot}')
         ],
         [
             InlineKeyboardButton('Back', callback_data='bots')
