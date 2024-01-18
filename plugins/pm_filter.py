@@ -153,7 +153,7 @@ async def handle_attempts_limit(client, selected_bot, total_attempts, validity_f
     )
     
 @Client.on_callback_query()
-async def cb_handler(client: Client, query: CallbackQuery, message: Message):  # Add `message` as an argument
+async def cb_handler(client: Client, query: CallbackQuery):
     today = date.today()
     is_admin = query.from_user.id in ADMINS
     if query.data == "close_data":
@@ -277,7 +277,7 @@ async def cb_handler(client: Client, query: CallbackQuery, message: Message):  #
                     else:
                         return
         except Exception as e:
-            await message.reply(f'Error - {e}')
+            await query.answer(f'Error - {e}')
             buttons = [
                 [InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
                  InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')],
