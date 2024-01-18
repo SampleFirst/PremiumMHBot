@@ -23,10 +23,15 @@ logger.setLevel(logging.ERROR)
 user_states = {}
 USER_SELECTED = {}
 
-TOTAL_MONTHLY_SEAT_BOT = 4
-SINGAL_MONTHLY_SEAT_BOT = 4
-TOTAL_DAILY_SEAT_BOT = 4
-SINGAL_DAILY_SEAT_BOT = 4
+MONTHLY_ATTEMPTS_COUNT = False 
+TOTAL_ATTEMPTS_COUNT = False
+
+# Define variables for attempt limits
+MONTHLY_TOTAL_COUNT = 4  # Replace with desired monthly total count
+DAILY_TOTAL_COUNT = 4  # Replace with desired daily total count
+MONTHLY_SPECIFIC_COUNT = 4  # Replace with desired monthly count per bot
+DAILY_SPECIFIC_COUNT = 4  # Replace with desired daily count per bot
+
 
 
 @Client.on_message(filters.photo & filters.private)
@@ -231,39 +236,76 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
-        # Check if total bot limit is enabled
-        selected_bot = query.data
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
-
-
-        if MONTHLY_BOT_LIMIT:
-            if TOTAL_BOT_COUNT:  # Check for total bot limit
-                total_attempts = await db.count_monthly_attempts()
-                if total_attempts >= TOTAL_MONTHLY_SEAT_BOT:
-                    await query.message.edit_text("Monthly attempts exceeded. Please contact support.")
+        try:
+            selected_bot = query.data
+            validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+            validity_formatted = validity_date.strftime("%B %d, %Y")
+    
+            month_total = db.get_total_attempts_monthly()
+            month_specific = db.get_total_attempts_monthly(selected_bot=selected_bot)
+            day_total = db.get_total_attempts_daily()
+            day_specific = db.get_total_attempts_daily(selected_bot=selected_bot)
+    
+            if MONTHLY_ATTEMPTS_COUNT:
+                if TOTAL_ATTEMPTS_COUNT:
+                    if month_total >= MONTHLY_TOTAL_COUNT:
+                        await query.message.edit_text(
+                            f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin."
+                        )
+                    else:
+                        return
                 else:
-                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
-            else:  # Check for specific bot limit
-                total_attempts = await db.count_monthly_attempts(selected_bot=selected_bot)
-                if total_attempts >= SINGAL_MONTHLY_SEAT_BOT:
-                    await query.message.edit_text("Monthly attempts exceeded for selected bot. Please contact support.")
+                    if month_specific >= MONTHLY_SPECIFIC_COUNT:
+                        await query.message.edit_text(
+                            f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin."
+                        )
+                    else:
+                        return
+            else:
+                if TOTAL_ATTEMPTS_COUNT:
+                    if day_total >= DAILY_TOTAL_COUNT:
+                        await query.message.edit_text(
+                            f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin."
+                        )
+                    else:
+                        return
                 else:
-                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
-        else:  # Daily limit logic
-            if TOTAL_BOT_COUNT:  # Check for total bot limit
-                total_attempts = await db.count_daily_attempts()
-                if total_attempts >= TOTAL_DAILY_SEAT_BOT:
-                    await query.message.edit_text("Daily attempts exceeded. Try again tomorrow. Please contact support.")
-                else:
-                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
-            else:  # Check for specific bot limit
-                total_attempts = await db.count_daily_attempts(selected_bot=selected_bot)
-                if total_attempts >= SINGAL_DAILY_SEAT_BOT:
-                    await query.message.edit_text("Daily attempts exceeded for selected bot. Try again tomorrow or please contact support.")
-                else:
-                    await handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted)
-
+                    if day_specific >= DAILY_SPECIFIC_COUNT:
+                        await query.message.edit_text(
+                            f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin."
+                        )
+                    else:
+                        return
+        except Exception as e:
+            await message.reply(f'Error - {e}')
+            buttons = [
+                [InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
+                 InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')],
+                [InlineKeyboardButton('Back', callback_data='bots')]
+            ]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            message_text = (
+                f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
+                f"Selected Bot: {selected_bot.capitalize()}\n"
+                f"Validity: {validity_formatted}\n\n"
+                f"Monthly Attempts: {month_total}/{MONTHLY_TOTAL_COUNT}\n"
+                f"Monthly Specific Attempts: {month_specific}/{MONTHLY_SPECIFIC_COUNT}\n"
+                f"Daily Attempts: {day_total}/{DAILY_TOTAL_COUNT}\n"
+                f"Daily Specific Attempts: {day_specific}/{DAILY_SPECIFIC_COUNT}\n\n"
+                "Make payments and then select **Confirmed** button:"
+            )
+    
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(
+                text=message_text,
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.MARKDOWN
+            )
+    
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
