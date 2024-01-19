@@ -289,13 +289,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
             f"Selected Bot: {selected_bot.capitalize()}\n"
             f"Validity: {validity_formatted}\n\n"
-            f"Monthly Attempts: {month_total}/{MONTHLY_TOTAL_COUNT}\n"
-            f"Monthly Specific Attempts: {month_specific}/{MONTHLY_SPECIFIC_COUNT}\n"
-            f"Daily Attempts: {day_total}/{DAILY_TOTAL_COUNT}\n"
             f"Daily Specific Attempts: {day_specific}/{DAILY_SPECIFIC_COUNT}\n\n"
             "Make payments and then select **Confirmed** button:"
         )
-
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
