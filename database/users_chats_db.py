@@ -157,7 +157,7 @@ class Database:
         filter_params = {'current_date_time': {'$gte': start_of_month}}
         if selected_bot:
             filter_params['selected_bot'] = selected_bot
-        return await db.dot.count_documents(filter_params)
+        return await self.dot.count_documents(filter_params)
     
     async def get_total_attempts_daily(selected_bot=None):
         tz = pytz.timezone('Asia/Kolkata')  # Adjust timezone if needed
@@ -165,7 +165,7 @@ class Database:
         filter_params = {'current_date_time': {'$gte': start_of_day}}
         if selected_bot:
             filter_params['selected_bot'] = selected_bot
-        return await db.dot.count_documents(filter_params)
+        return await self.dot.count_documents(filter_params)
         
    # async def count_total_attempts(self, selected_bot=None):
         # """Counts total attempts by selected bot or all bots."""
