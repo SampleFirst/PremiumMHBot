@@ -138,8 +138,7 @@ class Database:
     
         attempts = await self.dot.count_documents(filter_params)
         return attempts
-
-        
+   
     async def get_latest_attempt_dot(self, user_id):
         latest_attempt = await self.dot.find_one(
             {'user_id': user_id},
@@ -151,7 +150,7 @@ class Database:
         total_attempts = await self.dot.count_documents({'selected_bot': selected_bot})
         return total_attempts
 
-    async def get_total_attempts_monthly(selected_bot=None):
+    async def get_total_attempts_monthly(self, selected_bot=None):
         tz = pytz.timezone('Asia/Kolkata')  # Adjust timezone if needed
         start_of_month = datetime.now(tz).replace(day=1)
         filter_params = {'current_date_time': {'$gte': start_of_month}}
@@ -159,7 +158,7 @@ class Database:
             filter_params['selected_bot'] = selected_bot
         return await self.dot.count_documents(filter_params)
     
-    async def get_total_attempts_daily(selected_bot=None):
+    async def get_total_attempts_daily(self, selected_bot=None):
         tz = pytz.timezone('Asia/Kolkata')  # Adjust timezone if needed
         start_of_day = datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
         filter_params = {'current_date_time': {'$gte': start_of_day}}
