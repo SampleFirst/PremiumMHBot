@@ -242,16 +242,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
         if MONTHLY_ATTEMPTS_COUNT:
             if TOTAL_ATTEMPTS_COUNT:
-                MONTH_TOTAL = db.get_total_attempts_monthly()
-                if MONTH_TOTAL >= MONTHLY_TOTAL_COUNT:
+                month_total = await db.get_total_attempts_monthly()
+                if month_total >= MONTHLY_TOTAL_COUNT:
                     await query.message.edit_text(
                         f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin."
                     )
                 else:
                     return
             else:
-                MONTH_SPECIFIC = db.get_total_attempts_monthly(selected_bot=selected_bot)
-                if MONTH_SPECIFIC >= MONTHLY_SPECIFIC_COUNT:
+                month_specific = await db.get_total_attempts_monthly(selected_bot=selected_bot)
+                if month_specific >= MONTHLY_SPECIFIC_COUNT:
                     await query.message.edit_text(
                         f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin."
                     )
@@ -259,16 +259,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     return
         else:
             if TOTAL_ATTEMPTS_COUNT:
-                DAY_TOTAL = db.get_total_attempts_daily()
-                if DAY_TOTAL >= DAILY_TOTAL_COUNT:
+                day_total = await db.get_total_attempts_daily()
+                if day_total >= DAILY_TOTAL_COUNT:
                     await query.message.edit_text(
                         f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin."
                     )
                 else:
                     return
             else:
-                DAY_SPECIFIC = db.get_total_attempts_daily(selected_bot=selected_bot)
-                if DAY_SPECIFIC >= DAILY_SPECIFIC_COUNT:
+                day_specific = await db.get_total_attempts_daily(selected_bot=selected_bot)
+                if day_specific >= DAILY_SPECIFIC_COUNT:
                     await query.message.edit_text(
                         f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin."
                     )
