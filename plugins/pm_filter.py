@@ -24,7 +24,7 @@ user_states = {}
 USER_SELECTED = {}
 
 MONTHLY_ATTEMPTS_COUNT = False 
-TOTAL_ATTEMPTS_COUNT = False
+TOTAL_ATTEMPTS_COUNT = True 
 
 # Define variables for attempt limits
 MONTHLY_TOTAL_COUNT = 4  # Replace with desired monthly total count
@@ -289,7 +289,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
             f"Selected Bot: {selected_bot.capitalize()}\n"
             f"Validity: {validity_formatted}\n\n"
-            f"Daily Specific Attempts: {day_specific}/{DAILY_SPECIFIC_COUNT}\n\n"
+            f"Daily Attempts: {day_total}/{DAILY_TOTAL_COUNT}\n"
             "Make payments and then select **Confirmed** button:"
         )
         await client.edit_message_media(
