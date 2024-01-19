@@ -118,35 +118,36 @@ async def handle_db_screenshot(client, message, user_id, file_id):
     await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
     user_states[user_id] = False
 
-async def handle_attempts_limit(client, selected_bot, total_attempts, validity_formatted):
-    # rest of the function code...
-    buttons = [
-        [
-            InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{selected_bot}'),
-            InlineKeyboardButton('Description', callback_data=f'description_bot_{selected_bot}')
-        ],
-        [
-            InlineKeyboardButton('Back', callback_data='bots')
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(buttons)
-    message_text = (
-        f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
-        f"{total_attempts} == {int(TOTAL_DAILY_SEAT_BOT)}\n\n"
-        f"Selected Bot: {selected_bot.capitalize()}\n"
-        f"Validity: {validity_formatted}\n"
-        "Make payments and then select **Confirmed** button:"
-    )
-    await client.edit_message_media(
-        message.chat.id,
-        message.message_id,
-        InputMediaPhoto(random.choice(PICS))
-    )
-    await message.edit_text(
-        text=message_text,
-        reply_markup=reply_markup,
-        parse_mode=enums.ParseMode.MARKDOWN
-    )
+async def handle_attempts_limit(query, selected_bot):
+    try:
+        if MONTHLY_ATTEMPTS_COUNT:
+            if TOTAL_ATTEMPTS_COUNT:
+                month_total = await db.get_total_attempts_monthly()
+                if month_total >= MONTHLY_TOTAL_COUNT:
+                    await query.message.edit_text(f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin.")
+                else:
+                    return
+            else:
+                month_specific = await db.get_total_attempts_monthly(selected_bot=selected_bot)
+                if month_specific >= MONTHLY_SPECIFIC_COUNT:
+                    await query.message.edit_text(f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin.")
+                else:
+                    return
+        else:
+            if TOTAL_ATTEMPTS_COUNT:
+                day_total = await db.get_total_attempts_daily()
+                if day_total >= DAILY_TOTAL_COUNT:
+                    await query.message.edit_text(f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin.")
+                else:
+                    return
+            else:
+                day_specific = await db.get_total_attempts_daily(selected_bot=selected_bot)
+                if day_specific >= DAILY_SPECIFIC_COUNT:
+                    await query.message.edit_text(f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin.")
+                else:
+                    return
+    except Exception as e:
+        logger.error(f"Error in handle_attempts_limit: {e}")
     
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -231,38 +232,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
 
-    elif query.data == "mbot":
+    elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
         selected_bot = query.data
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-
-        if MONTHLY_ATTEMPTS_COUNT:
-            if TOTAL_ATTEMPTS_COUNT:
-                month_total = await db.get_total_attempts_monthly()
-                if month_total >= MONTHLY_TOTAL_COUNT:
-                    await query.message.edit_text(f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin.")
-                else:
-                    return
-            else:
-                month_specific = await db.get_total_attempts_monthly(selected_bot=selected_bot)
-                if month_specific >= MONTHLY_SPECIFIC_COUNT:
-                    await query.message.edit_text(f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin.")
-                else:
-                    return
-        else:
-            if TOTAL_ATTEMPTS_COUNT:
-                day_total = await db.get_total_attempts_daily()
-                if await day_total >= DAILY_TOTAL_COUNT:
-                    await query.message.edit_text(f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin.")
-                else:
-                    return
-            else:
-                day_specific = await db.get_total_attempts_daily(selected_bot=selected_bot)
-                if day_specific >= DAILY_SPECIFIC_COUNT:
-                    await query.message.edit_text(f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin.")
-                else:
-                    return
-            
+        
+        await handle_attempts_limit(query, selected_bot)
+        
         buttons = [
             [
                 InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
@@ -277,7 +253,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
             f"Selected Bot: {selected_bot.capitalize()}\n"
             f"Validity: {validity_formatted}\n\n"
-            f"Daily Attempts: {day_total}/{DAILY_TOTAL_COUNT}\n"
             "Make payments and then select **Confirmed** button:"
         )
         await client.edit_message_media(
