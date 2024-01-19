@@ -260,7 +260,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             if TOTAL_ATTEMPTS_COUNT:
                 day_total = db.get_total_attempts_daily()
-                if day_total >= DAILY_TOTAL_COUNT:
+                if await day_total >= DAILY_TOTAL_COUNT:
                     await query.message.edit_text(
                         f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin."
                     )
