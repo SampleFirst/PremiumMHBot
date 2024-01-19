@@ -24,7 +24,7 @@ user_states = {}
 USER_SELECTED = {}
 
 MONTHLY_ATTEMPTS_COUNT = False 
-TOTAL_ATTEMPTS_COUNT = True 
+TOTAL_ATTEMPTS_COUNT = False 
 
 # Define variables for attempt limits
 MONTHLY_TOTAL_COUNT = 4  # Replace with desired monthly total count
