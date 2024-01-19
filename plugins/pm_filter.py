@@ -122,26 +122,26 @@ async def handle_attempts_limit(query, selected_bot):
     try:
         if MONTHLY_ATTEMPTS_COUNT:
             if TOTAL_ATTEMPTS_COUNT:
-                month_total = await db.get_total_attempts_monthly()
+                month_total = await db.get_monthly_attempts_dot()
                 if month_total >= MONTHLY_TOTAL_COUNT:
                     await query.message.edit_text(f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin.")
                 else:
                     return
             else:
-                month_specific = await db.get_total_attempts_monthly(selected_bot=selected_bot)
+                month_specific = await db.get_monthly_attempts_dot(selected_bot=selected_bot)
                 if month_specific >= MONTHLY_SPECIFIC_COUNT:
                     await query.message.edit_text(f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin.")
                 else:
                     return
         else:
             if TOTAL_ATTEMPTS_COUNT:
-                day_total = await db.get_total_attempts_daily()
+                day_total = await db.get_daily_attempts_dot()
                 if day_total >= DAILY_TOTAL_COUNT:
                     await query.message.edit_text(f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin.")
                 else:
                     return
             else:
-                day_specific = await db.get_total_attempts_daily(selected_bot=selected_bot)
+                day_specific = await db.get_daily_attempts_dot(selected_bot=selected_bot)
                 if day_specific >= DAILY_SPECIFIC_COUNT:
                     await query.message.edit_text(f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin.")
                 else:
