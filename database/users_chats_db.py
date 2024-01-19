@@ -145,37 +145,39 @@ class Database:
         )
         return latest_attempt
 
-    async def get_monthly_attempts_dot(self, selected_bot=None):
-        filter_params = {}
+    async def get_total_attempts_monthly(self, current_date_time, selected_bot=None):
+        """
+        Gets the total attempt count for the current month, optionally filtered by selected_bot.
+        """
+        today = date.today()
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+
+        filter_params = {
+            'current_date_time': {'$gte': first_day_of_month, '$lte': last_day_of_month}
+        }
         if selected_bot:
             filter_params['selected_bot'] = selected_bot
-        
-        # Group by calendar month and count attempts
-        pipeline = [
-            {"$match": filter_params},
-            {"$group": {
-                "_id": {"year": {"$year": "$current_date_time"}, "month": {"$month": "$current_date_time"}},
-                "count": {"$sum": 1}
-            }}
-        ]
-        monthly_attempts = await self.dot.aggregate(pipeline).to_list(None)
-        return monthly_attempts
-    
-    async def get_daily_attempts_dot(self, selected_bot=None):
-        filter_params = {}
+
+        total_attempts = await self.dot.count_documents(filter_params)
+        return total_attempts
+
+    async def get_total_attempts_daily(self, current_date_time, selected_bot=None):
+        """
+        Gets the total attempt count for the current day, optionally filtered by selected_bot.
+        """
+        today = date.today()
+        start_of_day = datetime.combine(today, datetime.min.time())
+        end_of_day = datetime.combine(today, datetime.max.time())
+
+        filter_params = {
+            'current_date_time': {'$gte': start_of_day, '$lte': end_of_day}
+        }
         if selected_bot:
             filter_params['selected_bot'] = selected_bot
-        
-        # Group by calendar day and count attempts
-        pipeline = [
-            {"$match": filter_params},
-            {"$group": {
-                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$current_date_time"}},
-                "count": {"$sum": 1}
-            }}
-        ]
-        daily_attempts = await self.dot.aggregate(pipeline).to_list(None)
-        return daily_attempts
+
+        total_attempts = await self.dot.count_documents(filter_params)
+        return total_attempts
     
     async def get_total_attempts_dot(self, selected_bot=None):
         filter_params = {}
