@@ -92,6 +92,25 @@ async def log_file(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
+@Client.on_message(filters.command("get_attempts"))
+async def get_attempts_data(client, message):
+    try:
+        # Check if the command has a specified bot name
+        if len(message.command) > 1:
+            selected_bot = message.command[1]
+            total_attempts = await db.get_total_attempts_dot(selected_bot=selected_bot)
+            response_text = f"Total attempts for {selected_bot}: {total_attempts}"
+        else:
+            # If no bot name specified, get total attempts for all bots
+            total_attempts = await db.get_total_attempts_dot()
+            response_text = f"Total attempts for all bots: {total_attempts}"
+
+        await message.reply_text(response_text)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        await message.reply_text("An error occurred while processing the command.")
+
 @Client.on_message(filters.command('total') & filters.user(ADMINS))
 async def total_users(client, message):
     total_users_count = await db.total_users_count()
