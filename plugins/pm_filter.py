@@ -236,76 +236,77 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
-        try:
-            selected_bot = query.data
-            validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
-            validity_formatted = validity_date.strftime("%B %d, %Y")
-    
-            if MONTHLY_ATTEMPTS_COUNT:
-                if TOTAL_ATTEMPTS_COUNT:
-                    month_total = db.get_total_attempts_monthly()
-                    if month_total >= MONTHLY_TOTAL_COUNT:
-                        await query.message.edit_text(
-                            f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin."
-                        )
-                    else:
-                        return
+        selected_bot = query.data
+        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
+        validity_formatted = validity_date.strftime("%B %d, %Y")
+
+        if MONTHLY_ATTEMPTS_COUNT:
+            if TOTAL_ATTEMPTS_COUNT:
+                month_total = db.get_total_attempts_monthly()
+                if month_total >= MONTHLY_TOTAL_COUNT:
+                    await query.message.edit_text(
+                        f"Hey user, sorry to say our monthly quota is full. Try next calendar month or contact Admin."
+                    )
                 else:
-                    month_specific = db.get_total_attempts_monthly(selected_bot=selected_bot)
-                    if month_specific >= MONTHLY_SPECIFIC_COUNT:
-                        await query.message.edit_text(
-                            f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin."
-                        )
-                    else:
-                        return
+                    return
             else:
-                if TOTAL_ATTEMPTS_COUNT:
-                    day_total = db.get_total_attempts_daily()
-                    if day_total >= DAILY_TOTAL_COUNT:
-                        await query.message.edit_text(
-                            f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin."
-                        )
-                    else:
-                        return
+                month_specific = db.get_total_attempts_monthly(selected_bot=selected_bot)
+                if month_specific >= MONTHLY_SPECIFIC_COUNT:
+                    await query.message.edit_text(
+                        f"Hey user, sorry to say our monthly quota for {selected_bot} is full. Try next calendar month or contact Admin."
+                    )
                 else:
-                    day_specific = db.get_total_attempts_daily(selected_bot=selected_bot)
-                    if day_specific >= DAILY_SPECIFIC_COUNT:
-                        await query.message.edit_text(
-                            f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin."
-                        )
-                    else:
-                        return
-        
-            buttons = [
-                [InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
-                 InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')],
-                [InlineKeyboardButton('Back', callback_data='bots')]
+                    return
+        else:
+            if TOTAL_ATTEMPTS_COUNT:
+                day_total = db.get_total_attempts_daily()
+                if day_total >= DAILY_TOTAL_COUNT:
+                    await query.message.edit_text(
+                        f"Hey user, sorry to say our daily quota is full. Try tomorrow or contact Admin."
+                    )
+                else:
+                    return
+            else:
+                day_specific = db.get_total_attempts_daily(selected_bot=selected_bot)
+                if day_specific >= DAILY_SPECIFIC_COUNT:
+                    await query.message.edit_text(
+                        f"Hey user, sorry to say our daily quota for {selected_bot} is full. Try tomorrow or contact Admin."
+                    )
+                else:
+                    return
+    
+        buttons = [
+            [
+                InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
+                InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')
+            ],
+            [
+                InlineKeyboardButton('Back', callback_data='bots')
             ]
-            reply_markup = InlineKeyboardMarkup(buttons)
-            message_text = (
-                f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
-                f"Selected Bot: {selected_bot.capitalize()}\n"
-                f"Validity: {validity_formatted}\n\n"
-                f"Monthly Attempts: {month_total}/{MONTHLY_TOTAL_COUNT}\n"
-                f"Monthly Specific Attempts: {month_specific}/{MONTHLY_SPECIFIC_COUNT}\n"
-                f"Daily Attempts: {day_total}/{DAILY_TOTAL_COUNT}\n"
-                f"Daily Specific Attempts: {day_specific}/{DAILY_SPECIFIC_COUNT}\n\n"
-                "Make payments and then select **Confirmed** button:"
-            )
-    
-            await client.edit_message_media(
-                query.message.chat.id,
-                query.message.id,
-                InputMediaPhoto(random.choice(PICS))
-            )
-            await query.message.edit_text(
-                text=message_text,
-                reply_markup=reply_markup,
-                parse_mode=enums.ParseMode.MARKDOWN
-            )
-        except Exception as e:
-            await query.answer(f'Error - {e}')
-    
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        message_text = (
+            f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
+            f"Selected Bot: {selected_bot.capitalize()}\n"
+            f"Validity: {validity_formatted}\n\n"
+            f"Monthly Attempts: {month_total}/{MONTHLY_TOTAL_COUNT}\n"
+            f"Monthly Specific Attempts: {month_specific}/{MONTHLY_SPECIFIC_COUNT}\n"
+            f"Daily Attempts: {day_total}/{DAILY_TOTAL_COUNT}\n"
+            f"Daily Specific Attempts: {day_specific}/{DAILY_SPECIFIC_COUNT}\n\n"
+            "Make payments and then select **Confirmed** button:"
+        )
+
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=message_text,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+        
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
