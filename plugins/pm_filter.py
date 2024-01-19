@@ -300,7 +300,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 parse_mode=enums.ParseMode.MARKDOWN
             )
         except Exception as e:
-            await query.message.edit_text(f'Error - {e}')
+            await query.answer(f'Error - {e}')
+            logger.error(f'Error - {e}')
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
