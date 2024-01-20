@@ -152,7 +152,7 @@ class Database:
 
     async def get_this_month_attempts(self, selected_bot=None):
         tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.datetime.now(tz)
+        now = datetime.now(tz)
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         query = {'date': {'$gte': start_of_month.strftime("%Y-%m-%d")}}
         if selected_bot:
@@ -161,7 +161,7 @@ class Database:
 
     async def get_today_attempts(self, selected_bot=None):
         tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.datetime.now(tz)
+        now = datetime.now(tz)
         start_day = now.replace(day=1)
         query = {'date': start_day.strftime("%Y-%m-%d")}
         if selected_bot:
