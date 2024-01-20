@@ -116,11 +116,12 @@ async def user_attempts_command(client, message):
         response = "Your attempts:\n"
         for attempt in user_attempts:
             response += (
-                f"Bot: {attempt['bot_name']}, "
-                f"Date: {attempt['date']} {attempt['time']}, "
+                f"Bot: {attempt.get('bot_name', 'N/A')},"
+                f"Date: {attempt['date']} {attempt['time']},"
                 f"Validity: {attempt['validity']}\n"
             )
     else:
         response = "You have no attempts yet."
 
     
+
