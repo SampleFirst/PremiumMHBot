@@ -236,11 +236,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-        monthly_total = await db.get_monthly_attempts_dot()
-        daily_total = await db.get_daily_attempts_dot()
-        all_time_total = await db.get_total_attempts_dot()
-        
-        await handle_attempts_limit(query, selected_bot)
         
         buttons = [
             [
@@ -255,9 +250,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         message_text = (
             f"🍿 **{selected_bot.capitalize()} Premium Plan** 🍿\n\n"
             f"Selected Bot: {selected_bot.capitalize()}\n"
-            f"Monthely Total: {monthly_total}\n"
-            f"Daily Total: {daily_total}\n"
-            f"Total Attempts: {all_time_total}\n"
             f"Validity: {validity_formatted}\n\n"
             "Make payments and then select **Confirmed** button:"
         )
@@ -277,51 +269,75 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data.replace("confirm_bot_", "")
         user_name = query.from_user.username
         user_id = query.from_user.id
-
-        bot_name = selected_bot.capitalize()
+    
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-
-        # Add the attempt information to the database
-        total_attempt = await db.get_user_attempts_dot(user_id) + 1
-        total_attempt_bot = await db.get_user_attempts_dot(user_id, selected_bot) + 1
     
-        USER_SELECTED[user_id] = selected_bot
-
-        # Store subscription data in the database
+        tz = pytz.timezone('Asia/Kolkata')
+        now = datetime.datetime.now(tz)
+        current_date = now.strftime("%Y-%m-%d")
+        current_time = now.strftime("%H:%M:%S")
+    
         try:
-            await db.add_attempt_dot(user_id, user_name, selected_bot, validity_date, total_attempt, total_attempt_bot)
+            # Call the new function to store data in the database
+            await db.add_attempt(user_id, user_name, selected_bot, current_date, current_time, validity_formatted)
+    
+            user_total = await db.get_user_attempts(user_id)
+            user_total_bot = await db.get_user_attempts(user_id, selected_bot)
+    
+            monthly_attempts = await db.get_this_month_attempts()
+            monthly_attempts_bot = await db.get_this_month_attempts(selected_bot)
+    
+            daily_attempts = await db.get_today_attempts()
+            daily_attempts_bot = await db.get_today_attempts(selected_bot)
+    
+            total_attempts = await db.get_total_attempts()
+            total_attempts_bot = await db.get_total_attempts(selected_bot)
+    
+            USER_SELECTED[user_id] = selected_bot
+    
+            confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+            confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+    
+            admin_confirmation_message = (
+                f"Subscription Confirmed:\n\n"
+                f"User ID: {user_id}\n"
+                f"User: {user_name}\n"
+                f"Bot: {selected_bot.capitalize()}\n"
+                f"Validity: {validity_formatted}\n\n"
+                f"Current Date: {current_date}\n"
+                f"Current Time: {current_time}\n"
+                f"User Total: {user_total}\n"
+                f"User Total Bot: {user_total_bot}\n"
+                f"Monthly Attempts: {monthly_attempts}\n"
+                f"Monthly Attempts Bot: {monthly_attempts_bot}\n"
+                f"Daily Attempts: {daily_attempts}\n"
+                f"Daily Attempts Bot: {daily_attempts_bot}\n"
+                f"Total Attempts: {total_attempts}\n"
+                f"Total Attempts Bot: {total_attempts_bot}\n"
+                f"Please verify and handle the payment."
+            )
+            # Send Log about successful subscription
+            await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
+            # Notify user about successful subscription
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(
+                text=confirmation_message
+            )
+            user_states[user_id] = True
+    
         except Exception as e:
-            logger.error(f"Error storing subscription data: {e}")
-            await query.message.edit_text("An error occurred while storing subscription data. Please try again later.")
-            return
-    
-        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
-        confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
-    
-        admin_confirmation_message = (
-            f"Subscription Confirmed:\n\n"
-            f"User: {user_name}\n"
-            f"Bot: {selected_bot.capitalize()}\n"
-            f"Validity: {validity_formatted}\n"
-            f"Total Attempts: {total_attempt}\n"
-            f"Total {selected_bot.capitalize()} Attempts: {total_attempt_bot}\n\n"
-            f"Please verify and handle the payment."
-        )
-    
-        # Send Log about successful subscription
-        await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
-    
-        # Notify user about successful subscription
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=confirmation_message
-        )
-        user_states[user_id] = True
+            error_message = f"An error occurred during subscription confirmation:\n{str(e)}"
+            # Log the error
+            logger.error(error_message)
+            # Notify the user about the error
+            await query.message.edit_text(
+                text=error_message
+            )
         
     elif query.data.startswith("description_bot_"):
         selected_bot_type = query.data.replace("description_bot_", "")
