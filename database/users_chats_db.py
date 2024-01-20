@@ -117,17 +117,54 @@ class Database:
         await self.grp.delete_many({'id': int(chat_id)})
         
     # all dot related functions
-    async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date):
-        attempt_data = {
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_bot': selected_bot,
-            'attempt_number': attempt_number,
-            'attempt_number_selected_bot': attempt_number_selected_bot,
-            'current_date_time': current_date_time,
-            'validity_date': validity_date
+    async def add_attempt_dot(self, user_id, user_name, selected_bot, validity_date, total_attempt, total_attempt_bot):
+        attempt = {
+            "user_id": user_id,
+            "selected_bot": selected_bot,
+            "validity_date": validity_date,
+            "total_attempt": total_attempt,
+            "total_attempt_bot": total_attempt_bot,
+            "timestamp": datetime.datetime.now(pytz.utc)
         }
-        await self.dot.insert_one(attempt_data)
+        await self.dot.insert_one(attempt)
+    
+    async def get_monthly_attempts_dot(self, bot_name=None):
+        today = date.today()
+        first_day_of_month = today.replace(day=1)
+        filter = {"timestamp": {"$gte": first_day_of_month}}
+        if bot_name:
+            filter["selected_bot"] = bot_name
+        count = await self.dot.count_documents(filter)
+        return count
+    
+    async def get_daily_attempts_dot(self, bot_name=None):
+        today = date.today()
+        filter = {"timestamp": {"$gte": datetime.datetime.combine(today, datetime.time.min)}}
+        if bot_name:
+            filter["selected_bot"] = bot_name
+        count = await self.col.count_documents(filter)
+        return count
+    
+    async def get_total_attempts_dot(self, bot_name=None):
+        filter = {}
+        if bot_name:
+            filter["selected_bot"] = bot_name
+        count = await self.dot.count_documents(filter)
+        return count
+    
+    
+    # async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date):
+        # attempt_data = {
+            # 'user_id': user_id,
+            # 'user_name': user_name,
+            # 'selected_bot': selected_bot,
+            # 'attempt_number': attempt_number,
+            # 'attempt_number_selected_bot': attempt_number_selected_bot,
+            # 'current_date_time': current_date_time,
+            # 'validity_date': validity_date
+        # }
+        # await self.dot.insert_one(attempt_data)
+    
     
     async def get_user_attempts_dot(self, user_id, selected_bot=None):
         if selected_bot:
@@ -145,48 +182,9 @@ class Database:
         )
         return latest_attempt
 
-    async def get_total_attempts_monthly(self, current_date_time, selected_bot=None):
-        """
-        Gets the total attempt count for the current month, optionally filtered by selected_bot.
-        """
-        today = date.today()
-        first_day_of_month = today.replace(day=1)
-        last_day_of_month = today.replace(day=calendar.monthrange(today.year, today.month)[1])
-
-        filter_params = {
-            'current_date_time': {'$gte': first_day_of_month, '$lte': last_day_of_month}
-        }
-        if selected_bot:
-            filter_params['selected_bot'] = selected_bot
-
-        total_attempts = await self.dot.count_documents(filter_params)
-        return total_attempts
-
-    async def get_total_attempts_daily(self, current_date_time, selected_bot=None):
-        """
-        Gets the total attempt count for the current day, optionally filtered by selected_bot.
-        """
-        today = date.today()
-        start_of_day = datetime.combine(today, datetime.min.time())
-        end_of_day = datetime.combine(today, datetime.max.time())
-
-        filter_params = {
-            'current_date_time': {'$gte': start_of_day, '$lte': end_of_day}
-        }
-        if selected_bot:
-            filter_params['selected_bot'] = selected_bot
-
-        total_attempts = await self.dot.count_documents(filter_params)
-        return total_attempts
     
-    async def get_total_attempts_dot(self, selected_bot=None):
-        filter_params = {}
-        if selected_bot:
-            filter_params['selected_bot'] = selected_bot
-        
-        total_attempts = await self.dot.count_documents(filter_params)
-        return total_attempts
-
+    
+    
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
         cancel_data = {
             'user_id': user_id,
