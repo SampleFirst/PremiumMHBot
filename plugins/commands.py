@@ -95,18 +95,18 @@ async def log_file(bot, message):
 @Client.on_message(filters.command("total_attempts"))
 async def total_attempts(client, message):
     try:
-        monthly_total = await db.get_monthly_confirmed_button_total()
-        daily_total = await db.get_daily_confirmed_button_total()
-        all_time_total = await db.get_all_time_confirmed_button_total()
+        monthly_total = await db.get_monthly_attempts_dot()
+        daily_total = await db.get_daily_attempts_dot()
+        all_time_total = await db.get_total_attempts_dot()
 
         # Get data for specific bots if mentioned
         bot_names = message.command[1:]
         if bot_names:
             bot_data = []
             for bot_name in bot_names:
-                bot_monthly = await db.get_monthly_confirmed_button_total(bot_name)
-                bot_daily = await db.get_daily_confirmed_button_total(bot_name)
-                bot_all_time = await db.get_all_time_confirmed_button_total(bot_name)
+                bot_monthly = await db.get_monthly_attempts_dot(bot_name)
+                bot_daily = await db.get_daily_attempts_dot(bot_name)
+                bot_all_time = await db.get_total_attempts_dot(bot_name)
                 bot_data.append(
                     f"**{bot_name.capitalize()}:**\n"
                     f"  - Monthly: {bot_monthly}\n"
