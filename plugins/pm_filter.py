@@ -298,7 +298,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
             confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
             confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
-    
+        
             admin_confirmation_message = (
                 f"Subscription Confirmed:\n\n"
                 f"User ID: {user_id}\n"
@@ -317,8 +317,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 f"Total Attempts Bot: {total_attempts_bot}\n"
                 f"Please verify and handle the payment."
             )
+        
+            # Split the admin confirmation message into chunks
+            chunks = [admin_confirmation_message[i:i + 4096] for i in range(0, len(admin_confirmation_message), 4096)]
+        
             # Send Log about successful subscription
-            await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
+            for chunk in chunks:
+                await client.send_message(chat_id=LOG_CHANNEL, text=chunk)
+        
             # Notify user about successful subscription
             await client.edit_message_media(
                 query.message.chat.id,
@@ -329,7 +335,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 text=confirmation_message
             )
             user_states[user_id] = True
-    
+
         except Exception as e:
             error_message = f"An error occurred during subscription confirmation:\n{str(e)}"
             # Log the error
