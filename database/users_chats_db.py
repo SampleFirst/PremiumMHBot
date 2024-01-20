@@ -15,6 +15,16 @@ class Database:
         self.pro = self.db.premium_dot
         self.pre = self.db.premium_db
 
+    def new_user(self, id, name):
+        return dict(
+            id = id,
+            name = name,
+            ban_status=dict(
+                is_banned=False,
+                ban_reason="",
+            ),
+        )
+        
     # verification 
     async def update_verification(self, id, date, time):
         status = {
@@ -117,42 +127,47 @@ class Database:
         await self.grp.delete_many({'id': int(chat_id)})
         
     # all dot related functions
-    async def add_attempt_dot(self, user_id, user_name, selected_bot, validity_date, total_attempt, total_attempt_bot):
-        attempt = {
-            "user_id": user_id,
-            "selected_bot": selected_bot,
-            "validity_date": validity_date,
-            "total_attempt": total_attempt,
-            "total_attempt_bot": total_attempt_bot,
-            "timestamp": datetime.datetime.now(pytz.utc)
-        }
+    async def add_attempt(self, user_id, user_name, selected_bot, current_date, current_time, validity_formatted):
+        attempt = dict(
+            user_id=user_id,
+            user_name=user_name,
+            bot_name=selected_bot,
+            date=current_date,
+            time=current_time,
+            validity=validity_formatted
+        )
         await self.dot.insert_one(attempt)
-    
-    async def get_monthly_attempts_dot(self, bot_name=None):
-        today = date.today()
-        first_day_of_month = today.strftime("%Y-%m-01")
-        filter = {"timestamp": {"$gte": first_day_of_month}}
-        if bot_name:
-            filter["selected_bot"] = bot_name
-        count = await self.dot.count_documents(filter)
-        return count
-    
-    async def get_daily_attempts_dot(self, bot_name=None):
-        today = date.today()
-        filter = {"timestamp": {"$gte": datetime.datetime.combine(today, datetime.time.min)}}
-        if bot_name:
-            filter["selected_bot"] = bot_name
-        count = await self.col.count_documents(filter)
-        return count
-    
-    async def get_total_attempts_dot(self, bot_name=None):
-        filter = {}
-        if bot_name:
-            filter["selected_bot"] = bot_name
-        count = await self.dot.count_documents(filter)
-        return count
-    
-    
+
+    async def get_user_attempts(self, user_id, selected_bot=None):
+        query = {'user_id': user_id}
+        if selected_bot:
+            query['bot_name'] = selected_bot
+        return [attempt async for attempt in self.dot.find(query)]
+
+    async def get_total_attempts(self, selected_bot=None):
+        query = {}
+        if selected_bot:
+            query['bot_name'] = selected_bot
+        return await self.dot.count_documents(query)
+
+    async def get_this_month_attempts(self, selected_bot=None):
+        tz = pytz.timezone('Asia/Kolkata')
+        now = datetime.datetime.now(tz)
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        query = {'date': {'$gte': start_of_month.strftime("%Y-%m-%d")}}
+        if selected_bot:
+            query['bot_name'] = selected_bot
+        return await self.dot.count_documents(query)
+
+    async def get_today_attempts(self, selected_bot=None):
+        tz = pytz.timezone('Asia/Kolkata')
+        now = datetime.datetime.now(tz)
+        start_day = now.replace(day=1)
+        query = {'date': start_day.strftime("%Y-%m-%d")}
+        if selected_bot:
+            query['bot_name'] = selected_bot
+        return await self.dot.count_documents(query)
+
     # async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date):
         # attempt_data = {
             # 'user_id': user_id,
