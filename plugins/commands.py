@@ -92,6 +92,43 @@ async def log_file(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
+@Client.on_message(filters.command("total_attempts"))
+async def total_attempts(client, message):
+    try:
+        monthly_total = await db.get_monthly_confirmed_button_total()
+        daily_total = await db.get_daily_confirmed_button_total()
+        all_time_total = await db.get_all_time_confirmed_button_total()
+
+        # Get data for specific bots if mentioned
+        bot_names = message.command[1:]
+        if bot_names:
+            bot_data = []
+            for bot_name in bot_names:
+                bot_monthly = await db.get_monthly_confirmed_button_total(bot_name)
+                bot_daily = await db.get_daily_confirmed_button_total(bot_name)
+                bot_all_time = await db.get_all_time_confirmed_button_total(bot_name)
+                bot_data.append(
+                    f"**{bot_name.capitalize()}:**\n"
+                    f"  - Monthly: {bot_monthly}\n"
+                    f"  - Daily: {bot_daily}\n"
+                    f"  - All Time: {bot_all_time}\n"
+                )
+
+            response = "\n".join(bot_data)
+        else:
+            response = (
+                f"**Subscription Data:**\n"
+                f"  - Monthly Total: {monthly_total}\n"
+                f"  - Daily Total: {daily_total}\n"
+                f"  - All Time Total: {all_time_total}"
+            )
+
+        await message.reply_text(response)
+    except Exception as e:
+        logger.error(f"Error fetching subscription data: {e}")
+        await message.reply_text("An error occurred while retrieving subscription data. Please try again later.")
+
+
 @Client.on_message(filters.command("get_attempts"))
 async def get_attempts_data(client, message):
     try:
