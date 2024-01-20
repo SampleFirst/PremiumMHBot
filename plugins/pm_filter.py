@@ -270,19 +270,24 @@ async def cb_handler(client: Client, query: CallbackQuery):
         selected_bot = query.data.replace("confirm_bot_", "")
         user_name = query.from_user.username
         user_id = query.from_user.id
-    
+
         bot_name = selected_bot.capitalize()
-        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
-    
+
         # Add the attempt information to the database
-        attempt_number = await db.get_user_attempts_dot(user_id) + 1
-        attempt_number_selected_bot = await db.get_user_attempts_dot(user_id, selected_bot) + 1
-        
-        await db.add_attempt_dot(user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date)
+        total_attempt = await db.get_user_attempts_dot(user_id) + 1
+        total_attempt_bot = await db.get_user_attempts_dot(user_id, selected_bot) + 1
     
         USER_SELECTED[user_id] = selected_bot
+
+        # Store subscription data in the database
+        try:
+            await db.add_attempt_dot(user_id, user_name, selected_bot, validity_date, total_attempt, total_attempt_bot)
+        except Exception as e:
+            logger.error(f"Error storing subscription data: {e}")
+            await query.message.edit_text("An error occurred while storing subscription data. Please try again later.")
+            return
     
         confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
@@ -291,10 +296,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"Subscription Confirmed:\n\n"
             f"User: {user_name}\n"
             f"Bot: {selected_bot.capitalize()}\n"
-            f"Date: {current_date_time}\n"
             f"Validity: {validity_formatted}\n"
-            f"Total Attempts: {attempt_number}\n"
-            f"Total {selected_bot.capitalize()} Attempts: {attempt_number_selected_bot}\n\n"
+            f"Total Attempts: {total_attempt}\n"
+            f"Total {selected_bot.capitalize()} Attempts: {total_attempt_bot}\n\n"
             f"Please verify and handle the payment."
         )
     
