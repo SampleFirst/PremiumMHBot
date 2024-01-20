@@ -130,7 +130,7 @@ class Database:
     
     async def get_monthly_attempts_dot(self, bot_name=None):
         today = date.today()
-        first_day_of_month = today.replace(day=1)
+        first_day_of_month = today.strftime("%Y-%m-01")
         filter = {"timestamp": {"$gte": first_day_of_month}}
         if bot_name:
             filter["selected_bot"] = bot_name
