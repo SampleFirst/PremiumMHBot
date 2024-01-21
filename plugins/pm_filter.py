@@ -206,9 +206,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             validity_formatted = validity_date.strftime("%B %d, %Y")
     
             month_total = await db.get_total_attempts_monthly()
-            month_specific = await db.get_total_attempts_monthly(selected_bot)
+            month_specific = await db.get_total_attempts_monthly(selected_bot=selected_bot)
             day_total = await db.get_total_attempts_daily()
-            day_specific = await db.get_total_attempts_daily(selected_bot)
+            day_specific = await db.get_total_attempts_daily(selected_bot=selected_bot)
     
             if MONTHLY_ATTEMPTS_COUNT:
                 if TOTAL_ATTEMPTS_COUNT:
