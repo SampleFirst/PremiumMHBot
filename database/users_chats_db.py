@@ -25,24 +25,6 @@ class Database:
             ),
         )
         
-    # verification 
-    async def update_verification(self, id, date, time):
-        status = {
-            'date': str(date),
-            'time': str(time)
-        }
-        await self.col.update_one({'id': int(id)}, {'$set': {'verification_status': status}})
-    
-    async def get_verified(self, id):
-        default = {
-            'date': "1999-12-31",
-            'time': "23:59:59"
-        }
-        user = await self.col.find_one({'id': int(id)})
-        if user:
-            return user.get("verification_status", default)
-        return default
-    
     # all col related functions
     async def add_user(self, id, name):
         user = self.new_user(id, name)
@@ -127,69 +109,26 @@ class Database:
         await self.grp.delete_many({'id': int(chat_id)})
         
     # all dot related functions
-    async def add_attempt(self, user_id, user_name, selected_bot, current_date, current_time, validity_formatted):
-        attempt = dict(
-            user_id=user_id,
-            user_name=user_name,
-            bot_name=selected_bot,
-            date=current_date,
-            time=current_time,
-            validity=validity_formatted
-        )
-        await self.dot.insert_one(attempt)
-
-    async def get_user_attempts(self, user_id, selected_bot=None):
-        query = {'user_id': user_id}
-        if selected_bot:
-            query['bot_name'] = selected_bot
-        return [attempt async for attempt in self.dot.find(query)]
-
-    async def get_total_attempts(self, selected_bot=None):
-        query = {}
-        if selected_bot:
-            query['bot_name'] = selected_bot
-        return await self.dot.count_documents(query)
-
-    async def get_this_month_attempts(self, selected_bot=None):
-        tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.now(tz)
-        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        query = {'date': {'$gte': start_of_month.strftime("%Y-%m-%d")}}
-        if selected_bot:
-            query['bot_name'] = selected_bot
-        return await self.dot.count_documents(query)
-
-    async def get_today_attempts(self, selected_bot=None):
-        tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.now(tz)
-        start_day = now.replace(day=1)
-        query = {'date': start_day.strftime("%Y-%m-%d")}
-        if selected_bot:
-            query['bot_name'] = selected_bot
-        return await self.dot.count_documents(query)
-
-    # async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date):
-        # attempt_data = {
-            # 'user_id': user_id,
-            # 'user_name': user_name,
-            # 'selected_bot': selected_bot,
-            # 'attempt_number': attempt_number,
-            # 'attempt_number_selected_bot': attempt_number_selected_bot,
-            # 'current_date_time': current_date_time,
-            # 'validity_date': validity_date
-        # }
-        # await self.dot.insert_one(attempt_data)
-    
+    async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date):
+        attempt_data = {
+            'user_id': user_id,
+            'user_name': user_name,
+            'selected_bot': selected_bot,
+            'attempt_number': attempt_number,
+            'attempt_number_selected_bot': attempt_number_selected_bot,
+            'current_date_time': current_date_time,
+            'validity_date': validity_date
+        }
+        await self.dot.insert_one(attempt_data)
     
     async def get_user_attempts_dot(self, user_id, selected_bot=None):
         if selected_bot:
             filter_params = {'user_id': user_id, 'selected_bot': selected_bot}
         else:
-            filter_params = {'user_id': user_id}
-    
+            filter_params = {'user_id': user_id}    
         attempts = await self.dot.count_documents(filter_params)
         return attempts
-   
+
     async def get_latest_attempt_dot(self, user_id):
         latest_attempt = await self.dot.find_one(
             {'user_id': user_id},
@@ -197,9 +136,30 @@ class Database:
         )
         return latest_attempt
 
+    async def get_total_attempts_dot(self, selected_bot=None):
+        if selected_bot:
+            filter_params = {'selected_bot': selected_bot}
+        else:
+            filter_params = {}
+        total_attempts = await self.dot.count_documents(filter_params)
+        return total_attempts
+        
+    async def get_total_attempts_monthly(self, selected_bot=None):
+        tz = pytz.timezone('Asia/Kolkata')  # Adjust timezone if needed
+        start_of_month = datetime.now(tz).replace(day=1)
+        filter_params = {'current_date_time': {'$gte': start_of_month}}
+        if selected_bot:
+            filter_params['selected_bot'] = selected_bot
+        return await self.dot.count_documents(filter_params)
     
-    
-    
+    async def get_total_attempts_daily(self, selected_bot=None):
+        tz = pytz.timezone('Asia/Kolkata')  # Adjust timezone if needed
+        start_of_day = datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        filter_params = {'current_date_time': {'$gte': start_of_day}}
+        if selected_bot:
+            filter_params['selected_bot'] = selected_bot
+        return await self.dot.count_documents(filter_params)
+        
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
         cancel_data = {
             'user_id': user_id,
