@@ -1,6 +1,7 @@
 import motor.motor_asyncio
 from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT, AUTO_DELETE, MAX_BTN, AUTO_FFILTER, SHORTLINK_API, SHORTLINK_URL, DATABASE_LIMIT, BOT_LIMIT, IS_SHORTLINK, PREMIUM_PRICE
 import pytz
+from date import add_date
 from datetime import date, datetime, timedelta
 
 class Database:
@@ -10,18 +11,44 @@ class Database:
         self.db = self._client[database_name]
         self.col = self.db.users
         self.grp = self.db.groups
-        self.dot = self.db.users_dot
-        self.udb = self.db.users_db
-        self.pro = self.db.premium_dot
-        self.pre = self.db.premium_db
 
     def new_user(self, id, name):
         return dict(
-            id = id,
-            name = name,
+            id=id,
+            name=name,
             ban_status=dict(
                 is_banned=False,
                 ban_reason="",
+            ),
+            attempt_status=dict(
+                is_attempt=False,
+                bot_name=None,
+                attempt_date=None,
+                attempt_validity=None,
+            ),
+            confirm_status=dict(
+                is_confirm=False,
+                bot_name=None,
+                file_id=None,
+                confirm_date=None,
+            ),
+            premium_status=dict(
+                is_premium=False,
+                bot_name=None,
+                file_id=None,
+                premium_date=None,
+                premium_validity=None,
+            ),
+        )
+
+    def new_group(self, id, title, username):
+        return dict(
+            id=id,
+            title=title,
+            username=username,
+            chat_status=dict(
+                is_disabled=False,
+                reason="",
             ),
         )
         
@@ -108,57 +135,82 @@ class Database:
     async def delete_chat(self, chat_id):
         await self.grp.delete_many({'id': int(chat_id)})
         
-    # all dot related functions
-    async def add_attempt_dot(self, user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date):
-        attempt_data = {
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_bot': selected_bot,
-            'attempt_number': attempt_number,
-            'attempt_number_selected_bot': attempt_number_selected_bot,
-            'current_date_time': current_date_time,
-            'validity_date': validity_date
-        }
-        await self.dot.insert_one(attempt_data)
-    
-    async def get_user_attempts_dot(self, user_id, selected_bot=None):
-        if selected_bot:
-            filter_params = {'user_id': user_id, 'selected_bot': selected_bot}
-        else:
-            filter_params = {'user_id': user_id}    
-        attempts = await self.dot.count_documents(filter_params)
-        return attempts
+    # New functions for attempt status
 
-    async def get_latest_attempt_dot(self, user_id):
-        latest_attempt = await self.dot.find_one(
-            {'user_id': user_id},
-            sort=[('current_date_time', -1)]  # Sort by datetime in descending order
+    async def add_attempt(self, id, bot_name, attempt_validity):
+        now_date = add_date()
+        attempt_status = dict(
+            is_attempt=True,
+            bot_name=bot_name,
+            attempt_date=now_date,
+            attempt_validity=attempt_validity,
         )
-        return latest_attempt
+        await self.col.update_one({"id": id}, {"$set": {"attempt_status": attempt_status}})
 
-    async def get_total_attempts_dot(self, selected_bot=None):
-        if selected_bot:
-            filter_params = {'selected_bot': selected_bot}
-        else:
-            filter_params = {}
-        total_attempts = await self.dot.count_documents(filter_params)
-        return total_attempts
-        
-    async def get_total_attempts_monthly(self, selected_bot=None):
-        tz = pytz.timezone('Asia/Kolkata')  # Adjust timezone if needed
-        start_of_month = datetime.now(tz).replace(day=1)
-        filter_params = {'current_date_time': {'$gte': start_of_month}}
-        if selected_bot:
-            filter_params['selected_bot'] = selected_bot
-        return await self.dot.count_documents(filter_params)
-    
-    async def get_total_attempts_daily(self, selected_bot=None):
-        tz = pytz.timezone('Asia/Kolkata')  # Adjust timezone if needed
-        start_of_day = datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
-        filter_params = {'current_date_time': {'$gte': start_of_day}}
-        if selected_bot:
-            filter_params['selected_bot'] = selected_bot
-        return await self.dot.count_documents(filter_params)
+    async def clear_attempt(self, id):
+        attempt_status = dict(
+            is_attempt=False,
+            bot_name=None,
+            attempt_date=None,
+            attempt_validity=None,
+        )
+        await self.col.update_one({"id": id}, {"$set": {"attempt_status": attempt_status}})
+
+    async def is_attempt_active(self, id, bot_name):
+        user = await self.col.find_one({"id": id, "attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
+        return bool(user)
+
+    # New functions for confirm status
+
+    async def add_confirm(self, id, bot_name, file_id):
+        now_date = add_date()
+        confirm_status=dict(
+            is_confirm=True,
+            bot_name=bot_name,
+            file_id=file_id,
+            confirm_date=now_date,
+        )
+        await self.col.update_one({"id": id}, {"$set": {"confirm_status": confirm_status}})
+
+    async def clear_confirm(self, id):
+        confirm_status = dict(
+            is_confirm=False,
+            bot_name=None,
+            file_id=None,
+            confirm_date=None,
+        )
+        await self.col.update_one({"id": id}, {"$set": {"confirm_status": confirm_status}})
+
+    async def is_confirm_active(self, id, bot_name):
+        user = await self.col.find_one({"id": id, "confirm_status.is_confirm": True, "confirm_status.bot_name": bot_name})
+        return bool(user)
+
+    # New functions for premium status
+
+    async def add_premium(self, id, bot_name, file_id, premium_validity):
+        now_date = add_date()
+        premium_status=dict(
+            is_premium=True,
+            bot_name=bot_name,
+            file_id=file_id,
+            premium_date=now_date,
+            premium_validity=premium_validity,
+        )
+        await self.col.update_one({"id": id}, {"$set": {"premium_status": premium_status}})
+
+    async def clear_premium(self, id):
+        premium_status=dict(
+            is_premium=False,
+            bot_name=None,
+            file_id=None,
+            premium_date=None,
+            premium_validity=None,
+        )
+        await self.col.update_one({"id": id}, {"$set": {"premium_status": premium_status}})
+
+    async def is_premium_active(self, id, bot_name):
+        user = await self.col.find_one({"id": id, "premium_status.is_premium": True, "premium_status.bot_name": bot_name})
+        return bool(user)
         
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
         cancel_data = {
