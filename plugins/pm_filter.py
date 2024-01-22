@@ -61,7 +61,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
     latest_attempt = await db.get_latest_attempt_dot(user_id)
 
     if not latest_attempt:
-        await message.reply_text("Unable to retrieve latest attempt details. Please try again.")
+        await message.reply_text("Unable to retrieve the latest attempt details. Please try again.")
         return
 
     user_name = latest_attempt['user_name']
@@ -70,21 +70,45 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
     current_date_time = latest_attempt['current_date_time']
     validity_date = latest_attempt['validity_date']
 
-    caption_bot = f"User ID: {user_id}\n" \
-              f"User Name: {user_name}\n" \
-              f"Selected Bot: {selected_bot.capitalize()}\n" \
-              f"Attempt Number: {attempt_number}\n" \
-              f"Date and Time: {current_date_time}\n" \
-              f"Validity: {validity_date}\n"
+    caption_bot = (
+        f"User ID: {user_id}\n"
+        f"User Name: {user_name}\n"
+        f"Selected Bot: {selected_bot.capitalize()}\n"
+        f"Attempt Number: {attempt_number}\n"
+        f"Date and Time: {current_date_time}\n"
+        f"Validity: {validity_date}\n"
+    )
 
     keyboard = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton("✅ Confirmed", callback_data=f"payment_confirmed_bot"),
-            InlineKeyboardButton("❌ Cancel", callback_data=f"payment_cancel_bot")
-        ]]
+        [
+            [
+                InlineKeyboardButton("✅ Confirmed", callback_data="payment_confirmed_bot"),
+                InlineKeyboardButton("❌ Cancel", callback_data="payment_cancel_bot")
+            ]
+        ]
     )
+
+    # Add premium with user's provided screenshot
+    await db.add_premium(user_id, selected_bot, file_id, validity_date)
+
+    # Remove confirm and attempt status as premium is added
+    await db.clear_confirm(user_id)
+    await db.clear_attempt(user_id)
+
     await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_bot, reply_markup=keyboard)
-    await message.reply_text(f"Hey {user_name}!\n\nYour Payment Screenshot Received. Wait for Confirmation by Admin.\n\nSending Confirmation Message Soon...")
+
+    keyboard_user = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("✅ Confirmed", callback_data="payment_ok")
+            ]
+        ]
+    )
+    await message.reply_text(
+        f"Hey {user_name}!\n\nYour Payment Screenshot Received. "
+        f"Click **Confirmed** Button For Confirmation Your Payment...",
+        reply_markup=keyboard_user
+    )
     user_states[user_id] = False
 
 async def handle_db_screenshot(client, message, user_id, file_id):
@@ -214,6 +238,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 # Add attempt to the database
                 await db.add_attempt(user_id, bot_name, attempt_validity)
     
+            USER_SELECTED[user_id] = bot_name
+            
             buttons = [
                 [
                     InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
@@ -235,7 +261,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.MARKDOWN
             )
-    
         except Exception as e:
             error_message = f"An error:\n{str(e)}"
             # Log the error
@@ -247,50 +272,51 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
-        selected_bot = query.data.replace("confirm_bot_", "")
+        bot_name = query.data.replace("confirm_bot_", "")
         user_name = query.from_user.username
         user_id = query.from_user.id
-    
-        bot_name = selected_bot.capitalize()
-        current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
-        validity_formatted = validity_date.strftime("%B %d, %Y")
-    
-        # Add the attempt information to the database
-        attempt_number = await db.get_user_attempts_dot(user_id) + 1
-        attempt_number_selected_bot = await db.get_user_attempts_dot(user_id, selected_bot) + 1
+                
+        validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
+        confirm_validity = validity_days.strftime("%Y-%m-%d")
         
-        await db.add_attempt_dot(user_id, user_name, selected_bot, attempt_number, attempt_number_selected_bot, current_date_time, validity_date)
-    
-        USER_SELECTED[user_id] = selected_bot
-    
-        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
-        confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
-    
-        admin_confirmation_message = (
-            f"Subscription Confirmed:\n\n"
-            f"User: {user_name}\n"
-            f"Bot: {selected_bot.capitalize()}\n"
-            f"Date: {current_date_time}\n"
-            f"Validity: {validity_formatted}\n"
-            f"Total Attempts: {attempt_number}\n"
-            f"Total {selected_bot.capitalize()} Attempts: {attempt_number_selected_bot}\n\n"
-            f"Please verify and handle the payment."
-        )
-    
-        # Send Log about successful subscription
-        await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
-    
-        # Notify user about successful subscription
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=confirmation_message
-        )
-        user_states[user_id] = True
+        try:
+            if not await db.is_attempt_active(user_id, bot_name)
+                await query.message.edit_text("He User! i am not recognise your Request pls Re-attempt.")
+            else:
+                await db.add_confirm(user_id, bot_name, file_id)
+                await db.clear_attempt(user_id)
+            
+            confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+            confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+        
+            admin_confirmation_message = (
+                f"Subscription Confirmed:\n\n"
+                f"User: {user_name}\n"
+                f"Bot: {bot_name.capitalize()}\n"
+                f"Validity: {confirm_validity}\n"
+                f"Please verify and handle the payment."
+            )
+            # Send Log about successful subscription
+            await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
+        
+            # Notify user about successful subscription
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(
+                text=confirmation_message
+            )
+            user_states[user_id] = True
+        except Exception as e:
+            error_message = f"An error:\n{str(e)}"
+            # Log the error
+            logger.error(error_message)
+            # Notify the user about the error
+            await query.message.edit_text(
+                text=error_message
+            )
         
     elif query.data.startswith("description_bot_"):
         selected_bot_type = query.data.replace("description_bot_", "")
