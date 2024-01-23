@@ -51,16 +51,19 @@ async def payment_screenshot_received(client, message):
 
     # Update if and elif conditions for selected_type
     if selected_type in {"mbot", "abot", "rbot", "yibot"}:
-        await handle_bot_screenshot(client, message, user_id, file_id)
+        await handle_bot_screenshot(client, message, user_id, selected_type, file_id)
     elif selected_type in {"mdb", "adb", "tvsdb"}:
-        await handle_db_screenshot(client, message, user_id, file_id)
+        await handle_db_screenshot(client, message, user_id, selected_type, file_id)
     else:
         await message.reply_text("Invalid selection. Start the process again.")
 
-async def handle_bot_screenshot(client, message, user_id, file_id):
+async def handle_bot_screenshot(client, message, user_id, selected_type, file_id):
+    bot_name = selected_type
+    validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
+    premium_validity = validity_days.strftime("%Y-%m-%d")
+    
     caption_bot = (
         f"User ID: {user_id}\n"
-        f"User Name: {user_name}\n"
     )
 
     keyboard = InlineKeyboardMarkup(
@@ -73,7 +76,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
     )
 
     # Add premium with user's provided screenshot
-    await db.add_premium(user_id, selected_bot, file_id, validity_date)
+    await db.add_premium(user_id, bot_name, file_id, premium_validity)
 
     # Remove confirm and attempt status as premium is added
     await db.clear_confirm(user_id)
@@ -95,7 +98,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
     )
     user_states[user_id] = False
 
-async def handle_db_screenshot(client, message, user_id, file_id):
+async def handle_db_screenshot(client, message, user_id, selected_type, file_id):
     latest_attempt = await db.get_latest_attempt_db(user_id)
 
     if not latest_attempt:
