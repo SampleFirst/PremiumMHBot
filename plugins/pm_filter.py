@@ -58,25 +58,9 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("Invalid selection. Start the process again.")
 
 async def handle_bot_screenshot(client, message, user_id, file_id):
-    latest_attempt = await db.get_latest_attempt_dot(user_id)
-
-    if not latest_attempt:
-        await message.reply_text("Unable to retrieve the latest attempt details. Please try again.")
-        return
-
-    user_name = latest_attempt['user_name']
-    selected_bot = latest_attempt.get('selected_bot', '')
-    attempt_number = latest_attempt['attempt_number']
-    current_date_time = latest_attempt['current_date_time']
-    validity_date = latest_attempt['validity_date']
-
     caption_bot = (
         f"User ID: {user_id}\n"
         f"User Name: {user_name}\n"
-        f"Selected Bot: {selected_bot.capitalize()}\n"
-        f"Attempt Number: {attempt_number}\n"
-        f"Date and Time: {current_date_time}\n"
-        f"Validity: {validity_date}\n"
     )
 
     keyboard = InlineKeyboardMarkup(
@@ -110,7 +94,6 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
         reply_markup=keyboard_user
     )
     user_states[user_id] = False
-
 async def handle_db_screenshot(client, message, user_id, file_id):
     latest_attempt = await db.get_latest_attempt_db(user_id)
 
