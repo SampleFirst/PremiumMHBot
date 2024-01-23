@@ -245,6 +245,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.MARKDOWN
             )
+            user_states[user_id] = True
         except Exception as e:
             error_message = f"An error:\n{str(e)}"
             # Log the error
