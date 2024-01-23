@@ -263,7 +263,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         confirm_validity = validity_days.strftime("%Y-%m-%d")
         
         try:
-            if not await db.is_attempt_active(user_id, bot_name)
+            if not await db.is_attempt_active(user_id, bot_name):
                 await query.message.edit_text("He User! i am not recognise your Request pls Re-attempt.")
             else:
                 await db.add_confirm(user_id, bot_name, file_id)
