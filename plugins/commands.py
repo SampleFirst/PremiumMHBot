@@ -92,10 +92,29 @@ async def log_file(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
-@Client.on_message(filters.command("total_attempts"))
-async def total_attempts_command(client, message):
-    total_attempts = await db.get_total_attempts()
-    await message.reply(f"Total attempts: {total_attempts}")
+@Client.on_message(filters.command('total')
+async def total_data(bot, message):
+    try:
+        total_users = await db.total_users_count()
+        total_attempts = await db.total_attempts()
+        total_confirms = await db.total_confirm()
+        total_premiums = await db.total_premium()
+
+        response = f"Total Users: {total_users}\nTotal Attempts: {total_attempts}\nTotal Confirms: {total_confirms}\nTotal Premiums: {total_premiums}"
+
+        # For specific bot data
+        bot_names = []  
+        for bot_name in bot_names:
+            total_attempts_bot = await db.total_attempts(bot_name=bot_name)
+            total_confirms_bot = await db.total_confirm(bot_name=bot_name)
+            total_premiums_bot = await db.total_premium(bot_name=bot_name)
+
+            response += f"\n\n{bot_name}:\nTotal Attempts: {total_attempts_bot}\nTotal Confirms: {total_confirms_bot}\nTotal Premiums: {total_premiums_bot}"
+
+        await message.reply_text(response)
+
+    except Exception as e:
+        await message.reply(str(e))
 
 @Client.on_message(filters.command("monthly_attempts"))
 async def monthly_attempts_command(client, message):
