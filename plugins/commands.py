@@ -92,8 +92,8 @@ async def log_file(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
-@Client.on_message(filters.command('total')
-async def total_data(bot, message):
+@Client.on_message(filters.command('total'))
+async def total_users(bot, message):
     try:
         total_users = await db.total_users_count()
         total_attempts = await db.total_attempts()
