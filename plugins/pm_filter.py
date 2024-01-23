@@ -94,6 +94,7 @@ async def handle_bot_screenshot(client, message, user_id, file_id):
         reply_markup=keyboard_user
     )
     user_states[user_id] = False
+
 async def handle_db_screenshot(client, message, user_id, file_id):
     latest_attempt = await db.get_latest_attempt_db(user_id)
 
@@ -102,14 +103,14 @@ async def handle_db_screenshot(client, message, user_id, file_id):
         return
 
     user_name = latest_attempt['user_name']
-    selected_db = latest_attempt.get('selected_db', '')
+    bot_name = latest_attempt.get('bot_name', '')
     attempt_number = latest_attempt['attempt_number']
     current_date_time = latest_attempt['current_date_time']
     validity_date = latest_attempt['validity_date']
 
     caption_db = f"User ID: {user_id}\n" \
               f"User Name: {user_name}\n" \
-              f"Selected DB: {selected_db.capitalize()}\n" \
+              f"Selected DB: {bot_name.capitalize()}\n" \
               f"Attempt Number: {attempt_number}\n" \
               f"Date and Time: {current_date_time}\n" \
               f"Validity: {validity_date}\n"
@@ -262,45 +263,36 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
         confirm_validity = validity_days.strftime("%Y-%m-%d")
         
-        try:
-            if not await db.is_attempt_active(user_id, bot_name):
-                await query.message.edit_text("He User! i am not recognise your Request pls Re-attempt.")
-            else:
-                await db.add_confirm(user_id, bot_name, file_id)
-                await db.clear_attempt(user_id)
-            
-            confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
-            confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+        if not await db.is_attempt_active(user_id, bot_name):
+            await query.message.edit_text("He User! i am not recognise your Request pls Re-attempt.")
+        else:
+            await db.add_confirm(user_id, bot_name, file_id)
+            await db.clear_attempt(user_id)
         
-            admin_confirmation_message = (
-                f"Subscription Confirmed:\n\n"
-                f"User: {user_name}\n"
-                f"Bot: {bot_name.capitalize()}\n"
-                f"Validity: {confirm_validity}\n"
-                f"Please verify and handle the payment."
-            )
-            # Send Log about successful subscription
-            await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
-        
-            # Notify user about successful subscription
-            await client.edit_message_media(
-                query.message.chat.id,
-                query.message.id,
-                InputMediaPhoto(random.choice(PICS))
-            )
-            await query.message.edit_text(
-                text=confirmation_message
-            )
-            user_states[user_id] = True
-        except Exception as e:
-            error_message = f"An error:\n{str(e)}"
-            # Log the error
-            logger.error(error_message)
-            # Notify the user about the error
-            await query.message.edit_text(
-                text=error_message
-            )
-        
+        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+        confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
+    
+        admin_confirmation_message = (
+            f"Subscription Confirmed:\n\n"
+            f"User: {user_name}\n"
+            f"Bot: {bot_name.capitalize()}\n"
+            f"Validity: {confirm_validity}\n"
+            f"Please verify and handle the payment."
+        )
+        # Send Log about successful subscription
+        await client.send_message(chat_id=LOG_CHANNEL, text=admin_confirmation_message)
+    
+        # Notify user about successful subscription
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=confirmation_message
+        )
+        user_states[user_id] = True
+
     elif query.data.startswith("description_bot_"):
         selected_bot_type = query.data.replace("description_bot_", "")
         description_text = ""
@@ -326,7 +318,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "mdb" or query.data == "adb" or query.data == "tvsdb":
         # Display monthly plan message for selected bot
-        selected_db = query.data
+        bot_name = query.data
                     
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
@@ -357,25 +349,25 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
     elif query.data.startswith("confirm_db_"):
         # Handle user confirming bot subscription
-        selected_db = query.data.replace("confirm_db_", "")
+        bot_name = query.data.replace("confirm_db_", "")
         user_name = query.from_user.username
         user_id = query.from_user.id
 
-        db_name = selected_db.capitalize()
+        db_name = bot_name.capitalize()
         current_date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         validity_date = datetime.datetime.now() + datetime.timedelta(days=30)
         validity_formatted = validity_date.strftime("%B %d, %Y")
 
-        await db.add_attempt_db(user_id, user_name, selected_db, 1, current_date_time, validity_date)
-        USER_SELECTED[user_id] = selected_db
+        await db.add_attempt_db(user_id, user_name, bot_name, 1, current_date_time, validity_date)
+        USER_SELECTED[user_id] = bot_name
 
-        confirmation_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n"
+        confirmation_message = f"Subscription Confirmed for {bot_name.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
     
         admin_confirmation_message = (
             f"Subscription Confirmed:\n\n"
             f"User: {user_name}\n"
-            f"Database: {selected_db.capitalize()}\n"
+            f"Database: {bot_name.capitalize()}\n"
             f"Date: {current_date_time}\n"
             f"Validity: {validity_formatted}\n\n"
             f"Please verify and handle the payment."
@@ -474,15 +466,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
         if is_admin:
             # Handle payment confirmation by admins
             user_id = query.message.caption.split('\n')[0].split(': ')[1]
-            selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            bot_name = query.message.caption.split('\n')[2].split(': ')[1].lower()
             latest_attempt = await db.get_latest_attempt_db(user_id)
 
             # Check which database is selected and send invite link to the appropriate channel
-            if selected_db == 'mdb':
+            if bot_name == 'mdb':
                 channel_name = MOVIES_DB
-            elif selected_db == 'adb':
+            elif bot_name == 'adb':
                 channel_name = ANIME_DB
-            elif selected_db == 'tvsdb':
+            elif bot_name == 'tvsdb':
                 channel_name = SERIES_DB
             else:
                 # Handle invalid database selection
@@ -494,7 +486,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
             # Check if the channel is almost full (last 5 seats)
             if TOTAL_MEMBERS - current_members <= 5:
-                admin_notification = f"Attention! {selected_db.capitalize()} channel has only 5 seats left."
+                admin_notification = f"Attention! {bot_name.capitalize()} channel has only 5 seats left."
                 await client.send_message(chat_id=ADMINS, text=admin_notification)
 
             # Check if the channel is full, if yes, find the next available channel
@@ -520,35 +512,35 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
             await client.send_message(
                 chat_id=message.from_user.id,
-                text=f"**Hello {message.from_user.mention}, Join {selected_db.capitalize()}",
+                text=f"**Hello {message.from_user.mention}, Join {bot_name.capitalize()}",
                 reply_markup=InlineKeyboardMarkup(btn),
                 parse_mode=enums.ParseMode.MARKDOWN,
             )
             # Save data in users_chats_db
-            await db.add_premium_user_db(user_id, latest_attempt['user_name'], selected_db, current_date_time, latest_attempt['validity_months'])
+            await db.add_premium_user_db(user_id, latest_attempt['user_name'], bot_name, current_date_time, latest_attempt['validity_months'])
 
             # Notify the user about successful subscription and provide the invite link
-            user_message = f"Subscription Confirmed for {selected_db.capitalize()}!\n\n{invite_message}"
+            user_message = f"Subscription Confirmed for {bot_name.capitalize()}!\n\n{invite_message}"
             await client.send_message(user_id, user_message)
 
             # Send Log about successful subscription
-            admin_message = f"Subscription Confirmed for user ID: {user_id}\nUser: {latest_attempt['user_name']}\nDatabase: {selected_db.capitalize()}"
+            admin_message = f"Subscription Confirmed for user ID: {user_id}\nUser: {latest_attempt['user_name']}\nDatabase: {bot_name.capitalize()}"
             await client.send_message(chat_id=ADMINS, text=admin_message)
 
     elif query.data == "payment_cancel_db":
         if is_admin:
             # Handle payment confirmation by admins
             user_id = query.message.caption.split('\n')[0].split(': ')[1]
-            selected_db = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            bot_name = query.message.caption.split('\n')[2].split(': ')[1].lower()
             latest_attempt = await db.get_latest_attempt_db(user_id)
 
             # Add user to premium database
-            await db.add_cancel_user_db(user_id, user_name, selected_db, current_date_time)
+            await db.add_cancel_user_db(user_id, user_name, bot_name, current_date_time)
             
             # Notify ADMINS about the payment cancellation
             admin_message = f"❌ Payment Cancelled for user ID: {user_id}"
             admin_message += f"User: {latest_attempt['user_name']}\n"
-            admin_message += f"Bot: {selected_db.capitalize()}"
+            admin_message += f"Bot: {bot_name.capitalize()}"
             
             await client.send_message(chat_id=ADMINS, text=admin_message)
 
