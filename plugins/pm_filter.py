@@ -92,7 +92,7 @@ async def handle_bot_screenshot(client, message, user_id, selected_type, file_id
         ]
     )
     await message.reply_text(
-        f"Hey {user_name}!\n\nYour Payment Screenshot Received. "
+        f"Hey {user_id}!\n\nYour Payment Screenshot Received. "
         f"Click **Confirmed** Button For Confirmation Your Payment...",
         reply_markup=keyboard_user
     )
