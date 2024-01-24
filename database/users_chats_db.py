@@ -160,6 +160,13 @@ class Database:
         user = await self.col.find_one({"id": id, "attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
         return bool(user)
 
+    async def total_attempts(self, bot_name=None):
+        if bot_name:
+            count = await self.col.count_documents({"attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
+        else:
+            count = await self.col.count_documents({"attempt_status.is_attempt": True})
+        return count
+        
     # New functions for confirm status
 
     async def add_confirm(self, id, bot_name, file_id):
@@ -185,6 +192,13 @@ class Database:
         user = await self.col.find_one({"id": id, "confirm_status.is_confirm": True, "confirm_status.bot_name": bot_name})
         return bool(user)
 
+    async def total_confirm(self, bot_name=None):
+        if bot_name:
+            count = await self.col.count_documents({"confirm_status.is_confirm": True, "confirm_status.bot_name": bot_name})
+        else:
+            count = await self.col.count_documents({"confirm_status.is_confirm": True})
+        return count
+        
     # New functions for premium status
 
     async def add_premium(self, id, bot_name, file_id, premium_validity):
@@ -211,6 +225,13 @@ class Database:
     async def is_premium_active(self, id, bot_name):
         user = await self.col.find_one({"id": id, "premium_status.is_premium": True, "premium_status.bot_name": bot_name})
         return bool(user)
+
+    async def total_premium(self, bot_name=None):
+        if bot_name:
+            count = await self.col.count_documents({"premium_status.is_premium": True, "premium_status.bot_name": bot_name})
+        else:
+            count = await self.col.count_documents({"premium_status.is_premium": True})
+        return count
         
     async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
         cancel_data = {
