@@ -1,5 +1,5 @@
 import motor.motor_asyncio
-from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT, AUTO_DELETE, MAX_BTN, AUTO_FFILTER, SHORTLINK_API, SHORTLINK_URL, DATABASE_LIMIT, BOT_LIMIT, IS_SHORTLINK, PREMIUM_PRICE
+from info import DATABASE_NAME, DATABASE_URI
 import pytz
 from date import add_date
 from datetime import date, datetime, timedelta
@@ -19,26 +19,32 @@ class Database:
             ban_status=dict(
                 is_banned=False,
                 ban_reason="",
-            ),
-            attempt_status=dict(
+            ),  
+            attempt_status=dict( 
                 is_attempt=False,
                 bot_name=None,
                 attempt_date=None,
                 attempt_validity=None,
-            ),
+            ),                          # This Attempts Function For If Active Bot Limit 
             confirm_status=dict(
                 is_confirm=False,
                 bot_name=None,
                 file_id=None,
                 confirm_date=None,
-            ),
+            ),                          # This Confirme Function For if User Send A Payment Screenshot 
             premium_status=dict(
                 is_premium=False,
                 bot_name=None,
                 file_id=None,
                 premium_date=None,
                 premium_validity=None,
-            ),
+            ),                          # This Premium Function if ADMINS Added Thos User As Premium Features 
+            cancel_status=dict(
+                is_cancel=False,
+                bot_name=None,
+                file_id=None,
+                cancel_date=None,
+            ),                          # This Cancel Function if ADMINS Added Thos User Cancel Premium Features 
         )
 
     def new_group(self, id, title, username):
@@ -72,12 +78,12 @@ class Database:
         )
         await self.col.update_one({'id': id}, {'$set': {'ban_status': ban_status}})
 
-    async def ban_user(self, user_id, ban_reason="No Reason"):
+    async def ban_user(self, id, ban_reason="No Reason"):
         ban_status = dict(
             is_banned=True,
             ban_reason=ban_reason
         )
-        await self.col.update_one({'id': user_id}, {'$set': {'ban_status': ban_status}})
+        await self.col.update_one({'id': id}, {'$set': {'ban_status': ban_status}})
 
     async def get_ban_status(self, id):
         default = dict(
@@ -92,8 +98,8 @@ class Database:
     async def get_all_users(self):
         return self.col.find({})
 
-    async def delete_user(self, user_id):
-        await self.col.delete_many({'id': int(user_id)})
+    async def delete_user(self, id):
+        await self.col.delete_many({'id': int(id)})
 
     async def get_banned(self):
         users = self.col.find({'ban_status.is_banned': True})
@@ -160,12 +166,21 @@ class Database:
         user = await self.col.find_one({"id": id, "attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
         return bool(user)
 
-    async def total_attempts(self, bot_name=None):
+    async def get_user_attempts(self, id, bot_name=None):
         if bot_name:
-            count = await self.col.count_documents({"attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
+            filter_params = {'id': id, 'bot_name': bot_name}
         else:
-            count = await self.col.count_documents({"attempt_status.is_attempt": True})
-        return count
+            filter_params = {'id': id}
+    
+        attempts = await self.dot.count_documents(filter_params)
+        return attempts
+   
+    async def get_latest_attempt(self, id):
+        latest_attempt = await self.dot.find_one(
+            {'id': id},
+            sort=[('attempt_date', -1)]  # Sort by attempt date in descending order
+        )
+        return latest_attempt
         
     # New functions for confirm status
 
@@ -192,12 +207,21 @@ class Database:
         user = await self.col.find_one({"id": id, "confirm_status.is_confirm": True, "confirm_status.bot_name": bot_name})
         return bool(user)
 
-    async def total_confirm(self, bot_name=None):
+    async def get_user_confirms(self, id, bot_name=None):
         if bot_name:
-            count = await self.col.count_documents({"confirm_status.is_confirm": True, "confirm_status.bot_name": bot_name})
+            filter_params = {'id': id, 'bot_name': bot_name}
         else:
-            count = await self.col.count_documents({"confirm_status.is_confirm": True})
-        return count
+            filter_params = {'id': id}
+    
+        attempts = await self.dot.count_documents(filter_params)
+        return attempts
+   
+    async def get_latest_confirm(self, id):
+        latest_attempt = await self.dot.find_one(
+            {'id': id},
+            sort=[('confirm_date', -1)]  # Sort by attempt date in descending order
+        )
+        return latest_attempt
         
     # New functions for premium status
 
@@ -225,168 +249,62 @@ class Database:
     async def is_premium_active(self, id, bot_name):
         user = await self.col.find_one({"id": id, "premium_status.is_premium": True, "premium_status.bot_name": bot_name})
         return bool(user)
-
-    async def total_premium(self, bot_name=None):
+        
+    async def get_user_premiums(self, id, bot_name=None):
         if bot_name:
-            count = await self.col.count_documents({"premium_status.is_premium": True, "premium_status.bot_name": bot_name})
+            filter_params = {'id': id, 'bot_name': bot_name}
         else:
-            count = await self.col.count_documents({"premium_status.is_premium": True})
-        return count
-        
-    async def add_user_cancel_dot(self, user_id, user_name, selected_bot, current_date_time):
-        cancel_data = {
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_bot': selected_bot,
-            'current_date_time': current_date_time,
-        }
-        await self.dot.insert_one(cancel_data)
-
-    async def get_user_cancels_dot(self, user_id):
-        cancels = await self.dot.count_documents({'user_id': user_id, 'current_date_time': {'$exists': True}})
-        return cancels
-        
-    async def get_total_cancels_dot(self):
-        total_cancel_users = await self.dot.count_documents({'cancel_data': {'$exists': True}})
-        return total_cancel_users
+            filter_params = {'id': id}
     
-    # all pro related functions
-    async def add_user_premium_dot(self, user_id, user_name, selected_bot, current_date_time, validity_months):
-        expiry_date = current_date_time + timedelta(days=validity_months * 30)
-        premium_data = {
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_bot': selected_bot,
-            'current_date_time': current_date_time,
-            'validity_months': validity_months,
-            'expiry_date': expiry_date
-        }
-        await self.pro.insert_one(premium_data)
-
-    async def get_user_total_premium_dot(self, user_id):
-        premium_count = await self.pro.count_documents({'user_id': user_id})
-        return premium_count
-        
-    async def get_user_premium_active_dot(self, user_id):
-        tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.now(tz) 
-        active_premium = await self.pro.count_documents({'user_id': user_id, 'expiry_date': {'$gt': now}})
-        return active_premium
-        
-    async def get_user_total_payments_dot(self, user_id):
-        total_user_payments = await self.pro.count_documents({'user_id': user_id}) * PREMIUM_PRICE
-        return total_user_payments
-        
-    async def get_total_premium_dot(self):
-        total_premium_users = await self.pro.count_documents({})
-        return total_premium_users
-        
-    async def get_total_earnings_dot(self):
-        total_earnings = await self.pro.count_documents({}) * PREMIUM_PRICE
-        return total_earnings
-
-    # all udb related function
-    async def add_attempt_db(self, user_id, user_name, selected_db, attempt_number, current_date_time, validity_date):
-        attempt_data = {
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_db': selected_db,
-            'attempt_number': attempt_number,
-            'current_date_time': current_date_time,
-            'validity_date': validity_date
-        }
-        await self.udb.insert_one(attempt_data)
-    
-    async def get_user_attempts_db(self, user_id):
-        attempts = await self.udb.count_documents({'user_id': user_id})
+        attempts = await self.dot.count_documents(filter_params)
         return attempts
-
-    async def get_latest_attempt_db(self, user_id):
-        latest_attempt = await self.udb.find_one(
-            {'user_id': user_id},
-            sort=[('current_date_time', -1)]  # Sort by datetime in descending order
+   
+    async def get_latest_premium(self, id):
+        latest_attempt = await self.dot.find_one(
+            {'id': id},
+            sort=[('premium_date', -1)]  # Sort by attempt date in descending order
         )
         return latest_attempt
+    
+    # New functions for cancel status
 
-    async def get_total_attempts_db(self, selected_db):
-        total_attempts = await self.udb.count_documents({'selected_db': selected_db})
-        return total_attempts
+    async def add_cancel(self, id, bot_name, file_id, cancel_date):
+        cancel_status=dict(
+            is_cancel=True,
+            bot_name=bot_name,
+            file_id=file_id,
+            cancel_date=cancel_date,
+        )
+        await self.col.update_one({"id": id}, {"$set": {"cancel_status": cancel_status}})
 
-    async def add_user_cancel_db(self, user_id, user_name, selected_db, current_date_time):
-        cancel_data = {
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_db': selected_db,
-            'current_date_time': current_date_time,
-        }
-        await self.udb.insert_one(cancel_data)
+    async def clear_cancel(self, id):
+        cancel_status=dict(
+            is_cancel=False,
+            bot_name=None,
+            file_id=None,
+            cancel_date=None,
+        )
+        await self.col.update_one({"id": id}, {"$set": {"cancel_status": cancel_status}})
 
-    async def get_user_cancels_db(self, user_id):
-        cancels = await self.udb.count_documents({'user_id': user_id, 'current_date_time': {'$exists': True}})
+    async def is_cancel_active(self, id, bot_name):
+        user = await self.col.find_one({"id": id, "cancel_status.is_cancel": True, "cancel_status.bot_name": bot_name})
+        return bool(user)
+
+    async def get_user_cancel(self, id, bot_name=None):
+        if bot_name:
+            filter_params = {'id': id, 'bot_name': bot_name}
+        else:
+            filter_params = {'id': id}
+    
+        cancels = await self.col.count_documents(filter_params)
         return cancels
-
-    async def get_total_cancels_db(self):
-        total_cancel_users = await self.udb.count_documents({'cancel_data': {'$exists': True}})
-        return total_cancel_users
-        
-    # all pre related functions
-    async def add_user_premium_db(self, user_id, user_name, selected_db, current_date_time, validity_months):
-        expiry_date = current_date_time + timedelta(days=validity_months * 30)
-        premium_data = {
-            'user_id': user_id,
-            'user_name': user_name,
-            'selected_db': selected_db,
-            'current_date_time': current_date_time,
-            'validity_months': validity_months,
-            'expiry_date': expiry_date
-        }
-        await self.pre.insert_one(premium_data)
-
-    async def get_user_total_premium_db(self, user_id):
-        premium_count = await self.pre.count_documents({'user_id': user_id})
-        return premium_count
-        
-    async def get_user_premium_active_db(self, user_id):
-        tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.now(tz) 
-        active_premium = await self.pre.count_documents({'user_id': user_id, 'expiry_date': {'$gt': now}})
-        return active_premium
-        
-    async def get_user_total_payments_db(self, user_id):
-        total_user_payments = await self.pre.count_documents({'user_id': user_id}) * PREMIUM_PRICE
-        return total_user_payments
-        
-    async def get_total_premium_db(self):
-        total_premium_users = await self.pro.count_documents({})
-        return total_premium_users
-    
-    async def get_total_earnings_db(self):
-        total_earnings = await self.pre.count_documents({}) * PREMIUM_PRICE
-        return total_earnings
-    
-    async def update_settings(self, id, settings):
-        await self.grp.update_one({'id': int(id)}, {'$set': {'settings': settings}})
-    
-    async def get_settings(self, id):
-        default = {
-            'button': SINGLE_BUTTON,
-            'botpm': P_TTI_SHOW_OFF,
-            'file_secure': PROTECT_CONTENT,
-            'imdb': IMDB,
-            'spell_check': SPELL_CHECK_REPLY,
-            'welcome': MELCOW_NEW_USERS,
-            'auto_delete': AUTO_DELETE,
-            'auto_ffilter': AUTO_FFILTER,
-            'max_btn': MAX_BTN,
-            'template': IMDB_TEMPLATE,
-            'shortlink': SHORTLINK_URL,
-            'shortlink_api': SHORTLINK_API,
-            'is_shortlink': IS_SHORTLINK
-        }
-        chat = await self.grp.find_one({'id': int(id)})
-        if chat:
-            return chat.get('settings', default)
-        return default
+   
+    async def get_latest_cancel(self, id):
+        latest_cancel = await self.col.find_one(
+            {'id': id},
+            sort=[('cancel_date', -1)]  # Sort by cancel date in descending order
+        )
+        return latest_cancel
     
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']    
