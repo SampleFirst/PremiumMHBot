@@ -120,11 +120,14 @@ async def total_users(bot, message):
 async def my_plan(client, message):
     user_id = message.from_user.id
     my_plan_stats = await db.get_user_premium_stats(user_id)
-    
+
     if my_plan_stats:
         response = f"Your active plan details:\n"
-        for key, value in my_plan_stats.items():
-            response += f"{key}: {value}\n"
+        response += f"Premium: {my_plan_stats.get('is_premium', False)}\n"
+        response += f"Bot Name: {my_plan_stats.get('bot_name', 'N/A')}\n"
+        response += f"Screenshot: {my_plan_stats.get('file_id', 'No')}\n"
+        response += f"Premium Date: {my_plan_stats.get('premium_date', 'N/A')}\n"
+        response += f"Validity: {my_plan_stats.get('premium_validity', 'N/A')}\n"
         await message.reply(response)
     else:
         await message.reply("You don't have an active plan.")
@@ -134,11 +137,35 @@ async def user_plan(client, message):
     try:
         user_id = int(message.command[1])
         user_plan_stats = await db.get_user_premium_status(user_id)
-        
+
         if user_plan_stats:
             response = f"User {user_id}'s data:\n"
-            for key, value in user_plan_stats.items():
-                response += f"{key}: {value}\n"
+            response += f"id: {user_plan_stats.get('id', 'N/A')}\n"
+            response += f"Name: {user_plan_stats.get('name', 'N/A')}\n"
+            response += f"Screenshot: {user_plan_stats.get('premium_status', {}).get('file_id', 'No')}\n"
+
+            ban_status = user_plan_stats.get('ban_status', {})
+            response += f"\n#Ban_status:\nUser Banned: {ban_status.get('is_banned', False)}\nBan Reason: {ban_status.get('ban_reason', 'N/A')}\n"
+
+            attempt_status = user_plan_stats.get('attempt_status', {})
+            response += f"\n#Attempt_status:\nAttempt: {attempt_status.get('is_attempt', False)}\n"
+            response += f"Bot Name: {attempt_status.get('bot_name', 'N/A')}\n"
+            response += f"Attempt date: {attempt_status.get('attempt_date', 'N/A')}\n"
+            response += f"Attempt Validity: {attempt_status.get('attempt_validity', 'N/A')}\n"
+
+            confirm_status = user_plan_stats.get('confirm_status', {})
+            response += f"\n#Confirm_status:\nConfirm: {confirm_status.get('is_confirm', False)}\n"
+            response += f"Bot Name: {confirm_status.get('bot_name', 'N/A')}\n"
+            response += f"Screenshot: {confirm_status.get('file_id', 'No')}\n"
+            response += f"Confirm Date: {confirm_status.get('confirm_date', 'N/A')}\n"
+
+            premium_status = user_plan_stats.get('premium_status', {})
+            response += f"\n#Premium_status:\nPremium: {premium_status.get('is_premium', False)}\n"
+            response += f"Bot Name: {premium_status.get('bot_name', 'N/A')}\n"
+            response += f"Screenshot: {premium_status.get('file_id', 'No')}\n"
+            response += f"Premium Date: {premium_status.get('premium_date', 'N/A')}\n"
+            response += f"Premium Validity: {premium_status.get('premium_validity', 'N/A')}\n"
+
             await message.reply(response)
         else:
             await message.reply(f"User {user_id} not found.")
