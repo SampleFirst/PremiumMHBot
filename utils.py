@@ -67,6 +67,61 @@ class temp(object):
     SEND_ALL_TEMP = {}
     KEYWORD = {}
 
+MONTHLY_ATTEMPTS_COUNT = False
+TOTAL_ATTEMPTS_COUNT = True
+
+# Define variables for attempt limits
+MONTHLY_TOTAL_COUNT = 4
+MONTHLY_SPECIFIC_COUNT = 4
+
+DAILY_TOTAL_COUNT = 4
+DAILY_SPECIFIC_COUNT = 4
+
+
+async def check_limit(bot_name):
+    try:
+        if MONTHLY_ATTEMPTS_COUNT:
+            await monthly_limit(bot_name)
+        else:
+            await daily_limit(bot_name)
+    except Exception as e:
+        logger.exception(e)
+
+
+async def monthly_limit(bot_name):
+    try:
+        if TOTAL_ATTEMPTS_COUNT:
+            total_count = await db.total_attempt()
+            if total_count >= MONTHLY_TOTAL_COUNT:
+                await client.send_message("hii {username} This Monthly Premium limit is exceeded, try next calendar month or contact Admin! send  /help...")
+                await client.send_message(LOG_CHANNEL, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+                await client.send_message(ADMINS, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+        else:
+            bot_count = await db.specific_attempt(bot_name)
+            if bot_count >= MONTHLY_SPECIFIC_COUNT:
+                await client.send_message(f"hii {username} This {bot_name} This Month Premium limit is exceeded, try next calendar month or contact Admin! send  /help...")
+                await client.send_message(LOG_CHANNEL, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+                await client.send_message(ADMINS, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+    except Exception as e:
+        logger.exception(e)
+
+
+async def daily_limit(bot_name):
+    try:
+        if TOTAL_ATTEMPTS_COUNT:
+            total_count = await db.total_attempt()
+            if total_count >= DAILY_TOTAL_COUNT:
+                await client.send_message(f"hii {username} This Today Premium limit is exceeded, try next Tomorrow or contact Admin! send message with /send {{text message}}...")
+                await client.send_message(LOG_CHANNEL, text=f"He ADMINS daily limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+                await client.send_message(ADMINS, text=f"He ADMINS daily limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+        else:
+            bot_count = await db.specific_attempt(bot_name)
+            if bot_count >= DAILY_SPECIFIC_COUNT:
+                await client.send_message(f"hii {username} This {bot_name} Today Premium limit is exceeded, try Tomorrow or contact Admin! send message with /send {{text message}}...")
+                await client.send_message(LOG_CHANNEL, text=f"He ADMINS Today limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+                await client.send_message(ADMINS, text=f"He ADMINS Today  limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
+    except Exception as e:
+        logger.exception(e)
 
 async def is_subscribed(bot, query=None, userid=None):
     try:
