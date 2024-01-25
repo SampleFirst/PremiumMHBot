@@ -116,15 +116,34 @@ async def total_users(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
-@Client.on_message(filters.command("monthly_attempts"))
-async def monthly_attempts_command(client, message):
-    monthly_attempts = await db.get_this_month_attempts()
-    await message.reply(f"Monthly attempts: {monthly_attempts}")
+@Client.on_message(filters.command('myplan'))
+async def my_plan(client, message):
+    user_id = message.from_user.id
+    my_plan_stats = await db.get_user_premium_stats(user_id)
+    
+    if my_plan_stats:
+        response = f"Your active plan details:\n"
+        for key, value in my_plan_stats.items():
+            response += f"{key}: {value}\n"
+        await message.reply(response)
+    else:
+        await message.reply("You don't have an active plan.")
 
-@Client.on_message(filters.command("today_attempts"))
-async def today_attempts_command(client, message):
-    today_attempts = await db.get_today_attempts()
-    await message.reply(f"Attempts for today: {today_attempts}")
+@Client.on_message(filters.command('userplan') & filters.user(ADMINS))
+async def user_plan(client, message):
+    try:
+        user_id = int(message.command[1])
+        user_plan_stats = await db.get_user_premium_status(user_id)
+        
+        if user_plan_stats:
+            response = f"User {user_id}'s data:\n"
+            for key, value in user_plan_stats.items():
+                response += f"{key}: {value}\n"
+            await message.reply(response)
+        else:
+            await message.reply(f"User {user_id} not found.")
+    except (IndexError, ValueError):
+        await message.reply("Invalid command usage. Please provide a valid user ID.")
 
 @Client.on_message(filters.command("user_attempts"))
 async def user_attempts_command(client, message):
