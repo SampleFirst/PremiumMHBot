@@ -310,7 +310,8 @@ class Database:
         user = await self.col.find_one({'id': int(id)})
         if not user:
             return None
-        return user.get('premium_status')
+        premium_stats = user.get('premium_status', {})
+        return premium_stats
 
     async def get_user_premium_status(self, id):
         user = await self.col.find_one({'id': int(id)})
