@@ -181,6 +181,13 @@ class Database:
             sort=[('attempt_date', -1)]  # Sort by attempt date in descending order
         )
         return latest_attempt
+
+    async def total_attempts(self, bot_name=None):
+        if bot_name:
+            count = await self.col.count_documents({"attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
+        else:
+            count = await self.col.count_documents({"attempt_status.is_attempt": True})
+        return count
         
     # New functions for confirm status
 
@@ -222,6 +229,13 @@ class Database:
             sort=[('confirm_date', -1)]  # Sort by attempt date in descending order
         )
         return latest_attempt
+
+    async def total_confirm(self, bot_name=None):
+        if bot_name:
+            count = await self.col.count_documents({"confirm_status.is_confirm": True, "confirm_status.bot_name": bot_name})
+        else:
+            count = await self.col.count_documents({"confirm_status.is_confirm": True})
+        return count
         
     # New functions for premium status
 
@@ -265,7 +279,14 @@ class Database:
             sort=[('premium_date', -1)]  # Sort by attempt date in descending order
         )
         return latest_attempt
-    
+
+    async def total_premium(self, bot_name=None):
+        if bot_name:
+            count = await self.col.count_documents({"premium_status.is_premium": True, "premium_status.bot_name": bot_name})
+        else:
+            count = await self.col.count_documents({"premium_status.is_premium": True})
+        return count
+        
     # New functions for cancel status
 
     async def add_cancel(self, id, bot_name, file_id, cancel_date):
@@ -306,6 +327,13 @@ class Database:
         )
         return latest_cancel
 
+    async def total_cancel(self, bot_name=None):
+        if bot_name:
+            count = await self.col.count_documents({"cancel_status.is_premium": True, "cancel_status.bot_name": bot_name})
+        else:
+            count = await self.col.count_documents({"cancel_status.is_premium": True})
+        return count
+        
     async def get_user_premium_stats(self, id):
         user = await self.col.find_one({'id': int(id)})
         if not user:
