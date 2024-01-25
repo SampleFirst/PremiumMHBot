@@ -305,7 +305,19 @@ class Database:
             sort=[('cancel_date', -1)]  # Sort by cancel date in descending order
         )
         return latest_cancel
-    
+
+    async def get_user_premium_stats(self, id):
+        user = await self.col.find_one({'id': int(id)})
+        if not user:
+            return None
+        return user.get('premium_status')
+
+    async def get_user_premium_status(self, id):
+        user = await self.col.find_one({'id': int(id)})
+        if not user:
+            return None
+        return user
+        
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']    
 
