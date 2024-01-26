@@ -16,35 +16,34 @@ class Database:
         return dict(
             id=id,
             name=name,
+            file_id=None,
+            bot_name=None,
             ban_status=dict(
                 is_banned=False,
                 ban_reason="",
-            ),  
-            attempt_status=dict( 
+            ),
+            attempt_status=dict(
                 is_attempt=False,
-                bot_name=None,
+                attempt_active=False,
                 attempt_date=None,
                 attempt_validity=None,
-            ),                          # This Attempts Function For If Active Bot Limit 
+            ),
             confirm_status=dict(
                 is_confirm=False,
-                bot_name=None,
-                file_id=None,
+                confirm_active=False,
                 confirm_date=None,
-            ),                          # This Confirme Function For if User Send A Payment Screenshot 
+                confirm_validity=None,
+            ),
             premium_status=dict(
                 is_premium=False,
-                bot_name=None,
-                file_id=None,
+                premium_active=False,
                 premium_date=None,
                 premium_validity=None,
-            ),                          # This Premium Function if ADMINS Added Thos User As Premium Features 
+            ),
             cancel_status=dict(
                 is_cancel=False,
-                bot_name=None,
-                file_id=None,
                 cancel_date=None,
-            ),                          # This Cancel Function if ADMINS Added Thos User Cancel Premium Features 
+            ),
         )
 
     def new_group(self, id, title, username):
@@ -57,7 +56,7 @@ class Database:
                 reason="",
             ),
         )
-        
+
     # all col related functions
     async def add_user(self, id, name):
         user = self.new_user(id, name)
@@ -107,7 +106,7 @@ class Database:
         b_chats = [chat['id'] async for chat in chats]
         b_users = [user['id'] async for user in users]
         return b_users, b_chats
-    
+
     # all grp related functions
     async def add_chat(self, chat, title, username):
         new_group_data = self.new_group(chat, title, username)
@@ -116,37 +115,38 @@ class Database:
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id': int(chat)})
         return False if not chat else chat.get('chat_status')
-    
+
     async def re_enable_chat(self, id):
         chat_status = dict(
             is_disabled=False,
             reason="",
         )
         await self.grp.update_one({'id': int(id)}, {'$set': {'chat_status': chat_status}})
-    
+
     async def disable_chat(self, chat, reason="No Reason"):
         chat_status = dict(
             is_disabled=True,
             reason=reason,
         )
         await self.grp.update_one({'id': int(chat)}, {'$set': {'chat_status': chat_status}})
-    
+
     async def total_chat_count(self):
         count = await self.grp.count_documents({})
         return count
-    
+
     async def get_all_chats(self):
         return self.grp.find({})
-    
+
     async def delete_chat(self, chat_id):
         await self.grp.delete_many({'id': int(chat_id)})
-        
+
     # New functions for attempt status
 
-    async def add_attempt(self, id, bot_name, attempt_validity):
+    async def add_attempt(self, id, attempt_active, bot_name, attempt_validity):
         now_date = add_date()
         attempt_status = dict(
             is_attempt=True,
+            attempt_active=True,
             bot_name=bot_name,
             attempt_date=now_date,
             attempt_validity=attempt_validity,
@@ -155,7 +155,7 @@ class Database:
 
     async def clear_attempt(self, id):
         attempt_status = dict(
-            is_attempt=False,
+            attempt_active=False,
             bot_name=None,
             attempt_date=None,
             attempt_validity=None,
@@ -171,10 +171,10 @@ class Database:
             filter_params = {'id': id, 'bot_name': bot_name}
         else:
             filter_params = {'id': id}
-    
+
         attempts = await self.dot.count_documents(filter_params)
         return attempts
-   
+
     async def get_latest_attempt(self, id):
         latest_attempt = await self.dot.find_one(
             {'id': id},
@@ -184,17 +184,18 @@ class Database:
 
     async def total_attempts(self, bot_name=None):
         if bot_name:
-            count = await self.col.count_documents({"attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
+            count = await self.col.count_documents({"attempt_status.attempt_active": True, "attempt_status.bot_name": bot_name})
         else:
-            count = await self.col.count_documents({"attempt_status.is_attempt": True})
+            count = await self.col.count_documents({"attempt_status.attempt_active": True})
         return count
-        
+
     # New functions for confirm status
 
     async def add_confirm(self, id, bot_name, file_id):
         now_date = add_date()
-        confirm_status=dict(
+        confirm_status = dict(
             is_confirm=True,
+            confirm_active=True,
             bot_name=bot_name,
             file_id=file_id,
             confirm_date=now_date,
@@ -203,7 +204,7 @@ class Database:
 
     async def clear_confirm(self, id):
         confirm_status = dict(
-            is_confirm=False,
+            confirm_active=False,
             bot_name=None,
             file_id=None,
             confirm_date=None,
@@ -219,10 +220,10 @@ class Database:
             filter_params = {'id': id, 'bot_name': bot_name}
         else:
             filter_params = {'id': id}
-    
+
         attempts = await self.dot.count_documents(filter_params)
         return attempts
-   
+
     async def get_latest_confirm(self, id):
         latest_attempt = await self.dot.find_one(
             {'id': id},
@@ -232,17 +233,18 @@ class Database:
 
     async def total_confirm(self, bot_name=None):
         if bot_name:
-            count = await self.col.count_documents({"confirm_status.is_confirm": True, "confirm_status.bot_name": bot_name})
+            count = await self.col.count_documents({"confirm_status.confirm_active": True, "confirm_status.bot_name": bot_name})
         else:
-            count = await self.col.count_documents({"confirm_status.is_confirm": True})
+            count = await self.col.count_documents({"confirm_status.confirm_active": True})
         return count
-        
+
     # New functions for premium status
 
     async def add_premium(self, id, bot_name, file_id, premium_validity):
         now_date = add_date()
-        premium_status=dict(
+        premium_status = dict(
             is_premium=True,
+            premium_active=True,
             bot_name=bot_name,
             file_id=file_id,
             premium_date=now_date,
@@ -251,8 +253,8 @@ class Database:
         await self.col.update_one({"id": id}, {"$set": {"premium_status": premium_status}})
 
     async def clear_premium(self, id):
-        premium_status=dict(
-            is_premium=False,
+        premium_status = dict(
+            premium_active=False,
             bot_name=None,
             file_id=None,
             premium_date=None,
@@ -263,16 +265,16 @@ class Database:
     async def is_premium_active(self, id, bot_name):
         user = await self.col.find_one({"id": id, "premium_status.is_premium": True, "premium_status.bot_name": bot_name})
         return bool(user)
-        
+
     async def get_user_premiums(self, id, bot_name=None):
         if bot_name:
             filter_params = {'id': id, 'bot_name': bot_name}
         else:
             filter_params = {'id': id}
-    
+
         attempts = await self.dot.count_documents(filter_params)
         return attempts
-   
+
     async def get_latest_premium(self, id):
         latest_attempt = await self.dot.find_one(
             {'id': id},
@@ -282,15 +284,15 @@ class Database:
 
     async def total_premium(self, bot_name=None):
         if bot_name:
-            count = await self.col.count_documents({"premium_status.is_premium": True, "premium_status.bot_name": bot_name})
+            count = await self.col.count_documents({"premium_status.premium_active": True, "premium_status.bot_name": bot_name})
         else:
-            count = await self.col.count_documents({"premium_status.is_premium": True})
+            count = await self.col.count_documents({"premium_status.premium_active": True})
         return count
-        
+
     # New functions for cancel status
 
     async def add_cancel(self, id, bot_name, file_id, cancel_date):
-        cancel_status=dict(
+        cancel_status = dict(
             is_cancel=True,
             bot_name=bot_name,
             file_id=file_id,
@@ -299,7 +301,7 @@ class Database:
         await self.col.update_one({"id": id}, {"$set": {"cancel_status": cancel_status}})
 
     async def clear_cancel(self, id):
-        cancel_status=dict(
+        cancel_status = dict(
             is_cancel=False,
             bot_name=None,
             file_id=None,
@@ -316,10 +318,10 @@ class Database:
             filter_params = {'id': id, 'bot_name': bot_name}
         else:
             filter_params = {'id': id}
-    
+
         cancels = await self.col.count_documents(filter_params)
         return cancels
-   
+
     async def get_latest_cancel(self, id):
         latest_cancel = await self.col.find_one(
             {'id': id},
@@ -329,11 +331,11 @@ class Database:
 
     async def total_cancel(self, bot_name=None):
         if bot_name:
-            count = await self.col.count_documents({"cancel_status.is_premium": True, "cancel_status.bot_name": bot_name})
+            count = await self.col.count_documents({"cancel_status.is_cancel": True, "cancel_status.bot_name": bot_name})
         else:
-            count = await self.col.count_documents({"cancel_status.is_premium": True})
+            count = await self.col.count_documents({"cancel_status.is_cancel": True})
         return count
-        
+
     async def get_user_premium_stats(self, id):
         user = await self.col.find_one({'id': int(id)})
         if not user:
@@ -346,8 +348,8 @@ class Database:
         if not user:
             return None
         return user
-        
+
     async def get_db_size(self):
-        return (await self.db.command("dbstats"))['dataSize']    
+        return (await self.db.command("dbstats"))['dataSize']
 
 db = Database(DATABASE_URI, DATABASE_NAME)
