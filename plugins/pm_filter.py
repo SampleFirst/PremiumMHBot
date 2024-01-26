@@ -29,16 +29,16 @@ TOTAL = False
 MONTHLY_TOTAL_COUNT = 4
 DAILY_TOTAL_COUNT = 4
 MONTHLY_SPECIFIC_COUNT = {
-    "mbot": 14,
-    "abot": 13,
-    "rbot": 15,
-    "tvbot": 16,
+  "Movies Bot": 14,
+  "Anime Bot": 13,
+  "Rename Bot": 15,
+  "YT Downloader": 16,
 }
 DAILY_SPECIFIC_COUNT = {
-    "mbot": 4,
-    "abot": 3,
-    "rbot": 5,
-    "tvbot": 6,
+  "Movies Bot": 4,
+  "Anime Bot": 3,
+  "Rename Bot": 5,
+  "YT Downloader": 6,
 }
 
 async def type_check():
@@ -251,7 +251,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
-        bot_name = query.data
+        bot_name = query.message.reply_markup.inline_keyboard[0][0].text.lower()  # Get the text of the first button in the first row (Confirmed button)
         user_id = query.from_user.id
         validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
         attempt_validity = validity_days.strftime("%Y-%m-%d")
