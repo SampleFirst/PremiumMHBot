@@ -24,7 +24,7 @@ user_states = {}
 USER_SELECTED = {}
 
 MONTHLY = False
-TOTAL = True
+TOTAL = False 
 
 MONTHLY_TOTAL_COUNT = 4
 DAILY_TOTAL_COUNT = 4
