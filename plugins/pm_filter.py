@@ -23,15 +23,43 @@ logger.setLevel(logging.ERROR)
 user_states = {}
 USER_SELECTED = {}
 
-MONTHLY_ATTEMPTS_COUNT = False 
-TOTAL_ATTEMPTS_COUNT = True 
+MONTHLY = False
+TOTAL = True
 
-# Define variables for attempt limits
-MONTHLY_TOTAL_COUNT = 4  
-DAILY_TOTAL_COUNT = 4  
-MONTHLY_SPECIFIC_COUNT = 4  
-DAILY_SPECIFIC_COUNT = 4  
+MONTHLY_TOTAL_COUNT = 4
+DAILY_TOTAL_COUNT = 4
+MONTHLY_SPECIFIC_COUNT = {
+    "mbot": 14,
+    "abot": 13,
+    "rbot": 15,
+    "tvbot": 16,
+}
+DAILY_SPECIFIC_COUNT = {
+    "mbot": 4,
+    "abot": 3,
+    "rbot": 5,
+    "tvbot": 6,
+}
 
+async def type_check():
+    if MONTHLY and TOTAL:
+        return "monthly_total"
+    elif MONTHLY and not TOTAL:
+        return "monthly_specific"
+    elif not MONTHLY and not TOTAL:
+        return "daily_specific"
+    elif not MONTHLY and TOTAL:
+        return "daily_total"
+
+async def limit_check():
+    if MONTHLY and TOTAL:
+        return MONTHLY_TOTAL_COUNT
+    elif MONTHLY and not TOTAL:
+        return MONTHLY_SPECIFIC_COUNT
+    elif not MONTHLY and not TOTAL:
+        return DAILY_SPECIFIC_COUNT
+    elif not MONTHLY and TOTAL:
+        return DAILY_TOTAL_COUNT
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
@@ -173,16 +201,28 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.BOTS.format(user=query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
+        try:
+            limit = await limit_check()
+            type = await type_check()
+            message_text = f"type: {type}, limit: {limit}"  # Use f-string for formatting 
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(
+                text=message_text,
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+        except Exception as e:
+            error_message = f"An error:\n{str(e)}"
+            # Log the error
+            logger.error(error_message)
+            # Notify the user about the error
+            await query.message.edit_text(
+                text=error_message
+            )
         
     elif query.data == "database":
         buttons = [
