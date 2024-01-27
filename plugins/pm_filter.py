@@ -41,6 +41,16 @@ DAILY_SPECIFIC_COUNT = {
   "YT Downloader": 6,
 }
 
+async def org_bot_name(query_data):
+    if query_data == "mbot":
+        return "Movies Bot"
+    elif query_data == "abot":
+        return "Anime Bot"
+    elif query_data == "rbot":
+        return "Rename Bot"
+    elif query_data == "ytbot":
+        return "YouTube Downloader Bot"
+
 async def type_check():
     if MONTHLY and TOTAL:
         return "monthly_total"
@@ -60,6 +70,21 @@ async def limit_check():
         return DAILY_SPECIFIC_COUNT
     elif not MONTHLY and TOTAL:
         return DAILY_TOTAL_COUNT
+
+async def left_limit(username, bot_name):
+    if MONTHLY and TOTAL:
+        Monthly = await db.monthly_users_count()
+        await client.show_message(f"Hii {username} Monthly Quota is full. Try Next Month or Contact Admin")
+    elif MONTHLY and not TOTAL:
+        Monthlybot = await db.monthly_users_count(bot_name)
+        await client.show_message(f"Hii {username} Monthly Quota is full for {bot_name}. Try Next Month or Contact Admin")
+    elif not MONTHLY and not TOTAL:
+        Daily = await db.daily_users_count(bot_name)
+        await client.show_message(f"Hii {username} Daily Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
+    elif not MONTHLY and TOTAL:
+        Dailybot = await db.daily_users_count()
+        await client.show_message(f"Hii {username} Daily Quota is full. Try Tomorrow or Contact Admin")
+    return
 
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
@@ -251,15 +276,18 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
-        bot_name = query.message.reply_markup.inline_keyboard[0][0].text.lower()  # Get the text of the first button in the first row (Confirmed button)
+        bot_name = await org_bot_name(query.data)
         user_id = query.from_user.id
         validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
         attempt_validity = validity_days.strftime("%Y-%m-%d")
     
         try:
+            if await limit_check() >= await left_limit(username, bot_name):
+                return 
+            
             # Check if an attempt is already active for the user with the same bot_name
             if await db.is_attempt_active(user_id, bot_name):
-                await query.message.edit_text("You already have an active attempt for this bot.")
+                await query.message.edit_text("You already have an active request for this bot.")
                 return
             else:
                 # Add attempt to the database
@@ -290,10 +318,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
             user_states[user_id] = True
         except Exception as e:
-            error_message = f"An error:\n{str(e)}"
-            # Log the error
-            logger.error(error_message)
-            # Notify the user about the error
+            error = f"An error:\n{str(e)}"
+            logger.error(error)
             await query.message.edit_text(
                 text=error_message
             )
