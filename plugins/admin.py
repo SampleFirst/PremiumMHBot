@@ -1,6 +1,6 @@
 import os
 from pyrogram import Client, filters
-from database.user_chats_db import db
+from database.users_chats_db import db
 from info import ADMINS, LOG_CHANNEL
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
 
