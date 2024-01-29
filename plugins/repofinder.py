@@ -3,7 +3,7 @@ import subprocess
 import requests
 from info import ADMINS, LOG_CHANNEL 
 
-@Client.on_message(filters.command("list") & filter.users(ADMINS))
+@Client.on_message(filters.command("list") & filters.user(ADMINS))
 async def list(client, message):
     # Get the current working directory of the repository
     cwd = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode()
@@ -46,7 +46,7 @@ async def list(client, message):
         parse_mode=enums.ParseMode.MARKDOWN  # Enable markdown formatting
     )
 
-@Client.on_message(filters.command("repo") & filter.users(ADMINS))
+@Client.on_message(filters.command("repo") & filters.user(ADMINS))
 async def repo(client, message):
     # Split the message text and check if there are enough elements
     command_parts = message.text.split("/repo ", 1)
