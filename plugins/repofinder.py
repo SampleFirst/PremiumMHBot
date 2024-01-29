@@ -3,8 +3,6 @@ import subprocess
 import requests
 from info import ADMINS, LOG_CHANNEL 
 
-Repository = https://github.com/Joelkb/cinemagoer
-
 @Client.on_message(filters.command("list") & filter.users(ADMINS))
 async def list(client, message):
     # Get the current working directory of the repository
