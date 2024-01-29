@@ -54,10 +54,10 @@ class Bot(Client):
         date = curr.strftime('%d %B, %Y')
         time = curr.strftime('%I:%M:%S %p')
         await self.send_message(LOG_CHANNEL, text=script.RESTART_TXT.format(date, time))
-        await bot.send_message(ADMINS, text="hii Admin Bot Restarted")
+        await client.send_message(ADMINS, text="hii Admin Bot Restarted")
 
         await asyncio.sleep(30)
-        await bot.send_message(ADMINS, text="Hey Admin! Bot is working normally. Send /start.")
+        await self.send_message(ADMINS, text="Hey Admin! Bot is working normally. Send /start.")
 
         app = web.AppRunner(await web_server())
         await app.setup()
