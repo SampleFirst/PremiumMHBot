@@ -53,11 +53,22 @@ class Bot(Client):
         curr = datetime.now(tz)
         date = curr.strftime('%d %B, %Y')
         time = curr.strftime('%I:%M:%S %p')
-        await self.send_message(LOG_CHANNEL, text=script.RESTART_TXT.format(date, time))
-        await client.send_message(ADMINS, text="hii Admin Bot Restarted")
+        try:
+            await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(date, time))        
+        except Exception as e:
+            logger.warning(f"Bot Isn't Able To Send Message To LOG_CHANNEL \n{e}")
+
+        for admin_id in ADMINS:
+            try:
+                await self.send_message(admin_id, text=f"Bot started successfully at {date}, {time}.\nsend command /start")
+            except Exception as e:
+                logger.warning(f"Bot Isn't Able To Send Message To Admin {admin_id} \n{e}")
 
         await asyncio.sleep(30)
-        await self.send_message(ADMINS, text="Hey Admin! Bot is working normally. Send /start.")
+            try:
+                await self.send_message(chat_id=ADMINS, text="Hey Admin! Bot is working normally. Send /start.")
+            except Exception as e:
+                logger.warning(f"Bot Isn't Able To Send Message To Admin {admin_id} \n{e}")
 
         app = web.AppRunner(await web_server())
         await app.setup()
