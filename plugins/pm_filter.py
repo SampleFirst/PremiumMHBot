@@ -86,6 +86,23 @@ async def left_limit(username, bot_name):
         await client.show_message(f"Hii {username} Daily Quota is full. Try Tomorrow or Contact Admin")
     return
 
+# Define a new function to handle errors
+async def handle_error(e, client, query, is_admin):
+    error_message = f"An error:\n{str(e)}"
+    logger.error(error_message)
+    # Send error message to admins if admin is True
+    if is_admin = True:
+        for admin in ADMINS:
+            await client.send_message(admin, error_message)
+    # Send error message to log channel if log is True
+    if is_channel = False:
+        await client.send_message(LOG_CHANNEL, error_message)
+    # Show error message to user if user is True
+    if is_user = True:
+        await query.message.edit_text(
+            text=error_message
+        )
+      
 @Client.on_message(filters.photo & filters.private)
 async def payment_screenshot_received(client, message):
     user_id = message.from_user.id
@@ -241,13 +258,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 parse_mode=enums.ParseMode.HTML
             )
         except Exception as e:
-            error_message = f"An error:\n{str(e)}"
-            # Log the error
-            logger.error(error_message)
-            # Notify the user about the error
-            await query.message.edit_text(
-                text=error_message
-            )
+            # Call the new function to handle errors
+            await handle_error(e, client, query, is_admin)
+
         
     elif query.data == "database":
         buttons = [
