@@ -23,6 +23,10 @@ logger.setLevel(logging.ERROR)
 user_states = {}
 USER_SELECTED = {}
 
+is_admin = True 
+is_channel = False 
+is_user = True 
+
 MONTHLY = False
 TOTAL = False 
 
@@ -91,14 +95,14 @@ async def handle_error(e, client, query, is_admin):
     error_message = f"An error:\n{str(e)}"
     logger.error(error_message)
     # Send error message to admins if admin is True
-    if is_admin = True:
+    if is_admin:
         for admin in ADMINS:
             await client.send_message(admin, error_message)
     # Send error message to log channel if log is True
-    if is_channel = False:
+    if is_channel:
         await client.send_message(LOG_CHANNEL, error_message)
     # Show error message to user if user is True
-    if is_user = True:
+    if is_user:
         await query.message.edit_text(
             text=error_message
         )
