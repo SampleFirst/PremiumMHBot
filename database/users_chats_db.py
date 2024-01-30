@@ -189,6 +189,60 @@ class Database:
             count = await self.col.count_documents({"attempt_status.attempt_active": True})
         return count
 
+    async def total_attempts_daily(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, today.month, today.day, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date + timedelta(days=1)
+
+        # Define filter parameters based on bot_name if provided
+        filter_params = {"attempt_status.attempt_active": True}
+        if bot_name:
+            filter_params["attempt_status.bot_name"] = bot_name
+
+        # Count documents within the specified date range
+        count = await self.col.count_documents({
+            "attempt_status.attempt_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+
+    # New function for getting total attempts sorted by monthly
+    async def total_attempts_monthly(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, today.month, 1, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date.replace(month=start_date.month + 1) if start_date.month < 12 else start_date.replace(
+            year=start_date.year + 1, month=1)
+
+        # Define filter parameters based on bot_name if provided
+        filter_params = {"attempt_status.attempt_active": True}
+        if bot_name:
+            filter_params["attempt_status.bot_name"] = bot_name
+
+        # Count documents within the specified date range
+        count = await self.col.count_documents({
+            "attempt_status.attempt_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+
+    # New function for getting total attempts sorted by yearly
+    async def total_attempts_yearly(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, 1, 1, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date.replace(year=start_date.year + 1)
+
+        # Define filter parameters based on bot_name if provided
+        filter_params = {"attempt_status.attempt_active": True}
+        if bot_name:
+            filter_params["attempt_status.bot_name"] = bot_name
+
+        # Count documents within the specified date range
+        count = await self.col.count_documents({
+            "attempt_status.attempt_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+        
     # New functions for confirm status
 
     async def add_confirm(self, id, bot_name, file_id):
@@ -238,6 +292,55 @@ class Database:
             count = await self.col.count_documents({"confirm_status.confirm_active": True})
         return count
 
+        # New function for getting total confirms sorted by daily
+    async def total_confirms_daily(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, today.month, today.day, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date + timedelta(days=1)
+
+        filter_params = {"confirm_status.confirm_active": True}
+        if bot_name:
+            filter_params["confirm_status.bot_name"] = bot_name
+
+        count = await self.col.count_documents({
+            "confirm_status.confirm_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+
+    # New function for getting total confirms sorted by monthly
+    async def total_confirms_monthly(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, today.month, 1, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date.replace(month=start_date.month + 1) if start_date.month < 12 else start_date.replace(
+            year=start_date.year + 1, month=1)
+
+        filter_params = {"confirm_status.confirm_active": True}
+        if bot_name:
+            filter_params["confirm_status.bot_name"] = bot_name
+
+        count = await self.col.count_documents({
+            "confirm_status.confirm_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+
+    # New function for getting total confirms sorted by yearly
+    async def total_confirms_yearly(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, 1, 1, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date.replace(year=start_date.year + 1)
+
+        filter_params = {"confirm_status.confirm_active": True}
+        if bot_name:
+            filter_params["confirm_status.bot_name"] = bot_name
+
+        count = await self.col.count_documents({
+            "confirm_status.confirm_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+        
     # New functions for premium status
 
     async def add_premium(self, id, bot_name, file_id, premium_validity):
@@ -289,6 +392,55 @@ class Database:
             count = await self.col.count_documents({"premium_status.premium_active": True})
         return count
 
+    # New function for getting total premiums sorted by daily
+    async def total_premiums_daily(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, today.month, today.day, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date + timedelta(days=1)
+
+        filter_params = {"premium_status.premium_active": True}
+        if bot_name:
+            filter_params["premium_status.bot_name"] = bot_name
+
+        count = await self.col.count_documents({
+            "premium_status.premium_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+
+    # New function for getting total premiums sorted by monthly
+    async def total_premiums_monthly(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, today.month, 1, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date.replace(month=start_date.month + 1) if start_date.month < 12 else start_date.replace(
+            year=start_date.year + 1, month=1)
+
+        filter_params = {"premium_status.premium_active": True}
+        if bot_name:
+            filter_params["premium_status.bot_name"] = bot_name
+
+        count = await self.col.count_documents({
+            "premium_status.premium_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+
+    # New function for getting total premiums sorted by yearly
+    async def total_premiums_yearly(self, bot_name=None):
+        today = datetime.now(pytz.timezone('Asia/Kolkata')).date()
+        start_date = datetime(today.year, 1, 1, tzinfo=pytz.timezone('Asia/Kolkata'))
+        end_date = start_date.replace(year=start_date.year + 1)
+
+        filter_params = {"premium_status.premium_active": True}
+        if bot_name:
+            filter_params["premium_status.bot_name"] = bot_name
+
+        count = await self.col.count_documents({
+            "premium_status.premium_date": {"$gte": start_date, "$lt": end_date},
+            **filter_params
+        })
+        return count
+        
     # New functions for cancel status
 
     async def add_cancel(self, id, bot_name, file_id, cancel_date):
