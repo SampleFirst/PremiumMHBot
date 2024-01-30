@@ -28,7 +28,7 @@ is_channel = False
 is_user = True 
 
 MONTHLY = False
-TOTAL = False 
+TOTAL = True 
 
 MONTHLY_TOTAL_COUNT = 4
 DAILY_TOTAL_COUNT = 4
@@ -90,6 +90,50 @@ async def left_limit(username, bot_name):
         await client.show_message(f"Hii {username} Daily Quota is full. Try Tomorrow or Contact Admin")
     return
 
+async def check_limit_not_exceed(username, bot_name):
+    if MONTHLY and TOTAL:
+        premium = await db.total_premiums_monthly()
+        if premium >= MONTHLY_TOTAL_COUNT:
+            return await client.show_message(f"Hii {username} Monthly Premium Quota is full. Try Next Month or Contact Admin")
+        confirm = await db.total_confirms_monthly()
+        if confirm >= MONTHLY_TOTAL_COUNT:
+            return await client.show_message(f"Hii {username} Monthly Confirm Quota is full. Try Next Month or Contact Admin")
+        attempt = await db.total_attempts_monthly()
+        if attempt >= MONTHLY_TOTAL_COUNT:
+            return await client.show_message(f"Hii {username} Monthly Attempts Quota is full. Try Next Month or Contact Admin")
+    elif MONTHLY and not TOTAL:
+        premium = await db.total_premiums_monthly(bot_name)
+        if premium >= MONTHLY_SPECIFIC_COUNT[bot_name]:
+            return await client.show_message(f"Hii {username} Monthly Premium Quota is full for {bot_name}. Try Next Month or Contact Admin")
+        confirm = await db.total_confirms_monthly(bot_name)
+        if confirm >= MONTHLY_SPECIFIC_COUNT[bot_name]:
+            return await client.show_message(f"Hii {username} Monthly Confirm Quota is full for {bot_name}. Try Next Month or Contact Admin")
+        attempt = await db.total_attempts_monthly(bot_name)
+        if attempt >= MONTHLY_SPECIFIC_COUNT[bot_name]:
+            return await client.show_message(f"Hii {username} Monthly Attempts Quota is full for {bot_name}. Try Next Month or Contact Admin")
+    elif not MONTHLY and TOTAL:
+        premium = await db.total_premiums_daily()
+        if premium >= DAILY_TOTAL_COUNT:
+            return await client.show_message(f"Hii {username} Daily Premium Quota is full. Try Tomorrow or Contact Admin")
+        confirm = await db.total_confirms_daily()
+        if confirm >= DAILY_TOTAL_COUNT:
+            return await client.show_message(f"Hii {username} Daily Confirm Quota is full. Try Tomorrow or Contact Admin")
+        attempt = await db.total_attempts_daily()
+        if attempt >= DAILY_TOTAL_COUNT:
+            return await client.show_message(f"Hii {username} Daily Attempts Quota is full. Try Tomorrow or Contact Admin")
+    elif not MONTHLY and not TOTAL:
+        premium = await db.total_premiums_daily(bot_name)
+        if premium >= DAILY_SPECIFIC_COUNT[bot_name]:
+            return await client.show_message(f"Hii {username} Daily Premium Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
+        confirm = await db.total_confirms_daily(bot_name)
+        if confirm >= DAILY_SPECIFIC_COUNT[bot_name]:
+            return await client.show_message(f"Hii {username} Daily Confirm Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
+        attempt = await db.total_attempts_daily(bot_name)
+        if attempt >= DAILY_SPECIFIC_COUNT[bot_name]:
+            return await client.show_message(f"Hii {username} Daily Attempts Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
+    return
+    
+    
 # Define a new function to handle errors
 async def handle_error(e, client, query, is_admin):
     error_message = f"An error:\n{str(e)}"
@@ -264,7 +308,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except Exception as e:
             # Call the new function to handle errors
             await handle_error(e, client, query, is_admin)
-
         
     elif query.data == "database":
         buttons = [
@@ -299,47 +342,45 @@ async def cb_handler(client: Client, query: CallbackQuery):
         attempt_validity = validity_days.strftime("%Y-%m-%d")
     
         try:
-            if await limit_check() >= await left_limit(username, bot_name):
+            if await check_limit_not_exceed(username, bot_name):
                 return 
             
-            # Check if an attempt is already active for the user with the same bot_name
-            if await db.is_attempt_active(user_id, bot_name):
-                await query.message.edit_text("You already have an active request for this bot.")
-                return
             else:
-                # Add attempt to the database
-                await db.add_attempt(user_id, bot_name, attempt_validity)
-    
-            USER_SELECTED[user_id] = bot_name
-            
-            buttons = [
-                [
-                    InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
-                    InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')
-                ],
-                [
-                    InlineKeyboardButton('Back', callback_data='bots')
+                # Check if an attempt is already active for the user with the same bot_name
+                if await db.is_attempt_active(user_id, bot_name):
+                    await query.message.edit_text("You already have an active request for this bot.")
+                    return
+                else:
+                    # Add attempt to the database
+                    await db.add_attempt(user_id, bot_name, attempt_validity)
+        
+                USER_SELECTED[user_id] = bot_name
+                
+                buttons = [
+                    [
+                        InlineKeyboardButton('Confirmed', callback_data=f'confirm_bot_{query.data}'),
+                        InlineKeyboardButton('Description', callback_data=f'description_bot_{query.data}')
+                    ],
+                    [
+                        InlineKeyboardButton('Back', callback_data='bots')
+                    ]
                 ]
-            ]
-            reply_markup = InlineKeyboardMarkup(buttons)
-            message_text = "Some information about the bot."
-            await client.edit_message_media(
-                query.message.chat.id,
-                query.message.id,
-                InputMediaPhoto(random.choice(PICS))
-            )
-            await query.message.edit_text(
-                text=message_text,
-                reply_markup=reply_markup,
-                parse_mode=enums.ParseMode.MARKDOWN
-            )
-            user_states[user_id] = True
+                reply_markup = InlineKeyboardMarkup(buttons)
+                message_text = "Some information about the bot."
+                await client.edit_message_media(
+                    query.message.chat.id,
+                    query.message.id,
+                    InputMediaPhoto(random.choice(PICS))
+                )
+                await query.message.edit_text(
+                    text=message_text,
+                    reply_markup=reply_markup,
+                    parse_mode=enums.ParseMode.MARKDOWN
+                )
+                user_states[user_id] = True
         except Exception as e:
-            error = f"An error:\n{str(e)}"
-            logger.error(error)
-            await query.message.edit_text(
-                text=error_message
-            )
+            # Call the new function to handle errors
+            await handle_error(e, client, query, is_admin)
 
     elif query.data.startswith("confirm_bot_"):
         # Handle user confirming bot subscription
