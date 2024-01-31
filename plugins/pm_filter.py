@@ -75,7 +75,7 @@ async def limit_check():
     elif not MONTHLY and TOTAL:
         return DAILY_TOTAL_COUNT
 
-async def left_limit(username, bot_name):
+async def left_limit(user_name, bot_name):
     if MONTHLY and TOTAL:
         Monthly = await db.monthly_users_count()
         await client.show_message(f"Hii {username} Monthly Quota is full. Try Next Month or Contact Admin")
@@ -90,7 +90,7 @@ async def left_limit(username, bot_name):
         await client.show_message(f"Hii {username} Daily Quota is full. Try Tomorrow or Contact Admin")
     return
 
-async def check_limit_not_exceed(username, bot_name):
+async def check_limit_not_exceed(user_name, bot_name):
     if MONTHLY and TOTAL:
         premium = await db.total_premiums_monthly()
         if premium >= MONTHLY_TOTAL_COUNT:
@@ -337,12 +337,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "yibot":
         bot_name = await org_bot_name(query.data)
+        user_name = query.from_user.username
         user_id = query.from_user.id
         validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
         attempt_validity = validity_days.strftime("%Y-%m-%d")
     
         try:
-            if await check_limit_not_exceed(username, bot_name):
+            if await check_limit_not_exceed(user_name, bot_name):
                 return 
             
             else:
