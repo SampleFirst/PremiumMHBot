@@ -168,7 +168,7 @@ async def payment_screenshot_received(client, message):
         return
 
     # Update if and elif conditions for selected_type
-    if selected_type in {"mbot", "abot", "rbot", "yibot"}:
+    if selected_type in {"Movies Bot", "Anime Bot", "Rename Bot", "YouTube Downloader Bot"}:
         await handle_bot_screenshot(client, message, user_id, selected_type, file_id)
     elif selected_type in {"mdb", "adb", "tvsdb"}:
         await handle_db_screenshot(client, message, user_id, selected_type, file_id)
