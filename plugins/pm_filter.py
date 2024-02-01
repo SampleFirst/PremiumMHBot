@@ -187,7 +187,7 @@ async def handle_bot_screenshot(client, message, user_id, selected_type, file_id
     validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
     premium_validity = validity_days.strftime("%Y-%m-%d")
 
-    caption_db = f"User ID: {user_id}\n" \
+    caption_bot = f"User ID: {user_id}\n" \
               f"Selected Bot: {bot_name}\n" \
               f"Premium Validity: {premium_validity}\n" \
               f"Validity Days: {validity_days}\n"
