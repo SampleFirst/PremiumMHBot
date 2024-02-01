@@ -48,12 +48,12 @@ async def repo(client, message):
                    message_file = (
                        f"Repo Zip Files:\n"
                        f"**Default branch ({default_branch}):**\n"
-                       f"**[Download ZIP]({repo_url}/archive/refs/heads/{default_branch}.zip)**\n\n"
+                       f"({repo_url}/archive/refs/heads/{default_branch}.zip)\n\n"
                        f"**Other available branches:**\n"
-                       f"{', '.join([f'**[{branch[\'name\']}]({repo_url}/archive/refs/heads/{branch['name']}.zip)**' for branch in branches])}"
+                       f"{', '.join([f'({repo_url}/archive/refs/heads/{branch['name']}.zip)' for branch in branches])}"
                    )
                else:
-                   message_file = f"Repo Zip File:\n**[Download ZIP]({repo_url}/archive/refs/heads/{default_branch}.zip)**"
+                   message_file = f"Repo Zip File:\n({repo_url}/archive/refs/heads/{default_branch}.zip)"
 
                # Send messages with formatted text and file information
                await client.send_message(
