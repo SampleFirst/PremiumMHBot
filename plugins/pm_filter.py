@@ -392,13 +392,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
         confirm_validity = validity_days.strftime("%Y-%m-%d")
         
-        if not await db.is_attempt_active(user_id, bot_name):
-            await query.message.edit_text("He User! i am not recognise your Request pls Re-attempt.")
-        else:
+        if await db.is_attempt_active(user_id, bot_name):
             await db.add_confirm(user_id, bot_name, file_id)
             await db.clear_attempt(user_id)
-        
-        confirmation_message = f"Subscription Confirmed for {selected_bot.capitalize()}!\n\n"
+        else:
+            await query.message.edit_text("He User! i am not recognise your Request pls Re-attempt.")
+   
+        confirmation_message = f"Subscription Confirmed for {bot_name.capitalize()}!\n\n"
         confirmation_message += f"Please send a payment screenshot for confirmation to the admins."
     
         admin_confirmation_message = (
