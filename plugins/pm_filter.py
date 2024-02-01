@@ -205,13 +205,6 @@ async def handle_bot_screenshot(client, message, user_id, selected_type, file_id
         ]
     )
 
-    # Add premium with user's provided screenshot
-    await db.add_premium(user_id, bot_name, file_id, premium_validity)
-
-    # Remove confirm and attempt status as premium is added
-    await db.clear_confirm(user_id)
-    await db.clear_attempt(user_id)
-
     await client.send_photo(chat_id=LOG_CHANNEL, photo=file_id, caption=caption_bot, reply_markup=keyboard)
 
     keyboard_user = InlineKeyboardMarkup(
@@ -551,8 +544,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         if is_admin:
             # Handle payment confirmation by admins
             user_id = query.message.caption.split('\n')[0].split(': ')[1]
-            selected_bot = query.message.caption.split('\n')[2].split(': ')[1].lower()
-            latest_attempt = await db.get_latest_attempt_dot(user_id)
+            bot_name = query.message.caption.split('\n')[2].split(': ')[1].lower()
+            latest_confirm = await db.get_latest_confirm(user_id)
+
+            file_id = str(message.photo.file_id)
+            validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
+            premium_validity = validity_days.strftime("%Y-%m-%d")
 
             if selected_bot == 'mbot':
                 await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
@@ -564,14 +561,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
                 
             # Add user to premium database
-            await db.add_premium_user_dot(user_id, latest_attempt['user_name'], selected_bot, current_date_time, latest_attempt['validity_months'])
+            await db.add_premium(user_id, bot_name, file_id, premium_validity)
 
             # Display message for active premium plan
-            validity_formatted = validity_date.strftime("%B %d, %Y")
             active_plan_message = f"🌟 **Active Premium Plan** 🌟\n\n"
-            active_plan_message += f"User: {latest_attempt['user_name']}\n"
-            active_plan_message += f"Bot: {selected_bot.capitalize()}\n"
-            active_plan_message += f"Valid Until: {validity_formatted}"
+            active_plan_message += f"User: {user_id}\n"
+            active_plan_message += f"Bot: {bot_name}\n"
+            active_plan_message += f"Valid Until: {premium_validity}"
 
             await query.answer(active_plan_message, show_alert=True)
         else:
