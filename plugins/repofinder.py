@@ -50,8 +50,8 @@ async def repo(client, message):
                         f"**Default branch ({default_branch}):**\n"
                         f"**[Download ZIP]({repo_url}/archive/refs/heads/{default_branch}.zip)**\n\n"
                         f"**Other available branches:**\n"
-                        f"{', '.join({repo_url}/archive/refs/heads/{branch['name']}.zip)' 
-                        for branch in branches}"
+                        f"{({repo_url}/archive/refs/heads/{branch['name']}.zip)}"
+                        for branch in branches
                     )
                 else:
                     message_file = f"Repo Zip File:\n({repo_url}/archive/refs/heads/{default_branch}.zip)"
