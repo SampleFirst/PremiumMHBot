@@ -275,11 +275,11 @@ class Database:
         else:
             filter_params = {'id': id}
 
-        attempts = await self.dot.count_documents(filter_params)
+        attempts = await self.col.count_documents(filter_params)
         return attempts
 
     async def get_latest_confirm(self, id):
-        latest_attempt = await self.dot.find_one(
+        latest_attempt = await self.col.find_one(
             {'id': id},
             sort=[('confirm_date', -1)]  # Sort by attempt date in descending order
         )
@@ -375,11 +375,11 @@ class Database:
         else:
             filter_params = {'id': id}
 
-        attempts = await self.dot.count_documents(filter_params)
+        attempts = await self.col.count_documents(filter_params)
         return attempts
 
     async def get_latest_premium(self, id):
-        latest_attempt = await self.dot.find_one(
+        latest_attempt = await self.col.find_one(
             {'id': id},
             sort=[('premium_date', -1)]  # Sort by attempt date in descending order
         )
