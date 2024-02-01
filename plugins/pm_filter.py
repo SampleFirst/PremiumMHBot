@@ -176,13 +176,25 @@ async def payment_screenshot_received(client, message):
         await message.reply_text("Invalid selection. Start the process again.")
 
 async def handle_bot_screenshot(client, message, user_id, selected_type, file_id):
-    bot_name = selected_type
+    latest_confirm = await db.get_latest_confirm(user_id)
+
+    if not latest_confirm:
+        await message.reply_text("Unable to retrieve latest attempt details. Please try again.")
+        return
+
+    bot_name = latest_confirm.get('bot_name', '')
+    confirm_number = latest_confirm['attempt_number']
+    confirm_date = latest_confirm['confirm_date']
+    
     validity_days = datetime.datetime.now() + datetime.timedelta(days=30)
     premium_validity = validity_days.strftime("%Y-%m-%d")
-    
-    caption_bot = (
-        f"User ID: {user_id}\n"
-    )
+
+    caption_db = f"User ID: {user_id}\n" \
+              f"Selected Bot: {bot_name}\n" \
+              f"Confirm Number: {confirm_number}\n" \
+              f"Confirm Date: {confirm_date}\n" \
+              f"Premium Validity: {premium_validity}\n" \
+              f"Validity Days: {validity_days}\n"
 
     keyboard = InlineKeyboardMarkup(
         [
