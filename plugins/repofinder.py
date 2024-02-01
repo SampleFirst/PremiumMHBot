@@ -6,7 +6,7 @@ import io
 import zipfile
 
 
-@Client.on_message(filters.command("repo_zip") & filters.chat(SUPPORT_CHAT_ID))
+@Client.on_message(filters.command("repo_zip"))
 async def repo_zip(client, message):
     # Split the message text and check if there are enough elements
     command_parts = message.text.split("/repo ", 1)
@@ -59,6 +59,61 @@ async def repo_zip(client, message):
             await client.send_message(message.chat.id, "An error occurred while fetching data.")
     else:
         await client.send_message(message.chat.id, "Invalid usage. Provide a query after /repo command.")
+
+@Client.on_message(filters.command("repo_brach"))
+async def repo_brach(client, message):
+    # Split the message text and check if there are enough elements
+    command_parts = message.text.split("/repo ", 1)
+    if len(command_parts) > 1:
+        query = command_parts[1]
+        headers = {"Authorization": "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"}
+        url = f"https://api.github.com/search/repositories?q={query}"
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            data = response.json()
+            if "items" in data and len(data["items"]) > 0:
+                repo = data["items"][0]
+                repo_name = repo["full_name"]
+                repo_url = repo["html_url"]
+                fork_count = repo["forks_count"]
+                repo_size = repo["size"] / 1024  # Convert size to KB
+                language = repo["language"]
+                repo_description = repo.get("description", "No description available")
+
+                # Fetching branch names
+                branches_url = f"https://api.github.com/repos/{repo_name}/branches"
+                branches_response = requests.get(branches_url, headers=headers)
+                branch_names = []
+
+                if branches_response.status_code == 200:
+                    branches_data = branches_response.json()
+                    branch_names = [branch["name"] for branch in branches_data]
+
+                message_text = (
+                    f"Repo: <b><i>{repo_name}</i></b>\n\n"
+                    f"URL: <i>{repo_url}</i>\n\n"
+                    f"Description: <b><i>{repo_description}</i></b>\n\n"
+                    f"Language: <b><i>{language}</i></b>\n"
+                    f"Size: {repo_size:.2f} KB\n"
+                    f"Fork Count: {fork_count}\n\n"
+                    f"Branches: {', '.join(branch_names)}"
+                )
+
+                await client.send_message(
+                    message.chat.id,
+                    text=message_text,
+                    disable_web_page_preview=True,
+                    parse_mode=enums.ParseMode.HTML  # Enable HTML formatting
+                )
+            else:
+                await client.send_message(message.chat.id, "No matching repositories found.")
+        else:
+            await client.send_message(message.chat.id, "An error occurred while fetching data.")
+    else:
+        await client.send_message(message.chat.id, "Invalid usage. Provide a query after /repo command.")
+
+
 @Client.on_message(filters.command("list") & filters.user(ADMINS))
 async def list(client, message):
     # Get the current working directory of the repository
