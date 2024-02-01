@@ -1,7 +1,6 @@
-from pyrogram import Client, filters, types, enums
-import subprocess
+from pyrogram import Client, filters, enums
 import requests
-from info import ADMINS, LOG_CHANNEL
+from info import ADMINS
 
 @Client.on_message(filters.command("repo") & filters.user(ADMINS))
 async def repo(client, message):
@@ -25,10 +24,17 @@ async def repo(client, message):
                 language = repo["language"]
                 repo_description = repo.get("description", "No description available")
 
+                # Additional branches information
+                branches = repo.get("branches", [])
+                total_branches = len(branches)
+                branch_names = [branch["name"] for branch in branches]
+
                 message_text = (
                     f"Repo: <b><i>{repo_name}</i></b>\n\n"
                     f"URL: <i>{repo_url}</i>\n\n"
-                    f"Default Branch: <b><i>{default_branch}</i></b>\n\n"  # Include branch name
+                    f"Default Branch: <b><i>{default_branch}</i></b>\n\n"
+                    f"Total Branches: <b><i>{total_branches}</i></b>\n"  # Include total branches
+                    f"Branch Names: <b><i>{', '.join(branch_names)}</i></b>\n\n"
                     f"Description: <b><i>{repo_description}</i></b>\n\n"
                     f"Language: <b><i>{language}</i></b>\n"
                     f"Size: {repo_size:.2f} KB\n"
@@ -38,9 +44,9 @@ async def repo(client, message):
                 message_file = f"{repo_url}/archive/refs/heads/{default_branch}.zip"
 
                 # Check for additional branches
-                if len(repo.get("branches", [])) > 1:
+                if total_branches > 1:
                     message_file += f"\nOther branches:"
-                    for branch_info in repo["branches"]:
+                    for branch_info in branches:
                         branch_name = branch_info["name"]
                         if branch_name != default_branch:
                             message_file += f"\n{repo_url}/archive/refs/heads/{branch_name}.zip"
@@ -61,4 +67,3 @@ async def repo(client, message):
             await client.send_message(message.chat.id, "An error occurred while fetching data.")
     else:
         await client.send_message(message.chat.id, "Invalid usage. Provide a query after /repo command.")
-        
