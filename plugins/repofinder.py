@@ -2,7 +2,63 @@ from pyrogram import Client, filters, types, enums
 import subprocess
 import requests
 from info import ADMINS, LOG_CHANNEL 
+import io
+import zipfile
 
+
+@Client.on_message(filters.command("repo_zip") & filters.chat(SUPPORT_CHAT_ID))
+async def repo_zip(client, message):
+    # Split the message text and check if there are enough elements
+    command_parts = message.text.split("/repo ", 1)
+    if len(command_parts) > 1:
+        query = command_parts[1]
+        headers = {"Authorization": "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"}
+        url = f"https://api.github.com/search/repositories?q={query}"
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            data = response.json()
+            if "items" in data and len(data["items"]) > 0:
+                repo = data["items"][0]
+                repo_name = repo["full_name"]
+                repo_url = repo["html_url"]
+                repo_description = repo.get("description", "No description available")
+
+                # Get the repository as a zip file
+                zip_url = f"https://api.github.com/repos/{repo_name}/zipball/master"
+                zip_response = requests.get(zip_url)
+                
+                if zip_response.status_code == 200:
+                    zip_data = zip_response.content
+
+                    # Send repository info
+                    message_text = (
+                        f"Repo: <b><i>{repo_name}</i></b>\n\n"
+                        f"URL: <i>{repo_url}</i>\n\n"
+                        f"Description: <b><i>{repo_description}</i></b>"
+                    )
+
+                    await client.send_message(
+                        message.chat.id,
+                        text=message_text,
+                        disable_web_page_preview=True,
+                        parse_mode=enums.ParseMode.HTML
+                    )
+
+                    # Send repository as a zip file
+                    await client.send_document(
+                        chat_id=message.chat.id,
+                        document=io.BytesIO(zip_data),
+                        caption="Repository Zip File"
+                    )
+                else:
+                    await client.send_message(message.chat.id, "Failed to fetch repository zip file.")
+            else:
+                await client.send_message(message.chat.id, "No matching repositories found.")
+        else:
+            await client.send_message(message.chat.id, "An error occurred while fetching data.")
+    else:
+        await client.send_message(message.chat.id, "Invalid usage. Provide a query after /repo command.")
 @Client.on_message(filters.command("list") & filters.user(ADMINS))
 async def list(client, message):
     # Get the current working directory of the repository
