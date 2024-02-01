@@ -142,7 +142,7 @@ class Database:
 
     # New functions for attempt status
 
-    async def add_attempt(self, id, attempt_active, bot_name, attempt_validity):
+    async def add_attempt(self, id, bot_name, attempt_validity):
         now_date = add_date()
         attempt_status = dict(
             is_attempt=True,
