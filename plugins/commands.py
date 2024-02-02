@@ -116,7 +116,7 @@ async def total_users(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
-@Client.on_message(filters.command('myplan'))
+@Client.on_message(filters.command('myn'))
 async def my_plan(client, message):
     user_id = message.from_user.id
     my_plan_stats = await db.get_user_premium_stats(user_id)
