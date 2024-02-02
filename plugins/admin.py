@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from database.user_chats_db import db
+from database.users_chats_db import db
 from info import ADMINS, LOG_CHANNEL
 
 # Add this new command function after the existing commands in your command.py file
