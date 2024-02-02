@@ -5,7 +5,7 @@ from info import ADMINS, LOG_CHANNEL
 
 # Add this new command function after the existing commands in your command.py file
 @Client.on_message(filters.command('getplan') & filters.user(ADMINS))
-async def get_plan_details(_, message):
+async def get_plan_details(client, message):
     """Get user plan details (only for ADMINS)"""
     try:
         if message.from_user.id in ADMINS:
@@ -27,6 +27,15 @@ async def get_plan_details(_, message):
                         f"Validity: {user['premium_status']['premium_validity']}\n"
                         # Add any additional details as needed
                     )
+                    
+                    # Get the file_id from the user's premium status
+                    file_id = user['premium_status']['file_id']
+                    
+                    # Reply with the photo and plan details
+                    await message.reply_photo(
+                        photo=file_id,
+                        caption=plan_details,
+                    )
                 else:
                     plan_details = (
                         f"User ID: {user['id']}\n"
@@ -34,15 +43,12 @@ async def get_plan_details(_, message):
                         f"Plan: None\n"
                         # Add any additional details as needed
                     )
-    
-                # Send the plan details as a reply
-                await message.reply_text(plan_details)
-    
+                    await message.reply_text(plan_details)
             else:
                 # User not found in the database
                 await message.reply_text("User not found in the database.")
         else:
-            await message.reply_text("This command only for an ADMINS.")
+            await message.reply_text("This command is only for ADMINS.")
             
     except IndexError:
         # Handle the case where the user did not provide a user id in the command
@@ -51,3 +57,4 @@ async def get_plan_details(_, message):
     except Exception as e:
         # Handle other exceptions
         await message.reply_text(str(e))
+        
