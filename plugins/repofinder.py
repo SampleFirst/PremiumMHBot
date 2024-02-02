@@ -40,40 +40,58 @@ async def repo(client, message):
 
                     branches_text = "\nBranches:\n" + "\n".join(branch_list)
 
+                    message_text = (
+                        f"Repo: <b><i>{repo_name}</i></b>\n\n"
+                        f"URL: <i>{repo_url}</i>\n\n"
+                        f"Description: <b><i>{repo_description}</i></b>\n\n"
+                        f"Language: <b><i>{language}</i></b>\n"
+                        f"Size: {repo_size:.2f} KB\n"
+                        f"Fork Count: {fork_count}"
+                        f"{branches_text}"
+                    )
+
+                    await client.send_message(
+                        message.chat.id,
+                        text=message_text,
+                        disable_web_page_preview=True,
+                        parse_mode=enums.ParseMode.HTML  # Enable HTML formatting
+                    )
+
                     for branch in branches_data:
                         branch_name = branch["name"]
                         formatted_link = f"{repo_url}/archive/refs/heads/{branch_name}.zip"
                         await client.send_message(
                             message.chat.id,
-                            text=f"Formatted link for branch *{branch_name}*: {formatted_link}"
+                            text=f"Branch *{branch_name}*:\n\n{formatted_link}"
                         )
                 else:
                     branches_text = f"\nDefault Branch: *{repo['default_branch']}"
                     formatted_link = f"{repo_url}/archive/refs/heads/{repo['default_branch']}.zip"
                     await client.send_message(
                         message.chat.id,
-                        text=f"Formatted link for default branch *{repo['default_branch']}*: {formatted_link}"
+                        text=f"Default Branch *{repo['default_branch']}*:\n\n{formatted_link}"
                     )
 
-                message_text = (
-                    f"Repo: <b><i>{repo_name}</i></b>\n\n"
-                    f"URL: <i>{repo_url}</i>\n\n"
-                    f"Description: <b><i>{repo_description}</i></b>\n\n"
-                    f"Language: <b><i>{language}</i></b>\n"
-                    f"Size: {repo_size:.2f} KB\n"
-                    f"Fork Count: {fork_count}"
-                    f"{branches_text}"
-                )
+                    message_text = (
+                        f"Repo: <b><i>{repo_name}</i></b>\n\n"
+                        f"URL: <i>{repo_url}</i>\n\n"
+                        f"Description: <b><i>{repo_description}</i></b>\n\n"
+                        f"Language: <b><i>{language}</i></b>\n"
+                        f"Size: {repo_size:.2f} KB\n"
+                        f"Fork Count: {fork_count}"
+                        f"{branches_text}"
+                    )
 
-                await client.send_message(
-                    message.chat.id,
-                    text=message_text,
-                    disable_web_page_preview=True,
-                    parse_mode=enums.ParseMode.HTML  # Enable HTML formatting
-                )
+                    await client.send_message(
+                        message.chat.id,
+                        text=message_text,
+                        disable_web_page_preview=True,
+                        parse_mode=enums.ParseMode.HTML  # Enable HTML formatting
+                    )
             else:
                 await client.send_message(message.chat.id, "No matching repositories found.")
         else:
             await client.send_message(message.chat.id, "An error occurred while fetching data.")
     else:
         await client.send_message(message.chat.id, "Invalid usage. Provide a query after /repo command.")
+        
