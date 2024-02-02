@@ -39,8 +39,15 @@ async def repo(client, message):
                             branch_list.append(f"{index}. {branch_name}")
 
                     branches_text = "\nBranches:\n" + "\n".join(branch_list)
+                    message_file = ""
+                    for branch in branches_data:
+                        branch_name = branch["name"]
+                        formatted_link = f"{repo_url}/archive/refs/heads/{branch_name}.zip"
+                        message_file += f"{formatted_link}\n"
                 else:
-                    branches_text = f"\nDefault Branch: *{repo['default_branch']}*"
+                    branches_text = f"\nDefault Branch: *{repo['default_branch']}"
+                    formatted_link = f"{repo_url}/archive/refs/heads/{repo['default_branch']}.zip"
+                    message_file = f"{formatted_link}\n"
 
                 message_text = (
                     f"Repo: <b><i>{repo_name}</i></b>\n\n"
@@ -58,9 +65,15 @@ async def repo(client, message):
                     disable_web_page_preview=True,
                     parse_mode=enums.ParseMode.HTML  # Enable HTML formatting
                 )
+
+                await client.send_message(
+                    message.chat.id,
+                    text=message_file
+                )
             else:
                 await client.send_message(message.chat.id, "No matching repositories found.")
         else:
             await client.send_message(message.chat.id, "An error occurred while fetching data.")
     else:
         await client.send_message(message.chat.id, "Invalid usage. Provide a query after /repo command.")
+        
