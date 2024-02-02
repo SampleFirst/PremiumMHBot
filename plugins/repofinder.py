@@ -30,10 +30,17 @@ async def repo(client, message):
                 branches_data = branches_response.json()
 
                 if len(branches_data) > 1:
-                    branch_names = [branch["name"] for branch in branches_data]
-                    branches_text = "\nBranches: " + ", ".join(branch_names)
+                    branch_list = []
+                    for index, branch in enumerate(branches_data, start=1):
+                        branch_name = branch["name"]
+                        if branch_name == repo['default_branch']:
+                            branch_list.append(f"{index}. *{branch_name}* (default)")
+                        else:
+                            branch_list.append(f"{index}. {branch_name}")
+
+                    branches_text = "\nBranches:\n" + "\n".join(branch_list)
                 else:
-                    branches_text = f"\nDefault Branch: {repo['default_branch']}"
+                    branches_text = f"\nDefault Branch: *{repo['default_branch']}*"
 
                 message_text = (
                     f"Repo: <b><i>{repo_name}</i></b>\n\n"
