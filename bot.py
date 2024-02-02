@@ -59,13 +59,10 @@ class Bot(Client):
             logger.warning(f"Bot Isn't Able To Send Message To LOG_CHANNEL \n{e}")
 
         for admin_id in ADMINS:
-            try:
-                await self.send_message(admin_id, text=f"Bot started successfully at {date}, {time}.")
-                await asyncio.sleep(30)  # Wait for 30 seconds
-                await self.send_message(admin_id, text="Bot Now Working.\nsend command /start")
-            except Exception as e:
-                logger.warning(f"Bot Isn't Able To Send Message To Admin {admin_id} \n{e}")
-
+            await self.send_message(admin_id, text=f"Bot started successfully at {date}, {time}.")
+            await asyncio.sleep(30)  # Wait for 30 seconds
+            await self.send_message(admin_id, text="Bot Now Working.\nsend command /start")
+            
         app = web.AppRunner(await web_server())
         await app.setup()
         bind_address = "0.0.0.0"
