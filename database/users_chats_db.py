@@ -213,7 +213,7 @@ class Database:
 
         # Define filter parameters based on bot_name if provided
         filter_params = {"attempt_status.attempt_active": True}
-        if_bot_name:
+        if bot_name:
             filter_params["attempt_status.bot_name"] = bot_name
 
         # Count documents within the specified date range
