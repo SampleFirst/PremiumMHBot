@@ -68,7 +68,8 @@ async def payment_command(query_data, client, user_id):
 async def addpremium(bot, message):
     try:
         if message.from_user.id in ADMINS:
-            if user_id = message.text.split(" ")[1]
+            command_args = message.command[1:]  # Extract arguments after the command
+            if command_args:
                 buttons = [
                     [
                         InlineKeyboardButton("Premium Bots", callback_data="pre1_{user_id}"),
@@ -84,7 +85,7 @@ async def addpremium(bot, message):
                     quote=True
                 )
             else:
-            await message.reply_text("To add a premium user, use the following command:\n\n/addpremium {userid}")
+                await message.reply_text("To add a premium user, use the following command:\n\n/addpremium {userid}")
         else:
             await message.reply_text("You are not authorized to use this command.")
 
