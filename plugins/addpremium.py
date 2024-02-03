@@ -70,6 +70,7 @@ async def addpremium(bot, message):
         if message.from_user.id in ADMINS:
             command_args = message.command[1:]  # Extract arguments after the command
             if command_args:
+                user_id = command_args[0]
                 buttons = [
                     [
                         InlineKeyboardButton("Premium Bots", callback_data="pre1_{user_id}"),
