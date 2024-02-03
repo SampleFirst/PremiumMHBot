@@ -68,7 +68,7 @@ async def payment_command(query_data, client, user_id):
 async def addpremium(bot, message):
     try:
         if message.from_user.id in ADMINS:
-            if user_id = int(message.command[1])
+            if user_id := int(message.command[1]):
                 buttons = [
                     [
                         InlineKeyboardButton("Premium Bots", callback_data="pre1_{user_id}"),
