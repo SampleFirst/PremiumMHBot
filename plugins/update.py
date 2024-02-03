@@ -30,3 +30,4 @@ async def my_update(client, message):
         await message.reply(f"Your latest update:\n{user_update}")
     else:
         await message.reply("No update data found for your user ID.")
+        
