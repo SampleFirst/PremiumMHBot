@@ -93,7 +93,7 @@ async def addpremium(bot, message):
     except Exception as e:
         print(f"Error in buypremium: {e}")
 
-@Client.on_callback_query(filters.regex('pre1_'))
+@Client.on_callback_query(filters.regex(r'^pre1_\d+$'))
 async def premium_bots(client, callback_query):
     try: 
         user_id = int(callback_query.data.split("_")[1])
@@ -118,7 +118,7 @@ async def premium_bots(client, callback_query):
     except Exception as e:
         print(f"Error in premium bots: {e}")
 
-@Client.on_callback_query(filters.regex('pre2_'))
+@Client.on_callback_query(filters.regex(r'^pre2_\d+$'))
 async def premium_database(client, callback_query):
     try:
         user_id = int(callback_query.data.split("_")[1])
@@ -142,7 +142,7 @@ async def premium_database(client, callback_query):
         )
     except Exception as e:
         print(f"Error in premium database: {e}")
-        
+
 @Client.on_callback_query(filters.regex('pre1_m_|pre1_a_|pre1_r_|pre1_tv_'))
 async def premium_bot_durations(client, callback_query):
     try:
