@@ -141,7 +141,7 @@ async def premium_database(client, callback_query):
         )
     except Exception as e:
         print(f"Error in premium database: {e}")
-       -
+        
 @Client.on_callback_query(filters.regex('pre1_m_|pre1_a_|pre1_r_|pre1_tv_'))
 async def premium_bot_durations(client, callback_query):
     try:
