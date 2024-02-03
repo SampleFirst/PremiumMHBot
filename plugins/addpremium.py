@@ -68,7 +68,7 @@ async def payment_command(query_data, client, user_id):
 async def addpremium(bot, message):
     try:
         if message.from_user.id in ADMINS:
-            if user_id := int(message.command[1]):
+            if user_id = message.text.split(" ")[1]
                 buttons = [
                     [
                         InlineKeyboardButton("Premium Bots", callback_data="pre1_{user_id}"),
@@ -322,7 +322,7 @@ async def confirm_db_premium(client, callback_query):
     except Exception as e:
         print(f"Error in database premium: {e}")
         
-@Client.on_callback_query(filters.regex('cancel_premium'))
+@Client.on_callback_query(filters.regex('cancel_premium_'))
 async def cancel_premium(client, callback_query):
     await callback_query.answer("You clicked on 'Cancel Premium'")
     
