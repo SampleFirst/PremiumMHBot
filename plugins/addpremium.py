@@ -17,8 +17,8 @@ async def pre_bot_name(query_data):
         elif query_data == "botv":
             return "YouTube Downloader Bot"
     except Exception as e:
-        await bot.reply_text(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in add_premium: {e}")
+        await callback_query.answer(f"Error: {e}")
+        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
         return None
 
 async def pre_db_name(query_data):
@@ -32,8 +32,8 @@ async def pre_db_name(query_data):
         elif query_data == "dbtv":
             return "TV Series Database"
     except Exception as e:
-        await bot.reply_text(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in add_premium: {e}")
+        await callback_query.answer(f"Error: {e}")
+        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
         return None
 
 async def premium_validity(query_data):
@@ -50,8 +50,8 @@ async def premium_validity(query_data):
             pre_month = "3 Months"
         return pre_validity.strftime("%Y-%m-%d %H:%M:%S"), pre_month
     except Exception as e:
-        await bot.reply_text(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in add_premium: {e}")
+        await callback_query.answer(f"Error: {e}")
+        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
         return None, None
 
 async def payment_command(query_data, client, user_id):
@@ -65,8 +65,9 @@ async def payment_command(query_data, client, user_id):
         elif query_data == "bottv":
             await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
     except Exception as e:
-        await bot.reply_text(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in add_premium: {e}")
+        await callback_query.answer(f"Error: {e}")
+        await client.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
+
     
 @Client.on_message(filters.private & filters.command("addpremium") & filters.user(ADMINS))
 async def addpremium(bot, message):
