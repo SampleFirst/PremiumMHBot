@@ -64,20 +64,21 @@ async def payment_command(query_data, client, user_id):
         print(f"Error in payment_command: {e}")
 
 
+
 @Client.on_message(filters.private & filters.command("addpremium") & filters.user(ADMINS))
 async def addpremium(bot, message):
     try:
         if message.from_user.id in ADMINS:
-            command_args = message.command[1:]  # Extract arguments after the command
+            command_args = message.command[1:]
             if command_args:
                 user_id = command_args[0]
                 buttons = [
                     [
-                        InlineKeyboardButton("Premium Bots", callback_data="pre1_{user_id}"),
-                        InlineKeyboardButton("Premium Database", callback_data="pre2_{user_id}")
+                        InlineKeyboardButton("Premium Bots", callback_data=f"pre1|{user_id}"),
+                        InlineKeyboardButton("Premium Database", callback_data=f"pre2|{user_id}")
                     ],
                     [
-                        InlineKeyboardButton("Cancel", callback_data="cancel_premium_{user_id}")
+                        InlineKeyboardButton("Cancel", callback_data=f"cancel_premium|{user_id}")
                     ]
                 ]
                 await message.reply_text(
@@ -91,23 +92,23 @@ async def addpremium(bot, message):
             await message.reply_text("You are not authorized to use this command.")
 
     except Exception as e:
-        print(f"Error in buypremium: {e}")
+        print(f"Error in addpremium: {e}")
 
-@Client.on_callback_query(filters.regex(r'^pre1_\d+$'))
+@Client.on_callback_query(filters.regex(r'^pre1\|\d+$'))
 async def premium_bots(client, callback_query):
     try: 
-        user_id = int(callback_query.data.split("_")[1])
+        user_id = int(callback_query.data.split("|")[1])
         buttons = [
             [
-                InlineKeyboardButton("Movies Bot", callback_data="pre1_m_{user_id}"),
-                InlineKeyboardButton("Anime Bot", callback_data="pre1_a_{user_id}")
+                InlineKeyboardButton("Movies Bot", callback_data=f"pre1_m|{user_id}"),
+                InlineKeyboardButton("Anime Bot", callback_data=f"pre1_a|{user_id}")
             ],
             [
-                InlineKeyboardButton("Rename Bot", callback_data="pre1_r_{user_id}"),
-                InlineKeyboardButton("TV Series Bot", callback_data="pre1_tv_{user_id}")
+                InlineKeyboardButton("Rename Bot", callback_data=f"pre1_r|{user_id}"),
+                InlineKeyboardButton("TV Series Bot", callback_data=f"pre1_tv|{user_id}")
             ],
             [
-                InlineKeyboardButton("Cancel", callback_data="cancel_premium_{user_id}")
+                InlineKeyboardButton("Cancel", callback_data=f"cancel_premium|{user_id}")
             ]
         ]
         await callback_query.edit_message_text(
@@ -118,21 +119,21 @@ async def premium_bots(client, callback_query):
     except Exception as e:
         print(f"Error in premium bots: {e}")
 
-@Client.on_callback_query(filters.regex(r'^pre2_\d+$'))
+@Client.on_callback_query(filters.regex(r'^pre2\|\d+$'))
 async def premium_database(client, callback_query):
     try:
-        user_id = int(callback_query.data.split("_")[1])
+        user_id = int(callback_query.data.split("|")[1])
         buttons = [
             [
-                InlineKeyboardButton("Movies Database", callback_data="pre2_md_{user_id}"),
-                InlineKeyboardButton("Anime Database", callback_data="pre2_ad_{user_id}")
+                InlineKeyboardButton("Movies Database", callback_data=f"pre2_md|{user_id}"),
+                InlineKeyboardButton("Anime Database", callback_data=f"pre2_ad|{user_id}")
             ],
             [
-                InlineKeyboardButton("Audio Book Database", callback_data="pre2_abd_{user_id}"),
-                InlineKeyboardButton("TV Series Database", callback_data="pre2_tvd_{user_id}")
+                InlineKeyboardButton("Audio Book Database", callback_data=f"pre2_abd|{user_id}"),
+                InlineKeyboardButton("TV Series Database", callback_data=f"pre2_tvd|{user_id}")
             ],
             [
-                InlineKeyboardButton("Cancel", callback_data="cancel_premium_{user_id}")
+                InlineKeyboardButton("Cancel", callback_data=f"cancel_premium|{user_id}")
             ]
         ]
         await callback_query.edit_message_text(
