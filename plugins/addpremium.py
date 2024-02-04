@@ -5,28 +5,6 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from database.users_chats_db import db
 
-is_admin = True
-is_channel = False
-is_user = True
-
-# Define a new function to handle errors
-async def handle_error(e, client, query):
-    error_message = f"An error:\n{str(e)}"
-    logger.error(error_message)
-
-    # Send error message to admins if is_admin is True
-    if is_admin:
-        for admin in ADMINS:
-            await client.send_message(admin, error_message)
-
-    # Send error message to log channel if is_channel is True
-    if is_channel:
-        await client.send_message(LOG_CHANNEL, error_message)
-
-    # Show error message to user if is_user is True
-    if is_user:
-        await query.message.edit_text(text=error_message)
-        
         
 async def pre_bot_name(query_data):
     try:
@@ -39,7 +17,7 @@ async def pre_bot_name(query_data):
         elif query_data == "botv":
             return "YouTube Downloader Bot"
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
         return None
 
 async def pre_db_name(query_data):
@@ -53,7 +31,7 @@ async def pre_db_name(query_data):
         elif query_data == "dbtv":
             return "TV Series Database"
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
         return None
 
 async def premium_validity(query_data):
@@ -70,7 +48,7 @@ async def premium_validity(query_data):
             pre_month = "3 Months"
         return pre_validity.strftime("%Y-%m-%d %H:%M:%S"), pre_month
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
         return None, None
 
 async def payment_command(query_data, client, user_id):
@@ -84,7 +62,7 @@ async def payment_command(query_data, client, user_id):
         elif query_data == "bottv":
             await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
     
 @Client.on_message(filters.private & filters.command("addpremium") & filters.user(ADMINS))
 async def addpremium(bot, message):
@@ -112,7 +90,7 @@ async def addpremium(bot, message):
         else:
             await message.reply_text("You are not authorized to use this command.")
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('bot_'))
 async def premium_bots(client, callback_query):
@@ -136,7 +114,7 @@ async def premium_bots(client, callback_query):
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('db_'))
 async def premium_database(client, callback_query):
@@ -160,7 +138,7 @@ async def premium_database(client, callback_query):
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('botm_|bota_|botr_|bottv_'))
 async def premium_bot_durations(client, callback_query):
@@ -181,7 +159,7 @@ async def premium_bot_durations(client, callback_query):
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('dbm_|dba_|dbab_|dbtb_'))
 async def premium_database_durations(client, callback_query):
@@ -202,7 +180,7 @@ async def premium_database_durations(client, callback_query):
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('1bm_|2bm_|3bm_'))
 async def premium_bot_receipt(client, callback_query):
@@ -233,7 +211,7 @@ async def premium_bot_receipt(client, callback_query):
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('1dbm_|2dbm_|3dbm_'))
 async def premium_db_receipt(client, callback_query):
@@ -264,7 +242,7 @@ async def premium_db_receipt(client, callback_query):
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('adb_'))
 async def confirm_bot_premium(client, callback_query):
@@ -296,7 +274,7 @@ async def confirm_bot_premium(client, callback_query):
 
         await client.send_message(user_id, user_message)
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('addb_'))
 async def confirm_db_premium(client, callback_query):
@@ -326,7 +304,7 @@ async def confirm_db_premium(client, callback_query):
 
         await client.send_message(user_id, user_message)
     except Exception as e:
-        await handle_error(e, client, query, is_admin)
+        await message.reply(str(e))
 
 @Client.on_callback_query(filters.regex('cp_'))
 async def premium_cancel(client, callback_query):
