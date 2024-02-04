@@ -7,66 +7,51 @@ from database.users_chats_db import db
 
         
 async def pre_bot_name(query_data):
-    try:
-        if query_data == "botm":
-            return "Movies Bot"
-        elif query_data == "bota":
-            return "Anime Bot"
-        elif query_data == "botr":
-            return "Rename Bot"
-        elif query_data == "botv":
-            return "YouTube Downloader Bot"
-    except Exception as e:
-        await callback_query.answer(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
-        return None
+    if query_data == "botm":
+        return "Movies Bot"
+    elif query_data == "bota":
+        return "Anime Bot"
+    elif query_data == "botr":
+        return "Rename Bot"
+    elif query_data == "botv":
+        return "YouTube Downloader Bot"
+    return None
 
 async def pre_db_name(query_data):
-    try:
-        if query_data == "dbm":
-            return "Movies Database"
-        elif query_data == "dba":
-            return "Anime Database"
-        elif query_data == "dbab":
-            return "Audio Book Database"
-        elif query_data == "dbtv":
-            return "TV Series Database"
-    except Exception as e:
-        await callback_query.answer(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
-        return None
+    if query_data == "dbm":
+        return "Movies Database"
+    elif query_data == "dba":
+        return "Anime Database"
+    elif query_data == "dbab":
+        return "Audio Book Database"
+    elif query_data == "dbtv":
+        return "TV Series Database"
+    return None
 
 async def premium_validity(query_data):
-    try:
-        today_date = datetime.now()
-        if query_data == "1bm" or query_data == "1dbm":
-            pre_validity = today_date + timedelta(days=30)
-            pre_month = "1 Month"
-        elif query_data == "2bm" or query_data == "2dbm":
-            pre_validity = today_date + timedelta(days=60)
-            pre_month = "2 Months"
-        elif query_data == "3bm" or query_data == "3dbm":
-            pre_validity = today_date + timedelta(days=90)
-            pre_month = "3 Months"
-        return pre_validity.strftime("%Y-%m-%d %H:%M:%S"), pre_month
-    except Exception as e:
-        await callback_query.answer(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
-        return None, None
+    today_date = datetime.now()
+    if query_data == "1bm" or query_data == "1dbm":
+        pre_validity = today_date + timedelta(days=30)
+        pre_month = "1 Month"
+    elif query_data == "2bm" or query_data == "2dbm":
+        pre_validity = today_date + timedelta(days=60)
+        pre_month = "2 Months"
+    elif query_data == "3bm" or query_data == "3dbm":
+        pre_validity = today_date + timedelta(days=90)
+        pre_month = "3 Months"
+    return pre_validity.strftime("%Y-%m-%d %H:%M:%S"), pre_month
+    return None, None
 
 async def payment_command(query_data, client, user_id):
-    try:
-        if query_data == "botm":
-            await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
-        elif query_data == "bota":
-            await client.send_message(PAYMENT_CHAT, f"/pre {user_id}")
-        elif query_data == "botr":
-            await client.send_message(PAYMENT_CHAT, f"/try {user_id}")
-        elif query_data == "bottv":
-            await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
-    except Exception as e:
-        await callback_query.answer(f"Error: {e}")
-        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
+    if query_data == "botm":
+        await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
+    elif query_data == "bota":
+        await client.send_message(PAYMENT_CHAT, f"/pre {user_id}")
+    elif query_data == "botr":
+        await client.send_message(PAYMENT_CHAT, f"/try {user_id}")
+    elif query_data == "bottv":
+        await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
+      
 
     
 @Client.on_message(filters.private & filters.command("addpremium") & filters.user(ADMINS))
