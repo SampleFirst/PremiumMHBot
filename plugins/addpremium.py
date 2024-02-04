@@ -5,51 +5,53 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 from database.users_chats_db import db
 
-        
-async def pre_bot_name(query_data):
-    if query_data == "botm":
+USER_SELECTED = {}
+USER_VALIDITY = {}
+
+async def pre_bot_name(USER_SELECTED):
+    if USER_SELECTED == "botm":
         return "Movies Bot"
-    elif query_data == "bota":
+    elif USER_SELECTED == "bota":
         return "Anime Bot"
-    elif query_data == "botr":
+    elif USER_SELECTED == "botr":
         return "Rename Bot"
-    elif query_data == "botv":
+    elif USER_SELECTED == "botv":
         return "YouTube Downloader Bot"
     return None
 
-async def pre_db_name(query_data):
-    if query_data == "dbm":
+async def pre_db_name(USER_SELECTED):
+    if USER_SELECTED == "dbm":
         return "Movies Database"
-    elif query_data == "dba":
+    elif USER_SELECTED == "dba":
         return "Anime Database"
-    elif query_data == "dbab":
+    elif USER_SELECTED == "dbab":
         return "Audio Book Database"
-    elif query_data == "dbtv":
+    elif USER_SELECTED == "dbtv":
         return "TV Series Database"
     return None
 
-async def premium_validity(query_data):
+async def premium_validity(USER_VALIDITY):
     today_date = datetime.now()
-    if query_data == "1bm" or query_data == "1dbm":
+    if USER_VALIDITY == "1bm" or USER_VALIDITY == "1dbm":
         pre_validity = today_date + timedelta(days=30)
         pre_month = "1 Month"
-    elif query_data == "2bm" or query_data == "2dbm":
+    elif USER_VALIDITY == "2bm" or USER_VALIDITY == "2dbm":
         pre_validity = today_date + timedelta(days=60)
         pre_month = "2 Months"
-    elif query_data == "3bm" or query_data == "3dbm":
+    elif USER_VALIDITY == "3bm" or USER_VALIDITY == "3dbm":
         pre_validity = today_date + timedelta(days=90)
         pre_month = "3 Months"
     return pre_validity.strftime("%Y-%m-%d %H:%M:%S"), pre_month
     return None, None
 
-async def payment_command(query_data, client, user_id):
-    if query_data == "botm":
+async def payment_command(USER_SELECTED, client, user_id):
+    if USER_SELECTED == "botm":
         await client.send_message(PAYMENT_CHAT, f"/add {user_id}")
-    elif query_data == "bota":
+    elif USER_SELECTED == "bota":
         await client.send_message(PAYMENT_CHAT, f"/pre {user_id}")
-    elif query_data == "botr":
+    elif USER_SELECTED == "botr":
         await client.send_message(PAYMENT_CHAT, f"/try {user_id}")
-    elif query_data == "bottv":
+    elif USER_SELECTED == "bottv":
         await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
       
 
@@ -137,6 +139,7 @@ async def premium_database(client, callback_query):
 async def premium_bot_durations(client, callback_query):
     try:
         user_id = int(callback_query.data.split("_")[1])
+        USER_SELECTED[user_id] = query_data
         buttons = [
             [
                 InlineKeyboardButton("1 Month", callback_data=f"1bm_{user_id}"),
@@ -159,6 +162,7 @@ async def premium_bot_durations(client, callback_query):
 async def premium_database_durations(client, callback_query):
     try:
         user_id = int(callback_query.data.split("_")[1])
+        USER_SELECTED[user_id] = query_data
         buttons = [
             [
                 InlineKeyboardButton("1 Month", callback_data=f"1dbm_{user_id}"),
@@ -182,8 +186,10 @@ async def premium_bot_receipt(client, callback_query):
     try:
         user_id = int(callback_query.data.split("_")[1])
         username = callback_query.from_user.username
-        bot_name = await pre_bot_name(callback_query.data)
-        pre_validity, pre_month = await premium_validity(callback_query.data)
+        USER_VALIDITY[user_id] = query_data
+            
+        bot_name = await pre_bot_name(USER_SELECTED)
+        pre_validity, pre_month = await premium_validity(USER_VALIDITY)
 
         receipt_message = (
             f"Premium Receipt\n\n"
@@ -214,8 +220,10 @@ async def premium_db_receipt(client, callback_query):
     try:
         user_id = int(callback_query.data.split("_")[1])
         username = callback_query.from_user.username
-        database_name = await pre_db_name(callback_query.data)
-        pre_validity, pre_month = await premium_validity(callback_query.data)
+        USER_VALIDITY[user_id] = query_data
+            
+        database_name = await pre_db_name(USER_SELECTED)
+        pre_validity, pre_month = await premium_validity(USER_VALIDITY)
 
         receipt_message = (
             f"Premium Receipt\n\n"
@@ -246,8 +254,8 @@ async def confirm_bot_premium(client, callback_query):
     try:
         user_id = int(callback_query.data.split("_")[1])
         username = callback_query.from_user.username
-        bot_name = await pre_bot_name(callback_query.data)
-        pre_validity, pre_month = await premium_validity(callback_query.data)
+        bot_name = await pre_bot_name(USER_SELECTED)
+        pre_validity, pre_month = await premium_validity(USER_VALIDITY)
 
         await payment_command(callback_query.data, client, user_id)
 
@@ -279,8 +287,8 @@ async def confirm_db_premium(client, callback_query):
     try:
         user_id = int(callback_query.data.split("_")[1])
         username = callback_query.from_user.username
-        db_name = await pre_bot_name(callback_query.data)
-        pre_validity, pre_month = await premium_validity(callback_query.data)
+        db_name = await pre_bot_name(USER_SELECTED)
+        pre_validity, pre_month = await premium_validity(USER_VALIDITY)
 
         db.add_premium(id=user_id, db_name=db_name, file_id=None, premium_date=datetime.now(), premium_validity=pre_validity)
 
