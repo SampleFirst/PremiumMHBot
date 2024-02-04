@@ -95,7 +95,7 @@ async def addpremium(bot, message):
         print(f"Error in addpremium: {e}")
 
 @Client.on_callback_query(filters.regex(r'^pre1\|\d+$'))
-async def premium_bots(client, callback_query):
+async def premium_bot(client, callback_query):
     try: 
         user_id = int(callback_query.data.split("|")[1])
         buttons = [
