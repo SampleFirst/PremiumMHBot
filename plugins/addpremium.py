@@ -113,8 +113,7 @@ async def premium_bot(client, callback_query):
         ]
         await callback_query.edit_message_text(
             text="Select Premium Bot:",
-            reply_markup=InlineKeyboardMarkup(buttons),
-            quote=True
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
         print(f"Error in premium bots: {e}")
@@ -125,8 +124,8 @@ async def premium_database(client, callback_query):
         user_id = int(callback_query.data.split("|")[1])
         buttons = [
             [
-                InlineKeyboardButton("Movies Database", callback_data=f"pre2_md|{user_id}"),
-                InlineKeyboardButton("Anime Database", callback_data=f"pre2_ad|{user_id}")
+                InlineKeyboardButton("Movies Database", callback_data=f"pre2_md_{user_id}"),
+                InlineKeyboardButton("Anime Database", callback_data=f"pre2_ad_{user_id}")
             ],
             [
                 InlineKeyboardButton("Audio Book Database", callback_data=f"pre2_abd|{user_id}"),
