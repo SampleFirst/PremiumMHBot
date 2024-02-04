@@ -138,8 +138,7 @@ async def premium_database(client, callback_query):
         ]
         await callback_query.edit_message_text(
             text="Select Premium Database:",
-            reply_markup=InlineKeyboardMarkup(buttons),
-            quote=True
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
         print(f"Error in premium database: {e}")
@@ -160,8 +159,7 @@ async def premium_bot_durations(client, callback_query):
         ]
         await callback_query.edit_message_text(
             text="Select Premium Plan Duration:",
-            reply_markup=InlineKeyboardMarkup(buttons),
-            quote=True
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
         print(f"Error in premium bot month: {e}")
@@ -182,8 +180,7 @@ async def premium_database_durations(client, callback_query):
         ]
         await callback_query.edit_message_text(
             text="Select Premium Plan Duration:",
-            reply_markup=InlineKeyboardMarkup(buttons),
-            quote=True
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
         print(f"Error in premium database month: {e}")
@@ -215,8 +212,7 @@ async def premium_bot_receipt(client, callback_query):
     
         await callback_query.edit_message_text(
             text=receipt_message,
-            reply_markup=InlineKeyboardMarkup(buttons),
-            quote=True
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
         print(f"Error in premium bot month: {e}")
@@ -248,8 +244,7 @@ async def premium_bot_receipt(client, callback_query):
     
         await callback_query.edit_message_text(
             text=receipt_message,
-            reply_markup=InlineKeyboardMarkup(buttons),
-            quote=True
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
     except Exception as e:
         print(f"Error in premium database month: {e}")
@@ -275,8 +270,7 @@ async def confirm_bot_premium(client, callback_query):
         )
 
         await callback_query.edit_message_text(
-            text=confirmation_message,
-            quote=True
+            text=confirmation_message
         )
 
         # Send a message to the user
@@ -309,8 +303,7 @@ async def confirm_db_premium(client, callback_query):
         )
     
         await callback_query.edit_message_text(
-            text=confirmation_message,
-            quote=True
+            text=confirmation_message
         )
     
         # Send a message to the user
