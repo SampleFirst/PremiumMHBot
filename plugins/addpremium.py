@@ -66,7 +66,7 @@ async def payment_command(query_data, client, user_id):
             await client.send_message(PAYMENT_CHAT, f"/pro {user_id}")
     except Exception as e:
         await callback_query.answer(f"Error: {e}")
-        await client.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
+        await bot.send_message(LOG_CHANNEL, f"Error in premium_bots: {e}")
 
     
 @Client.on_message(filters.private & filters.command("addpremium") & filters.user(ADMINS))
