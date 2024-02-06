@@ -90,48 +90,62 @@ async def left_limit(user_name, bot_name):
         await client.show_message(f"Hii {username} Daily Quota is full. Try Tomorrow or Contact Admin")
     return
 
-async def check_limit_not_exceed(user_name, bot_name):
-    if MONTHLY and TOTAL:
+async def check_limit_not_exceed(user_name, bot_name, client):
+    if MONTHLY:
+        await monthly_users_count(user_name, bot_name, client)
+    else:
+        await daily_users_count(user_name, bot_name, client)
+
+
+async def monthly_users_count(user_name, bot_name, client):
+    if TOTAL:
         premium = await db.total_premiums_monthly()
-        if premium >= MONTHLY_TOTAL_COUNT:
-            return await client.show_message(f"Hii {username} Monthly Premium Quota is full. Try Next Month or Contact Admin")
         confirm = await db.total_confirms_monthly()
-        if confirm >= MONTHLY_TOTAL_COUNT:
-            return await client.show_message(f"Hii {username} Monthly Confirm Quota is full. Try Next Month or Contact Admin")
         attempt = await db.total_attempts_monthly()
-        if attempt >= MONTHLY_TOTAL_COUNT:
-            return await client.show_message(f"Hii {username} Monthly Attempts Quota is full. Try Next Month or Contact Admin")
-    elif MONTHLY and not TOTAL:
+
+        if premium >= MONTHLY_TOTAL_COUNT:
+            await client.send_message(f"Hii {user_name} Monthly Premium Quota is full. Try Next Month or Contact Admin")
+        elif confirm >= MONTHLY_TOTAL_COUNT:
+            await client.send_message(f"Hii {user_name} Monthly Confirm Quota is full. Try Next Month or Contact Admin")
+        elif attempt >= MONTHLY_TOTAL_COUNT:
+            await client.send_message(f"Hii {user_name} Monthly Attempts Quota is full. Try Next Month or Contact Admin")
+    else:
         premium = await db.total_premiums_monthly(bot_name)
-        if premium >= MONTHLY_SPECIFIC_COUNT[bot_name]:
-            return await client.show_message(f"Hii {username} Monthly Premium Quota is full for {bot_name}. Try Next Month or Contact Admin")
         confirm = await db.total_confirms_monthly(bot_name)
-        if confirm >= MONTHLY_SPECIFIC_COUNT[bot_name]:
-            return await client.show_message(f"Hii {username} Monthly Confirm Quota is full for {bot_name}. Try Next Month or Contact Admin")
         attempt = await db.total_attempts_monthly(bot_name)
-        if attempt >= MONTHLY_SPECIFIC_COUNT[bot_name]:
-            return await client.show_message(f"Hii {username} Monthly Attempts Quota is full for {bot_name}. Try Next Month or Contact Admin")
-    elif not MONTHLY and TOTAL:
+
+        if premium >= MONTHLY_SPECIFIC_COUNT(bot_name, 0):
+            await client.send_message(f"Hii {user_name} Monthly Premium Quota is full for {bot_name}. Try Next Month or Contact Admin")
+        elif confirm >= MONTHLY_SPECIFIC_COUNT(bot_name, 0):
+            await client.send_message(f"Hii {user_name} Monthly Confirm Quota is full for {bot_name}. Try Next Month or Contact Admin")
+        elif attempt >= MONTHLY_SPECIFIC_COUNT(bot_name, 0):
+            await client.send_message(f"Hii {user_name} Monthly Attempts Quota is full for {bot_name}. Try Next Month or Contact Admin")
+
+
+async def daily_users_count(user_name, bot_name, client):
+    if TOTAL:
         premium = await db.total_premiums_daily()
-        if premium >= DAILY_TOTAL_COUNT:
-            return await client.show_message(f"Hii {username} Daily Premium Quota is full. Try Tomorrow or Contact Admin")
         confirm = await db.total_confirms_daily()
-        if confirm >= DAILY_TOTAL_COUNT:
-            return await client.show_message(f"Hii {username} Daily Confirm Quota is full. Try Tomorrow or Contact Admin")
         attempt = await db.total_attempts_daily()
-        if attempt >= DAILY_TOTAL_COUNT:
-            return await client.show_message(f"Hii {username} Daily Attempts Quota is full. Try Tomorrow or Contact Admin")
-    elif not MONTHLY and not TOTAL:
+
+        if premium >= DAILY_TOTAL_COUNT:
+            await client.send_message(f"Hii {user_name} Daily Premium Quota is full. Try Tomorrow or Contact Admin")
+        elif confirm >= DAILY_TOTAL_COUNT:
+            await client.send_message(f"Hii {user_name} Daily Confirm Quota is full. Try Tomorrow or Contact Admin")
+        elif attempt >= DAILY_TOTAL_COUNT:
+            await client.send_message(f"Hii {user_name} Daily Attempts Quota is full. Try Tomorrow or Contact Admin")
+    else:
         premium = await db.total_premiums_daily(bot_name)
-        if premium >= DAILY_SPECIFIC_COUNT[bot_name]:
-            return await client.show_message(f"Hii {username} Daily Premium Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
         confirm = await db.total_confirms_daily(bot_name)
-        if confirm >= DAILY_SPECIFIC_COUNT[bot_name]:
-            return await client.show_message(f"Hii {username} Daily Confirm Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
         attempt = await db.total_attempts_daily(bot_name)
-        if attempt >= DAILY_SPECIFIC_COUNT[bot_name]:
-            return await client.show_message(f"Hii {username} Daily Attempts Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
-    return
+
+        if premium >= DAILY_SPECIFIC_COUNT(bot_name, 0):
+            await client.send_message(f"Hii {user_name} Daily Premium Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
+        elif confirm >= DAILY_SPECIFIC_COUNT(bot_name, 0):
+            await client.send_message(f"Hii {user_name} Daily Confirm Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
+        elif attempt >= DAILY_SPECIFIC_COUNT(bot_name, 0):
+            await client.send_message(f"Hii {user_name} Daily Attempts Quota is full for {bot_name}. Try Tomorrow or Contact Admin")
+
     
     
 # Define a new function to handle errors
