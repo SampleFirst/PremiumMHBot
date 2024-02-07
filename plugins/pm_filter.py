@@ -10,11 +10,14 @@ from database.users_chats_db import db
 
 from Script import script
 from utils import temp
+from plugins.get_datatime import get_datatime 
+from plugins.expiry_date import get_expiry_date
+from plugins.get_name import get_bot_name, get_db_name
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-
+         
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "cancel":
@@ -124,6 +127,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
+        bot_name = await get_bot_name(query.data)
+        
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
@@ -148,6 +153,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
+        db_name = await get_db_name(query.data):
+        now_date = await get_datatime(1)
+        now_time = await get_datatime(3)
+        expiry_date expiry_name = await get_expiry_date(1, None, today_to_30d, expiry_name):
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
@@ -160,13 +169,20 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        caption = f"""Hey {query.from_user.mention}, Good Choice!
+            Bot Name: {db_name}
+            Today's Date: {now_date}
+            Current Time: {now_time}
+            Expiry Date: {expiry_date}
+            Expires on: {expiry_name}
+            """
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.DB_SELECTED.format(user=query.from_user.mention),
+            text=caption,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
