@@ -173,13 +173,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
     elif query.data == "buy_bot_pre":
         await query.message.edit_text(
-            text=script.BUY_BOT_PREMIUM.format(user=query.from_user.mention),
-            show_alert=True
+            text=script.BUY_BOT_PREMIUM.format(user=query.from_user.mention)
         )
     
     elif query.data == "buy_db_pre":
         await query.message.edit_text(
-            text=script.BUY_DB_PREMIUM.format(user=query.from_user.mention),
-            show_alert=True
+            text=script.BUY_DB_PREMIUM.format(user=query.from_user.mention)
         )
         
