@@ -3,7 +3,7 @@ class script(object):
     
     BOTS = """Hey {user},\nChoose a Bot Premium category:"""
     
-    DATABSE = """Hey {user},\nChoose a Database Premium category:"""
+    DATABASE = """Hey {user},\nChoose a Database Premium category:"""
     
     BOT_SELECTED = """Hey {user},\nSelect **Buy Bot Premium** Button For Confirmed Premium Buy"""
   
@@ -27,7 +27,7 @@ class script(object):
     
     SERIESDB_TEXT = """Here are the details about the TV Show Database premium plan:\n\n- Access to a wide range of TV shows\n- Latest episode updates"""
 
-    CONSTRUCTION = """This Feature under construction.\n\nAvailable soon..."""
+    CONSTRUCTION = """Hey {user}\nThis Feature under construction.\n\nAvailable soon..."""
     
     HELP_TXT = """<b>Hey {}
 Here Is The Help For My Commands.</b>"""
