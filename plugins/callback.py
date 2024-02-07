@@ -47,10 +47,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "plan":
-        await query.answer(text="Features under construction. Available soon...", show_alert=True)
+        await query.answer(
+            text=script.CONSTRUCTION,
+            show_alert=True
+        )
 
     elif query.data == "status":
-        await query.answer(text="Processing...", show_alert=True)
+        await query.answer(
+            text=script.CONSTRUCTION,
+            show_alert=True
+        )
 
     elif query.data == "bots":
         buttons = [
@@ -105,7 +111,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "botspack":
-        await query.answer(text="Features under construction. Available soon...", show_alert=True)
+        await query.answer(
+            text=script.CONSTRUCTION,
+            show_alert=True
+        )
 
     elif query.data == "dbpack":
-        await query.answer(text="Features under construction. Available soon...", show_alert=True)
+        await query.answer(
+            text=script.CONSTRUCTION,
+            show_alert=True
+        )
