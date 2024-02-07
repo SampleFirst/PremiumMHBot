@@ -472,8 +472,19 @@ class Database:
             sort=[('_id', -1)]  # Sort by ObjectId in descending order
         )
         return latest_update
-        
+
+    async def set_maintenance_mode(self, mode):
+        await self.db.config.update_one({}, {'$set': {'maintenance_mode': mode}}, upsert=True)
+
+    async def get_maintenance_mode(self):
+        config = await self.db.config.find_one({})
+        if not config:
+            return False
+        return config.get('maintenance_mode', False)
+
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
+
+
 
 db = Database(DATABASE_URI, DATABASE_NAME)
