@@ -1,10 +1,18 @@
 class script(object):
-    START_TXT = """Hello {user}! Welcome to the bot. Visit {bot} for more information."""
+    START_TXT = """Hello {user}!\nWelcome to the Bot."""
     
-    BOTS = """{user}, choose a bot premium category:"""
+    BOTS = """Hey {user},\nChoose a Bot Premium category:"""
     
-    DATABSE = """{user}, choose a database premium category:"""
+    DATABSE = """Hey {user},\nChoose a Database Premium category:"""
     
+    BOT_SELECTED = """Hey {user},\nSelect **Buy Bot Premium** Button For Confirmed Premium Buy"""
+  
+    DB_SELECTED = """Hey {user},\nSelect **Buy Database Premium** Button For Confirmed Premium Buy"""
+  
+    BUY_BOT_PREMIUM = """Hey {user}\n\nThank To Buy A Premium Access For Bot\nMake Patients Admin Review You Request and Sending Confirmation Message soon.."""
+    
+    BUY_DB_PREMIUM = """Hey {user}\n\nThank To Buy A Premium Access For Database\nMake Patients Admin Review You Request and Sending Confirmation Message soon.."""
+
     MOVIES_TEXT = """Here are the details about the Movies Bot premium plan:\n\n- Exclusive movie recommendations\n- High-speed streaming access"""
     
     ANIME_TEXT = """Here are the details about the Anime Bot premium plan:\n\n- Curated anime suggestions\n- Early access to new episodes"""
