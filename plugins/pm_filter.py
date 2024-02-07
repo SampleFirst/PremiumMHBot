@@ -126,7 +126,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
         buttons = [
             [
-                InlineKeyboardButton('Buy Bot Premium', callback_data='buy_bot_pre'),
+                InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
             ],
             [
                 InlineKeyboardButton('Go Back', callback_data='bots'),
@@ -150,7 +150,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         buttons = [
             [
-                InlineKeyboardButton('Buy Database Premium', callback_data='buy_db_pre'),
+                InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
             ],
             [
                 InlineKeyboardButton('Go Back', callback_data='database'),
@@ -171,13 +171,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
     
-    elif query.data == "buy_bot_pre":
+    elif query.data == "botpre":
         await query.message.edit_text(
             text=script.BUY_BOT_PREMIUM.format(user=query.from_user.mention),
             parse_mode=enums.ParseMode.HTML
         )
         
-    elif query.data == "buy_db_pre":
+    elif query.data == "dbpre":
         await query.message.edit_text(
             text=script.BUY_DB_PREMIUM.format(user=query.from_user.mention),
             parse_mode=enums.ParseMode.HTML
