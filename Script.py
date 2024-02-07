@@ -18,6 +18,8 @@ class script(object):
     ANIMEDB_TEXT = """Here are the details about the Anime Database premium plan:\n\n- Comprehensive anime database\n- Personalized recommendations"""
     
     SERIESDB_TEXT = """Here are the details about the TV Show Database premium plan:\n\n- Access to a wide range of TV shows\n- Latest episode updates"""
+
+    CONSTRUCTION = """This Feature under construction.\n\nAvailable soon..."""
     
     HELP_TXT = """<b>Hey {}
 Here Is The Help For My Commands.</b>"""
