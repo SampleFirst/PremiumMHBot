@@ -49,13 +49,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "plan":
         await query.answer(
-            text=script.CONSTRUCTION,
+            text=script.CONSTRUCTION.format(user=query.from_user.mention),
             show_alert=True
         )
 
     elif query.data == "status":
         await query.answer(
-            text=script.CONSTRUCTION,
+            text=script.CONSTRUCTION.format(user=query.from_user.mention),
             show_alert=True
         )
 
@@ -113,13 +113,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "botspack":
         await query.answer(
-            text=script.CONSTRUCTION,
+            text=script.CONSTRUCTION.format(user=query.from_user.mention),
             show_alert=True
         )
 
     elif query.data == "dbpack":
         await query.answer(
-            text=script.CONSTRUCTION,
+            text=script.CONSTRUCTION.format(user=query.from_user.mention),
             show_alert=True
         )
 
