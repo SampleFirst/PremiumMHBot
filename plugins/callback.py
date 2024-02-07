@@ -1,3 +1,4 @@
+# callback.py
 import random
 import logging
 
@@ -41,7 +42,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.START_TXT.format(user=query.from_user.mention, bot=temp.B_LINK),
+            text=script.START_TXT.format(user=query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
@@ -66,7 +67,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],
             [
                 InlineKeyboardButton('Rename Bot', callback_data='rbot'),
-                InlineKeyboardButton('YT Downloader', callback_data='yibot')
+                InlineKeyboardButton('YT Downloader', callback_data='dbot')
             ],
             [
                 InlineKeyboardButton('Back', callback_data='start')
@@ -91,8 +92,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton('Anime Database', callback_data='adb')
             ],
             [
-                InlineKeyboardButton('TV Show Database', callback_data='tvsdb'),
-                InlineKeyboardButton('Audio Books', callback_data='abdb')
+                InlineKeyboardButton('TV Show Database', callback_data='sdb'),
+                InlineKeyboardButton('Audio Books', callback_data='bdb')
             ],
             [
                 InlineKeyboardButton('Back', callback_data='start')
@@ -105,7 +106,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.DATABSE.format(user=query.from_user.mention),
+            text=script.DATABASE.format(user=query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
@@ -121,3 +122,66 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=script.CONSTRUCTION,
             show_alert=True
         )
+
+    elif query.data in ["mbot", "abot", "rbot", "dbot"]:
+        buttons = [
+            [
+                InlineKeyboardButton('Buy Bot Premium', callback_data='buy_bot_pre'),
+            ],
+            [
+                InlineKeyboardButton('Go Back', callback_data='bots'),
+            ],
+            [
+                InlineKeyboardButton('Cancel', callback_data='cancel')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.BOT_SELECTED.format(user=query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    
+    elif query.data in ["mdb", "adb", "sdb", "bdb"]:
+        buttons = [
+            [
+                InlineKeyboardButton('Buy Database Premium', callback_data='buy_db_pre'),
+            ],
+            [
+                InlineKeyboardButton('Go Back', callback_data='database'),
+            ],
+            [
+                InlineKeyboardButton('Cancel', callback_data='cancel')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.DB_SELECTED.format(user=query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    
+    elif query.data == "buy_bot_pre":
+        await query.message.edit_text(
+            text=script.BUY_BOT_PREMIUM.format(user=query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    
+    elif query.data == "buy_db_pre":
+        await query.message.edit_text(
+            text=script.BUY_DB_PREMIUM.format(user=query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+        
