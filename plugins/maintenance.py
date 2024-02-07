@@ -4,7 +4,7 @@ from info import ADMINS
 
 MAINTENANCE_MODE = False
 
-@Client.on_message(filters.command("maintenance") & filters.user(ADMINS))
+@Client.on_message(filters.command("mode") & filters.user(ADMINS))
 async def maintenance(client, message):
     keyboard = InlineKeyboardMarkup(
         [[
@@ -17,7 +17,7 @@ async def maintenance(client, message):
 
 
 @Client.on_callback_query(filters.regex(r'^set_mode') & filters.user(ADMINS))
-async def maintenance_toggle(client, callback_query):
+async def set_maintenance(client, callback_query):
     global MAINTENANCE_MODE
     MAINTENANCE_MODE = not MAINTENANCE_MODE
 
@@ -38,7 +38,7 @@ async def maintenance_mode(client, callback_query):
             show_alert=True
         )
 
-@Client.on_message(filters.text & (filters.command | filters.group | filters.private))
+@Client.on_message(filters.text & filters.command)
 async def maintenance_mode_handler(client, message):
     global MAINTENANCE_MODE
     user_id = message.from_user.id
