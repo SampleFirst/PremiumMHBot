@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 
-async def get_bot_name(query):
+async def get_bot_name(query.data):
     bot_name = None
     if query.data == "mbot":
         bot_name = "Movies Bot"
@@ -18,7 +18,7 @@ async def get_bot_name(query):
     return bot_name
 
 
-async def get_db_name(query):
+async def get_db_name(query.data):
     db_name = None
     if query.data == "mdb":
         db_name = "Movies Database"
