@@ -10,7 +10,7 @@ from database.users_chats_db import db
 
 from Script import script
 from utils import temp
-from plugins.get_datatime import get_datatime 
+from plugins.datatime import get_datatime 
 from plugins.expiry_date import get_expiry_date
 from plugins.get_name import get_bot_name, get_db_name
 
@@ -156,7 +156,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         db_name = await get_db_name(query.data):
         now_date = await get_datatime(1)
         now_time = await get_datatime(3)
-        expiry_date expiry_name = await get_expiry_date(1, None, today_to_30d, expiry_name):
+        expiry_date expiry_name = await get_expiry_date(1, now_date, today_to_30d, expiry_name):
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
