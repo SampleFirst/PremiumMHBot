@@ -2,7 +2,7 @@
 import pytz
 from datetime import datetime
 
-def get_datatime(format_type):
+def get_datetime(format_type):
     """
     Retrieves the current date and time in Kolkata timezone and formats it according to the specified format_type.
 
