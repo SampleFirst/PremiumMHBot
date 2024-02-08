@@ -1,7 +1,7 @@
 # expiry_date.py
 import pytz
 from datetime import datetime, timedelta
-from plugins.datetime import format_type
+from plugins.datetime import get_datatime
 import time
 
 
@@ -42,6 +42,8 @@ def get_expiry_date(format_type, base_datetime=None, expiry_option=None, expiry_
     IST = pytz.timezone('Asia/Kolkata')
     now = datetime.now(IST)
 
+    await get_datatime(format_type)
+    
     # ... (existing code to format datetime based on format_type)
 
     # Calculate expiry date/time based on expiry_option
