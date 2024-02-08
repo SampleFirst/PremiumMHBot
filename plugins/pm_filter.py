@@ -127,8 +127,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
-        bot_name = await get_bot_name(query.data)
-        
+        query = query.data
+        bot_name = await get_bot_name(query)
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
@@ -153,10 +153,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
-        db_name = get_db_name(query.data)
+        query = query.data
+        db_name = get_db_name(query)
         now_date = get_datetime(1)
         now_time = get_datetime(3)
-        base_datetime, expiry_datetime, expiry_name = get_expiry_date(1, expiry_option="today_to_30d")
+        base_datetime, expiry_datetime, expiry_name = get_expiry_date(format_type=1, expiry_option="today_to_10d")
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
