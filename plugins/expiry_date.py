@@ -1,7 +1,7 @@
 # expiry_date.py
 import pytz
 from datetime import datetime, timedelta
-from plugins.datatime import format_type
+from plugins.datetime import format_type
 import time
 
 
