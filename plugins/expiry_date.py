@@ -42,7 +42,7 @@ def get_expiry_date(format_type, base_datetime=None, expiry_option=None, expiry_
     IST = pytz.timezone('Asia/Kolkata')
     now = datetime.now(IST)
 
-    await get_datatime(format_type)
+    format_type = await get_datatime(format_type)
     
     # ... (existing code to format datetime based on format_type)
 
