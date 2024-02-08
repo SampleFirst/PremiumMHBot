@@ -175,8 +175,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             Today's Date: {now_date}
             Current Time: {now_time}
             Expiry Date: {expiry_datetime}
-            Expires on: {expiry_name}
-            """
+            Expires on: {expiry_name}"""
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
