@@ -5,7 +5,7 @@ from plugins.datetime import get_datetime
 import time
 
 
-def get_expiry_date(format_type, base_datetime=None, expiry_option=None, expiry_name=None):
+def get_expiry_date(format_type, base_datetime=None, expiry_option=None, expiry_name=""):
     """
     Retrieves the current date and time (or a specified base datetime) in Kolkata timezone
     and formats it according to the given format_type, along with calculating and formatting
