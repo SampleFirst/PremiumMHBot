@@ -156,7 +156,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         db_name = get_db_name(query.data)
         now_date = get_datetime(1)
         now_time = get_datetime(3)
-        expiry_date, expiry_name = get_expiry_date(1, "today_to_30d")
+        base_datetime, expiry_datetime, expiry_name = get_expiry_date(1, expiry_option="today_to_30d")
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
@@ -173,7 +173,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             Bot Name: {db_name}
             Today's Date: {now_date}
             Current Time: {now_time}
-            Expiry Date: {expiry_date}
+            Expiry Date: {expiry_datetime}
             Expires on: {expiry_name}
             """
         await client.edit_message_media(
