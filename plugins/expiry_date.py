@@ -112,7 +112,7 @@ def get_expiry_date(format_type, base_datetime=None, expiry_option=None, expiry_
             expiry_datetime = None
             expiry_name = None
 
-    return formatted_datetime, expiry_datetime, expiry_name
+    return format_type, expiry_datetime, expiry_name
 
 
 # Example usage:
