@@ -5,28 +5,28 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 
-async def get_bot_name(query_data):
+async def get_bot_name(query):
     bot_name = None
-    if query_data == "mbot":
+    if query == "mbot":
         bot_name = "Movies Bot"
-    elif query_data == "abot":
+    elif query == "abot":
         bot_name = "Anime Bot"
-    elif query_data == "rbot":
+    elif query == "rbot":
         bot_name = "Rename Bot"
-    elif query_data == "dbot":
+    elif query == "dbot":
         bot_name = "YouTube Downloader Bot"
     return bot_name
 
 
-async def get_db_name(query_data):
+async def get_db_name(query):
     db_name = None
-    if query_data == "mdb":
+    if query == "mdb":
         db_name = "Movies Database"
-    elif query_data == "adb":
+    elif query == "adb":
         db_name = "Anime Database"
-    elif query_data == "sdb":
+    elif query == "sdb":
         db_name = "TV Series Database"
-    elif query_data == "bdb":
+    elif query == "bdb":
         db_name = "Audio Book Database"
     return db_name
     
