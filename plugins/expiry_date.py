@@ -49,9 +49,24 @@ def get_expiry_date(format_type, base_datetime=None, expiry_option=None, expiry_
     # Calculate expiry date/time based on expiry_option
     if expiry_option:
         if expiry_option.startswith("now_to_"):
-            minutes = int(expiry_option.split("_")[2])
-            expiry_datetime = (now + timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
-            expiry_name = f"Next {minutes} minutes"
+            delta_minutes = int(expiry_option.split("_")[2])
+            expiry_datetime = (now + timedelta(minutes=delta_minutes)).strftime("%Y-%m-%d %H:%M:%S")
+            if delta_minutes == 5:
+                expiry_name = "Next 5 minutes"
+            elif delta_minutes == 10:
+                expiry_name = "Next 10 minutes"
+            elif delta_minutes == 15:
+                expiry_name = "Next 15 minutes"
+            elif delta_minutes == 20:
+                expiry_name = "Next 20 minutes"
+            elif delta_minutes == 30:
+                expiry_name = "Next 30 minutes"
+            elif delta_minutes == 45:
+                expiry_name = "Next 45 minutes"
+            elif delta_minutes == 60:
+                expiry_name = "Next 60 minutes"
+            else:
+                expiry_name = f"In {minutes} Minutes"
         elif expiry_option.startswith("today_to_"):
             delta_days = int(expiry_option.split("_")[2])
             expiry_datetime = (now + timedelta(days=delta_days)).strftime("%Y-%m-%d %H:%M:%S")
