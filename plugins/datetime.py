@@ -63,7 +63,7 @@ def get_datetime(format_type):
         raise ValueError("Invalid format_type. Please choose a number between 1 and 13.")
 
 # Example usage:
-print(get_datatime(1))  # Output: 8 February 2024
-print(get_datatime(3))  # Output: 03:57 AM
-print(get_datatime(6))  # Output: 03:57:10
-print(get_datatime(7))  # Output:
+print(get_datetime(1))  # Output: 8 February 2024
+print(get_datetime(3))  # Output: 03:57 AM
+print(get_datetime(6))  # Output: 03:57:10
+print(get_datetime(7))  # Output:
