@@ -153,10 +153,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
-        db_name = await get_db_name(query.data):
+        db_name = await get_db_name(query.data)
         now_date = await get_datatime(1)
         now_time = await get_datatime(3)
-        expiry_date expiry_name = await get_expiry_date(1, now_date, today_to_30d, expiry_name):
+        expiry_date expiry_name = await get_expiry_date(1, now_date, today_to_30d, expiry_name)
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
