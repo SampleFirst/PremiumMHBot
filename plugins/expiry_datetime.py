@@ -23,6 +23,25 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
     IST = pytz.timezone('Asia/Kolkata')
     now = datetime.now(IST) if not base_datetime else base_datetime
 
+    
+    expiry_options = [
+        {f"now_to_{i}m": i for i in range(1, 1440)},
+        {f"today_to_{i}d": i for i in range(1, 365)}
+    ]
+
+    # Calculate expiry date/time based on expiry_option
+    expiry_datetime = None
+    for option_dict in expiry_options:
+        if expiry_option in option_dict:
+            if expiry_option.startswith("now_to_"):
+                delta_minutes = option_dict[expiry_option]
+                expiry_datetime = now + timedelta(minutes=delta_minutes)
+            elif expiry_option.startswith("today_to_"):
+                delta_days = option_dict[expiry_option]
+                expiry_datetime = now + timedelta(days=delta_days)
+            break  # Break loop once option is found
+
+    
     if format_type == 1:
         return expiry_datetime.strftime("%d %B %Y")  # Day number, month text name, year number
     elif format_type == 2:
@@ -51,24 +70,6 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
         return expiry_datetime.isoformat()  # ISO 8601 date and time
     else:
         raise ValueError("Invalid format_type. Please choose a number between 1 and 13.")
-
-
-    expiry_options = [
-        {f"now_to_{i}m": i for i in range(1, 1440)},
-        {f"today_to_{i}d": i for i in range(1, 365)}
-    ]
-
-    # Calculate expiry date/time based on expiry_option
-    expiry_datetime = None
-    for option_dict in expiry_options:
-        if expiry_option in option_dict:
-            if expiry_option.startswith("now_to_"):
-                delta_minutes = option_dict[expiry_option]
-                expiry_datetime = now + timedelta(minutes=delta_minutes)
-            elif expiry_option.startswith("today_to_"):
-                delta_days = option_dict[expiry_option]
-                expiry_datetime = now + timedelta(days=delta_days)
-            break  # Break loop once option is found
 
     formatted_date = expiry_datetime.strftime(format_type) if expiry_datetime else None
     formatted_time = expiry_datetime.strftime(format_type) if expiry_datetime else None
