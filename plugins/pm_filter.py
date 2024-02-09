@@ -11,7 +11,7 @@ from database.users_chats_db import db
 from Script import script
 from utils import temp
 from plugins.datetime import get_datetime 
-from plugins.expiry_date import get_expiry_date
+from plugins.expiry_datetime import get_expiry_datetime
 from plugins.get_name import get_bot_name, get_db_name
 
 logger = logging.getLogger(__name__)
@@ -155,7 +155,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         db_name = get_db_name(query.data)
         now_date = get_datetime(1)
         now_time = get_datetime(3)
-        base_datetime, expiry_datetime, expiry_name = get_expiry_date(format_type=1, expiry_option="today_to_10d")
+        expiry_date = get_expiry_datetime(1)
+        expiry_time = get_expiry_datetime(3)
+        expiry_name = get_expiry_datetime(expiry_name)
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
@@ -172,7 +174,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             Bot Name: {db_name}
             Today's Date: {now_date}
             Current Time: {now_time}
-            Expiry Date: {expiry_datetime}
+            Expiry Date: {expiry_date}
+            Expiry Time: {expiry_time}
             Expires on: {expiry_name}
             """
         await client.edit_message_media(
