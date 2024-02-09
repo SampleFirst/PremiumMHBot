@@ -115,7 +115,7 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
 # Usage example (assuming get_datetime returns valid formats):
 expiry_date = get_expiry_datetime(1)
 expiry_time = get_expiry_datetime(3)
-expiry_name = get_expiry_datetime(expiry_option="today_to_30d")
+expiry_name = get_expiry_datetime(1, expiry_option="today_to_30d")
 
 print(f"Expiry date: {expiry_date}")
 print(f"Expiry time: {expiry_time}")
