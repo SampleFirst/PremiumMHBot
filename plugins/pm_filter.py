@@ -156,8 +156,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         db_name = get_db_name(query.data)
         now_date = get_datetime(1)
         now_time = get_datetime(3)
-        expiry_date = get_expiry_datetime(1, "today_to_30d")
-        expiry_time = get_expiry_datetime(3, "today_to_30d")
+        expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
+        _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
         expiry_name =  get_expiry_name("today_to_30d")
         
         buttons = [
