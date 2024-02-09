@@ -129,6 +129,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
         bot_name = get_bot_name(query.data)
+        now_date = get_datetime(1)
+        now_time = get_datetime(3)
+        expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
+        _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
+        expiry_name =  get_expiry_name("today_to_30d")
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
@@ -141,13 +146,21 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        caption = f"""*Hey {query.from_user.mention}, Good Choice!*
+            *Bot Name: {bot_name}*
+            *Today's Date: {now_date}*
+            *Current Time: {now_time}*
+            *Expiry Date: {expiry_date}*
+            *Expiry Time: {expiry_time}*
+            *Expires on: {expiry_name}*
+            """
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
             InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
-            text=script.BOT_SELECTED.format(user=query.from_user.mention),
+            text=caption,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
@@ -172,13 +185,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        caption = f"""Hey {query.from_user.mention}, Good Choice!
-            Bot Name: {db_name}
-            Today's Date: {now_date}
-            Current Time: {now_time}
-            Expiry Date: {expiry_date}
-            Expiry Time: {expiry_time}
-            Expires on: {expiry_name}
+        caption = f"""*Hey {query.from_user.mention}, Good Choice!*
+            *Db Name: {db_name}*
+            *Today's Date: {now_date}*
+            *Current Time: {now_time}*
+            *Expiry Date: {expiry_date}*
+            *Expiry Time: {expiry_time}*
+            *Expires on: {expiry_name}*
             """
         await client.edit_message_media(
             query.message.chat.id,
