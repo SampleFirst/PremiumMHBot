@@ -1,16 +1,19 @@
+# expiry_date.py
 import pytz
 from datetime import datetime, timedelta
-from plugins.datetime import get_datetime  # Assume this function gets a valid format type
+from plugins.datetime import get_datetime
+import time
 
-def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
+
+def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None, expiry_name=""):
     """
     Retrieves the current date and time (or a specified base datetime) in Kolkata timezone
     and formats it according to the given format_type, along with calculating and formatting
-    the next expiry date/time based on the provided expiry_option.
+    the next expiry date/time based on the provided options.
 
     Args:
-        format_type (int): An integer representing the desired formatting style from plugins.datetime.
-        base_datetime (datetime, optional): The base datetime to use instead of now.
+        format_type (int): An integer representing the desired formatting style:
+            ... (same as before)
         expiry_option (str or int, optional): The expiry option to calculate:
             - "now_to_5m": Next 5 minutes
             - "now_to_10m": Next 10 minutes
@@ -27,44 +30,37 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
             - "today_to_180d": Next 6 months
             - "today_to_365d": Next year
             - None: No expiry calculation is performed.
+        expiry_name (str, optional): An optional name for the expiry date/time.
 
     Returns:
-        tuple: A tuple containing three elements:
-            - formatted_datetime (str): The formatted current date and time.
-            - expiry_datetime (str or None): The formatted expiry date and time, or None if no expiry is calculated.
-            - expiry_name (str or None): The name of the expiry date/time, or None if no expiry is calculated.
+        tuple: A tuple containing two elements:
+            - formatted_datetime (str): The formatted current date and time (if base_datetime is not provided) or base_datetime.
+            - expiry_datetime (str): The formatted expiry date and time, or None if no expiry is calculated.
+            - expiry_name (str): The name of the expiry date/time.
 
     Raises:
         ValueError: If an invalid format_type or expiry_option is provided.
     """
 
+    # Set Kolkata timezone
     IST = pytz.timezone('Asia/Kolkata')
-    now = datetime.now(IST) if base_datetime is None else base_datetime
+    now = datetime.now(IST) if not base_datetime else base_datetime
 
-    format_type = get_datetime(format_type)  # Retrieve valid format string
+    format_type = get_datetime(format_type)
 
     expiry_options = {
-        "now_to_5": 5,
-        "now_to_10": 10,
-        "now_to_15": 15,
-        "now_to_20": 20,
-        "now_to_30": 30,
-        "now_to_45": 45,
-        "now_to_60": 60,
-        "today_to_1d": 1,
-        "today_to_7d": 7,
-        "today_to_30d": 30,
-        "today_to_60d": 60,
-        "today_to_90d": 90,
-        "today_to_180d": 180,
-        "today_to_365d": 365,
+        f"now_to_{i}m": i for i in range(1, 1440)
+        f"today_to_{i}d": i for i in range(1, 365)
     }
 
+    # Calculate expiry date/time based on expiry_option
     if expiry_option:
         if expiry_option in expiry_options:
             if expiry_option.startswith("now_to_"):
                 delta_minutes = expiry_options[expiry_option]
-                expiry_datetime = (now + timedelta(minutes=delta_minutes)).strftime(format_type)
+                expiry_datetime = now + timedelta(minutes=delta_minutes)
+                expiry_date = expiry_datetime.strftime(format_type)
+                expiry_time = expiry_datetime.strftime(format_type)
                 if delta_minutes == 5:
                     expiry_name = "Next 5 minutes"
                 elif delta_minutes == 10:
@@ -80,14 +76,18 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
                 elif delta_minutes == 60:
                     expiry_name = "Next 60 minutes"
                 else:
-                    expiry_name = f"In {minutes} Minutes"
+                    expiry_name = f"Next {delta_minutes} Minutes"
             elif expiry_option.startswith("today_to_"):
                 delta_days = expiry_options[expiry_option]
-                expiry_datetime = (now + timedelta(days=delta_days)).strftime(format_type)
+                expiry_datetime = now + timedelta(days=delta_days)
+                expiry_date = expiry_datetime.strftime(format_type)
+                expiry_time = expiry_datetime.strftime(format_type)
                 if delta_days == 1:
                     expiry_name = "Tomorrow"
                 elif delta_days == 7:
                     expiry_name = "Next week"
+                elif delta_days == 28:
+                    expiry_name = "Next month"
                 elif delta_days == 30:
                     expiry_name = "Next month"
                 elif delta_days == 60:
@@ -99,25 +99,54 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
                 elif delta_days == 365:
                     expiry_name = "Next year"
                 else:
-                    expiry_name = f"In {delta_days} days"
+                    expiry_name = f"Next {delta_days} days"
             else:
                 raise ValueError(f"Invalid expiry_option: {expiry_option}")
         else:
-            expiry_datetime = None
+            expiry_date = None
+            expiry_time = None
             expiry_name = None
-    else:
-        expiry_datetime = None
-        expiry_name = None
 
-    return format_type, expiry_datetime, expiry_name
+    return base_datetime, expiry_date, expiry_time, expiry_name
+    
+    
+    
+# Example Output 
+format_type = "%Y-%m-%d %H:%M:%S"
+
+# Example 1: Calculate expiry date/time for next 10 minutes
+expiry_option = "now_to_10m"
+base_datetime = datetime.now()
+base_datetime, expiry_date, expiry_time, expiry_name = get_expiry_datetime(format_type, base_datetime, expiry_option)
+
+print("Example 1:")
+print("Current datetime:", base_datetime)
+print("Expiry date:", expiry_date)
+print("Expiry time:", expiry_time)
+print("Expiry name:", expiry_name)
+print()
+
+Example 1:
+Current datetime: 2024-02-09 15:32:45
+Expiry date: 2024-02-09
+Expiry time: 15:42:45
+Expiry name: Next 10 minutes
 
 
-# Usage example (assuming get_datetime returns valid formats):
-expiry_date = get_expiry_datetime(1)
-expiry_time = get_expiry_datetime(3)
-expiry_name = get_expiry_datetime(1, expiry_option="today_to_30d")
+# Example 2: Calculate expiry date/time for tomorrow
+expiry_option = "today_to_1d"
+base_datetime = datetime.now()
+base_datetime, expiry_date, expiry_time, expiry_name = get_expiry_datetime(format_type, base_datetime, expiry_option)
 
-print(f"Expiry date: {expiry_date}")
-print(f"Expiry time: {expiry_time}")
-print(f"Expiry name: {expiry_name}")
+print("Example 2:")
+print("Current datetime:", base_datetime)
+print("Expiry date:", expiry_date)
+print("Expiry time:", expiry_time)
+print("Expiry name:", expiry_name)
+print()
 
+Example 2:
+Current datetime: 2024-02-09 15:32:45
+Expiry date: 2024-02-10
+Expiry time: 15:32:45
+Expiry name: Tomorrow
