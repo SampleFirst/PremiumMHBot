@@ -49,8 +49,8 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None, exp
     format_type = get_datetime(format_type)
 
     expiry_options = {
-        f"now_to_{i}m": i for i in range(1, 1440)
-        f"today_to_{i}d": i for i in range(1, 365)
+        {f"now_to_{i}m": i for i in range(1, 1440)},
+        {f"today_to_{i}d": i for i in range(1, 365)}
     }
 
     # Calculate expiry date/time based on expiry_option
