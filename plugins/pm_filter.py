@@ -157,7 +157,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         now_time = get_datetime(3)
         expiry_date = get_expiry_datetime(1)
         expiry_time = get_expiry_datetime(3)
-        expiry_name = get_expiry_datetime(expiry_name)
+        expiry_name = get_expiry_datetime(expiry_option="today_to_30d")
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
