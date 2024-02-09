@@ -55,45 +55,73 @@ def get_expiry_name(expiry_option):
 
     Args:
         expiry_option (str): The expiry option to get the name for.
+            - "now_to_5m": Next 5 minutes
+            - "now_to_10m": Next 10 minutes
+            - "now_to_15m": Next 15 minutes
+            - "now_to_20m": Next 20 minutes
+            - "now_to_30m": Next 30 minutes
+            - "now_to_45m": Next 45 minutes
+            - "now_to_60m": Next 60 minutes
+            - "today_to_1d": Tomorrow
+            - "today_to_7d": Next week
+            - "today_to_30d": Next month
+            - "today_to_60d": Next 2 months
+            - "today_to_90d": Next quarter
+            - "today_to_180d": Next 6 months
+            - "today_to_365d": Next year
+            - None: No expiry calculation is performed.
+        expiry_name (str, optional): An optional name for the expiry date/time.
 
     Returns:
         str: The name of the expiry date/time.
     """
-    if expiry_option.startswith("now_to_"):
-        delta_minutes = int(expiry_option.split("_")[2][:-1])
-        if delta_minutes == 5:
-            return "Next 5 minutes"
-        elif delta_minutes == 10:
-            return "Next 10 minutes"
-        elif delta_minutes == 15:
-            return "Next 15 minutes"
-        elif delta_minutes == 20:
-            return "Next 20 minutes"
-        elif delta_minutes == 30:
-            return "Next 30 minutes"
-        elif delta_minutes == 45:
-            return "Next 45 minutes"
-        elif delta_minutes == 60:
-            return "Next 60 minutes"
+    expiry_options = [
+        {f"now_to_{i}m": i for i in range(1, 1440)},
+        {f"today_to_{i}d": i for i in range(1, 365)}
+    ]
+
+    # Calculate expiry date/time based on expiry_option
+    if expiry_option:
+        if expiry_option in expiry_options:
+            if expiry_option.startswith("now_to_"):
+                delta_minutes = int(expiry_option.split("_")[2][:-1])
+                if delta_minutes == 5:
+                    return "Next 5 minutes"
+                elif delta_minutes == 10:
+                    return "Next 10 minutes"
+                elif delta_minutes == 15:
+                    return "Next 15 minutes"
+                elif delta_minutes == 20:
+                    return "Next 20 minutes"
+                elif delta_minutes == 30:
+                    return "Next 30 minutes"
+                elif delta_minutes == 45:
+                    return "Next 45 minutes"
+                elif delta_minutes == 60:
+                    return "Next 60 minutes"
+                else:
+                    return f"Next {delta_minutes} Minutes"
+            elif expiry_option.startswith("today_to_"):
+                delta_days = int(expiry_option.split("_")[2][:-1])
+                if delta_days == 1:
+                    return "Tomorrow"
+                elif delta_days == 7:
+                    return "Next week"
+                elif delta_days == 28 or delta_days == 30:
+                    return "Next month"
+                elif delta_days == 60:
+                    return "Next 2 months"
+                elif delta_days == 90:
+                    return "Next quarter"
+                elif delta_days == 180:
+                    return "Next 6 months"
+                elif delta_days == 365:
+                    return "Next year"
+                else:
+                    return f"Next {delta_days} days"
+            else:
+                raise ValueError(f"Invalid expiry_option: {expiry_option}")
         else:
-            return f"Next {delta_minutes} Minutes"
-    elif expiry_option.startswith("today_to_"):
-        delta_days = int(expiry_option.split("_")[2][:-1])
-        if delta_days == 1:
-            return "Tomorrow"
-        elif delta_days == 7:
-            return "Next week"
-        elif delta_days == 28 or delta_days == 30:
-            return "Next month"
-        elif delta_days == 60:
-            return "Next 2 months"
-        elif delta_days == 90:
-            return "Next quarter"
-        elif delta_days == 180:
-            return "Next 6 months"
-        elif delta_days == 365:
-            return "Next year"
-        else:
-            return f"Next {delta_days} days"
-    else:
-        return None
+            expiry_name = None
+    return expiry_name, expiry_option
+        
