@@ -36,7 +36,7 @@ def get_datetime(format_type):
     if format_type == 1:
         return now.strftime("%d %B %Y")  # Day number, month text name, year number
     elif format_type == 2:
-        return now.strftime("%d/%m/%Y")  # Day/month/year
+        return now.strftime("%d %B %Y" "%I:%M %p")
     elif format_type == 3:
         return now.strftime("%I:%M %p")  # Hour minute AM/PM
     elif format_type == 4:
