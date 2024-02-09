@@ -117,36 +117,27 @@ format_type = "%Y-%m-%d %H:%M:%S"
 # Example 1: Calculate expiry date/time for next 10 minutes
 expiry_option = "now_to_10m"
 base_datetime = datetime.now()
-base_datetime, expiry_date, expiry_time, expiry_name = get_expiry_datetime(format_type, base_datetime, expiry_option)
+base_datetime, base_date, base_time, expiry_date, expiry_time, expiry_name = get_expiry_datetime(format_type, base_datetime, expiry_option)
 
 print("Example 1:")
-print("Current datetime:", base_datetime)
+print("Base datetime:", base_datetime)
+print("Base date:", base_date)
+print("Base time:", base_time)
 print("Expiry date:", expiry_date)
 print("Expiry time:", expiry_time)
 print("Expiry name:", expiry_name)
 print()
 
-Example 1:
-Current datetime: 2024-02-09 15:32:45
-Expiry date: 2024-02-09
-Expiry time: 15:42:45
-Expiry name: Next 10 minutes
-
-
-# Example 2: Calculate expiry date/time for tomorrow
-expiry_option = "today_to_1d"
+# Example 2: Calculate expiry date/time for Next Month 
+expiry_option = "today_to_30d"
 base_datetime = datetime.now()
-base_datetime, expiry_date, expiry_time, expiry_name = get_expiry_datetime(format_type, base_datetime, expiry_option)
+base_datetime, base_date, base_time, expiry_date, expiry_time, expiry_name = get_expiry_datetime(format_type, base_datetime, expiry_option)
 
 print("Example 2:")
-print("Current datetime:", base_datetime)
+print("Base datetime:", base_datetime)
+print("Base date:", base_date)
+print("Base time:", base_time)
 print("Expiry date:", expiry_date)
 print("Expiry time:", expiry_time)
 print("Expiry name:", expiry_name)
 print()
-
-Example 2:
-Current datetime: 2024-02-09 15:32:45
-Expiry date: 2024-02-10
-Expiry time: 15:32:45
-Expiry name: Tomorrow
