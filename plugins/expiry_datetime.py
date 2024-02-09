@@ -43,8 +43,8 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
                 expiry_datetime = now + timedelta(days=delta_days)
             break  # Break loop once option is found
 
-    formatted_date = expiry_datetime.strftime("%Y-%m-%d") if expiry_datetime else None
-    formatted_time = expiry_datetime.strftime("%H:%M:%S") if expiry_datetime else None
+    formatted_date = expiry_datetime.strftime(format_type) if expiry_datetime else None
+    formatted_time = expiry_datetime.strftime(format_type) if expiry_datetime else None
 
     return formatted_date, formatted_time
 
