@@ -1,6 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
-from plugins.datetime import get_datatime  # Assume this function gets a valid format type
+from plugins.datetime import get_datetime  # Assume this function gets a valid format type
 
 def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
     """
