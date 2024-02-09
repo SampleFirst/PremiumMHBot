@@ -32,22 +32,21 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
     ]
 
     # Calculate expiry date/time based on expiry_option
-    if expiry_option:
-        if expiry_option in expiry_options:
+    expiry_datetime = None
+    for option_dict in expiry_options:
+        if expiry_option in option_dict:
             if expiry_option.startswith("now_to_"):
-                delta_minutes = expiry_options[expiry_option]
+                delta_minutes = option_dict[expiry_option]
                 expiry_datetime = now + timedelta(minutes=delta_minutes)
             elif expiry_option.startswith("today_to_"):
-                delta_days = expiry_options[expiry_option]
+                delta_days = option_dict[expiry_option]
                 expiry_datetime = now + timedelta(days=delta_days)
-            else:
-                raise ValueError(f"Invalid expiry_option: {expiry_option}")
-        else:
-            expiry_datetime = None
+            break  # Break loop once option is found
 
-    formatted_datetime = expiry_datetime.strftime(format_type) if expiry_datetime else None
-    return formatted_datetime, expiry_option
+    formatted_date = expiry_datetime.strftime("%Y-%m-%d") if expiry_datetime else None
+    formatted_time = expiry_datetime.strftime("%H:%M:%S") if expiry_datetime else None
 
+    return formatted_date, formatted_time
 
 def get_expiry_name(expiry_option):
     """
@@ -81,8 +80,9 @@ def get_expiry_name(expiry_option):
     ]
 
     # Calculate expiry date/time based on expiry_option
-    if expiry_option:
-        if expiry_option in expiry_options:
+    expiry_name = None
+    for option_dict in expiry_options:
+        if expiry_option in option_dict:
             if expiry_option.startswith("now_to_"):
                 delta_minutes = int(expiry_option.split("_")[2][:-1])
                 if delta_minutes == 5:
@@ -119,9 +119,6 @@ def get_expiry_name(expiry_option):
                     return "Next year"
                 else:
                     return f"Next {delta_days} days"
-            else:
-                raise ValueError(f"Invalid expiry_option: {expiry_option}")
-        else:
-            expiry_name = None
-    return expiry_name, expiry_option
-        
+            break  # Break loop once option is found
+    return expiry_name
+    
