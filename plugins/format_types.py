@@ -41,6 +41,3 @@ def format_types(obj, format_type):
     else:
         raise ValueError("Invalid format_type. Please choose a number between 1 and 13.")
 
-# Usage examples:
-now = datetime.datetime.now()
-print(format_types(now, 1))  # Example usage for formatting now datetime
