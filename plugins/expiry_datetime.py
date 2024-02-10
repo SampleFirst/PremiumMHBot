@@ -1,6 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
-from format_types import get_format
+from format_types import format_types
 
 def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
     """
@@ -42,12 +42,12 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
             break  # Break loop once option is found
 
     
-    format_type = get_format(expiry_datetime, format_type)
+    format_type = format_types(expiry_datetime, format_type)
 
-    formatted_date = expiry_datetime.strftime(format_type) if expiry_datetime else None
-    formatted_time = expiry_datetime.strftime(format_type) if expiry_datetime else None
+    expiry_date = expiry_datetime.strftime(format_type) if expiry_datetime else None
+    expiry_time = expiry_datetime.strftime(format_type) if expiry_datetime else None
 
-    return formatted_date, formatted_time
+    return expiry_date, expiry_time
 
 def get_expiry_name(expiry_option):
     """
