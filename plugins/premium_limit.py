@@ -8,8 +8,8 @@ from interval_functions import get_date_range
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-MONTHLY = False 
-BOT_NAME = False 
+MONTHLY = False
+BOT_NAME = False
 
 # Define quotas
 MONTHLY_TOTAL_COUNT = 1000
@@ -31,18 +31,12 @@ DAILY_SPECIFIC_COUNT = {
 
 MONTHLY_QUOTAS = {
     "total": MONTHLY_TOTAL_COUNT,
-    "Movies Bot": MONTHLY_SPECIFIC_COUNT["Movies Bot"],
-    "Anime Bot": MONTHLY_SPECIFIC_COUNT["Anime Bot"],
-    "Rename Bot": MONTHLY_SPECIFIC_COUNT["Rename Bot"],
-    "YT Downloader": MONTHLY_SPECIFIC_COUNT["YT Downloader"],
+    **{bot: MONTHLY_SPECIFIC_COUNT[bot] for bot in MONTHLY_SPECIFIC_COUNT},
 }
 
 DAILY_QUOTAS = {
     "total": DAILY_TOTAL_COUNT,
-    "Movies Bot": DAILY_SPECIFIC_COUNT["Movies Bot"],
-    "Anime Bot": DAILY_SPECIFIC_COUNT["Anime Bot"],
-    "Rename Bot": DAILY_SPECIFIC_COUNT["Rename Bot"],
-    "YT Downloader": DAILY_SPECIFIC_COUNT["YT Downloader"],
+    **{bot: DAILY_SPECIFIC_COUNT[bot] for bot in DAILY_SPECIFIC_COUNT},
 }
 
 # Function to check if monthly quota is reached
@@ -55,9 +49,9 @@ def is_monthly_quota_reached(interval='monthly', bot_name=None):
         )
     else:
         return (
-            db.total_active_premium_sorted('monthly', bot_name) >= MONTHLY_QUOTAS[bot_name]
-            or db.total_active_confirms_sorted('monthly', bot_name) >= MONTHLY_QUOTAS[bot_name]
-            or db.total_active_attempts_sorted('monthly', bot_name) >= MONTHLY_QUOTAS[bot_name]
+            db.total_active_premium_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
+            or db.total_active_confirms_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
+            or db.total_active_attempts_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
         )
 
 # Function to check if daily quota is reached
@@ -70,9 +64,9 @@ def is_daily_quota_reached(interval='daily', bot_name=None):
         )
     else:
         return (
-            db.total_active_premium_sorted('daily', bot_name) >= DAILY_QUOTAS[bot_name]
-            or db.total_active_confirms_sorted('daily', bot_name) >= DAILY_QUOTAS[bot_name]
-            or db.total_active_attempts_sorted('daily', bot_name) >= DAILY_QUOTAS[bot_name]
+            db.total_active_premium_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
+            or db.total_active_confirms_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
+            or db.total_active_attempts_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
         )
 
 # Function to send a quota-reached message
@@ -99,8 +93,8 @@ async def count_totals(interval='', bot_name=None):
     if MONTHLY:
         if BOT_NAME:
             return {
-                "premiums": db.total_active_premium_sorted('monthly', bot_name)
-                "confirms": db.total_active_confirms_sorted('monthly', bot_name)
+                "premiums": db.total_active_premium_sorted('monthly', bot_name),
+                "confirms": db.total_active_confirms_sorted('monthly', bot_name),
                 "attempts": db.total_active_attempts_sorted('monthly', bot_name)
             }
         else:
@@ -118,8 +112,9 @@ async def count_totals(interval='', bot_name=None):
             }
         else:
             return {
-                "premiums": db.total_active_premium_sorted('daily', bot_name)
-                "confirms": db.total_active_confirms_sorted('daily', bot_name)
+                "premiums": db.total_active_premium_sorted('daily', bot_name),
+                "confirms": db.total_active_confirms_sorted('daily', bot_name),
                 "attempts": db.total_active_attempts_sorted('daily', bot_name)
             }
+            
 
