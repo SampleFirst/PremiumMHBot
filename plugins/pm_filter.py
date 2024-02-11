@@ -140,40 +140,43 @@ async def cb_handler(client: Client, query: CallbackQuery):
         _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
         expiry_name =  get_expiry_name("today_to_30d")
         
-        # Check if an attempt is already active for the user with the same bot_name
-        if await db.is_attempt_active(user_id, bot_name):
-            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
+        if await get_user_limit(username, bot_name):
             return
         else:
-            # Add attempt to the database
-            await db.add_attempt(user_id, bot_name, now_date, expiry_date)
-            
-            USER_SELECTED[user_id] = bot_name
-            
-            buttons = [
-                [
-                    InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
-                ],
-                [
-                    InlineKeyboardButton('Go Back', callback_data='bots'),
-                ],
-                [
-                    InlineKeyboardButton('Cancel', callback_data='cancel')
+            # Check if an attempt is already active for the user with the same bot_name
+            if await db.is_attempt_active(user_id, bot_name):
+                await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
+                return
+            else:
+                # Add attempt to the database
+                await db.add_attempt(user_id, bot_name, now_date, expiry_date)
+                
+                USER_SELECTED[user_id] = bot_name
+                
+                buttons = [
+                    [
+                        InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
+                    ],
+                    [
+                        InlineKeyboardButton('Go Back', callback_data='bots'),
+                    ],
+                    [
+                        InlineKeyboardButton('Cancel', callback_data='cancel')
+                    ]
                 ]
-            ]
-            reply_markup = InlineKeyboardMarkup(buttons)
-            caption = f"""✦ Hey {user_name}, Best Choice!\n\n✦ Bot Name: {bot_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
-            await client.edit_message_media(
-                query.message.chat.id,
-                query.message.id,
-                InputMediaPhoto(random.choice(PICS))
-            )
-            await query.message.edit_text(
-                text=caption,
-                reply_markup=reply_markup,
-                parse_mode=enums.ParseMode.HTML
-            )
-            USER_STATS[user_id] = True
+                reply_markup = InlineKeyboardMarkup(buttons)
+                caption = f"""✦ Hey {user_name}, Best Choice!\n\n✦ Bot Name: {bot_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
+                await client.edit_message_media(
+                    query.message.chat.id,
+                    query.message.id,
+                    InputMediaPhoto(random.choice(PICS))
+                )
+                await query.message.edit_text(
+                    text=caption,
+                    reply_markup=reply_markup,
+                    parse_mode=enums.ParseMode.HTML
+                )
+                USER_STATS[user_id] = True
         
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         db_name = get_db_name(query.data)
