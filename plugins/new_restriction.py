@@ -27,8 +27,8 @@ allowed_entity_types = [
 ]
 
 
-@Client.on_message(filters.group & filters.text)
-async def restrict_entity(client: Client, message: types.Message):
+@Client.on_message(filters.group & filters.text & filters.incoming)
+async def restrict_entity(client, message):
     """
     Restricts links and logs deleted messages in a group.
 
