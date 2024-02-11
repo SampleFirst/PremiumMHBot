@@ -71,11 +71,32 @@ def is_daily_quota_reached(interval='daily', bot_name=None):
 
 # Function to send a quota-reached message
 async def send_quota_reached_message(user_name, bot_name=None):
-    message = (
-        f"Hi {user_name}, your monthly quota for {bot_name if BOT_NAME else 'all bots'} "
-        "has been reached. Please try again next month or contact admin."
-    )
-    await client.send_message(LOG_CHANNEL, message)
+    totals = await count_totals()
+    
+    if MONTHLY:  # Assuming MONTHLY is defined somewhere
+        message = (
+            f"Hey {user_name}, our monthly quota for {bot_name if BOT_NAME else 'All bots'} "
+            "has been reached. Please try again next month or contact admin."
+        )
+        log_message = (
+            f"Hey ADMINS, Our monthly quota for {bot_name if BOT_NAME else 'All bots'} "
+            "has been reached. And {user_name} trying to attempts Please try Reinfrm user."
+            f"\n🏅 Premiums: {totals['premiums']}\n🥈 Confirms: {totals['confirms']}\n🥇 Attempts: {totals['attempts']}"
+        )
+    else:
+        message = (
+            f"Hey {user_name}, our daily quota for {bot_name if BOT_NAME else 'all bots'} "
+            "has been reached. Please try again tomorrow or contact admin."
+        )
+        log_message = (
+            f"Hey ADMINS, Our daily quota for {bot_name if BOT_NAME else 'All bots'} "
+            "has been reached. And {user_name} trying to attempts Please try Reinfrm user."
+            f"\n🏅 Premiums: {totals['premiums']}\n🥈 Confirms: {totals['confirms']}\n🥇 Attempts: {totals['attempts']}"
+        )
+    
+    # Assuming client is defined somewhere and LOG_CHANNEL is defined as well
+    await client.send_message(LOG_CHANNEL, log_message)
+    await client.send_message(user_id, message)
 
 # Function to check user's limit (monthly or daily)
 async def get_user_limit(user_name, bot_name=None):
@@ -116,5 +137,4 @@ async def count_totals(interval='', bot_name=None):
                 "confirms": db.total_active_confirms_sorted('daily', bot_name),
                 "attempts": db.total_active_attempts_sorted('daily', bot_name)
             }
-            
 
