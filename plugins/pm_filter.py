@@ -14,6 +14,7 @@ from utils import temp
 from plugins.datetime import get_datetime 
 from plugins.expiry_datetime import get_expiry_datetime, get_expiry_name
 from plugins.get_name import get_bot_name, get_db_name
+from plugins.premium_limit import get_user_limit
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -140,7 +141,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
         expiry_name =  get_expiry_name("today_to_30d")
         
-        if await get_user_limit(username, bot_name):
+        if await get_user_limit(user_name, bot_name):
             return
         else:
             # Check if an attempt is already active for the user with the same bot_name
