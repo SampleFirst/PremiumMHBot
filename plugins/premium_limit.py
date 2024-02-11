@@ -83,12 +83,12 @@ async def send_quota_reached_message(user_name, bot_name=None):
     await client.send_message(LOG_CHANNEL, message)
 
 # Function to check user's limit (monthly or daily)
-async def get_user_limit(username, bot_name=None):
+async def get_user_limit(user_name, bot_name=None):
     if MONTHLY:
         if is_monthly_quota_reached(bot_name):
-            await send_quota_reached_message(username, bot_name)
+            await send_quota_reached_message(user_name, bot_name)
             return True
     else:
         if is_daily_quota_reached(bot_name):
-            await send_quota_reached_message(username, bot_name)
+            await send_quota_reached_message(user_name, bot_name)
             return True
