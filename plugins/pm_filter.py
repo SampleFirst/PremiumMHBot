@@ -18,7 +18,10 @@ from plugins.get_name import get_bot_name, get_db_name
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-         
+# Define a dictionary to store user states (locked or not)
+USER_STATS = {}
+USER_SELECTED = {}
+
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "cancel":
@@ -130,21 +133,22 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
         user_id = query.from_user.id
         user_name = query.from_user.username
-        bot_name = get_bot_name(query.data)
+        db_name = get_db_name(query.data)
         now_date = get_datetime(format_type=1)
         now_time = get_datetime(format_type=3)
         expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
         _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
         expiry_name =  get_expiry_name("today_to_30d")
-        attempt_validity = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
         
         # Check if an attempt is already active for the user with the same bot_name
         if await db.is_attempt_active(user_id, bot_name):
-            await query.answer(f"You already have an active request for {bot_name}.", show_alert=True)
+            await query.answer("You already have an active request for this bot.", show_alert=True)
             return
         else:
             # Add attempt to the database
-            await db.add_attempt(user_id, bot_name, attempt_validity)
+            await db.add_attempt(user_id, bot_name, now_date, expiry_date)
+            
+            USER_SELECTED[user_id] = bot_name
             
             buttons = [
                 [
@@ -169,6 +173,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML
             )
+            USER_STATS[user_id] = True
         
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         db_name = get_db_name(query.data)
