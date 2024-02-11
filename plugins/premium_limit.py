@@ -40,40 +40,40 @@ DAILY_QUOTAS = {
 }
 
 # Function to check if monthly quota is reached
-def is_monthly_quota_reached(interval='monthly', bot_name=None):
+async def is_monthly_quota_reached(interval='monthly', bot_name=None):
     if not BOT_NAME:
         return (
-            db.total_active_premium_sorted('monthly') >= MONTHLY_QUOTAS["total"]
-            or db.total_active_confirms_sorted('monthly') >= MONTHLY_QUOTAS["total"]
-            or db.total_active_attempts_sorted('monthly') >= MONTHLY_QUOTAS["total"]
+            await db.total_active_premium_sorted('monthly') >= MONTHLY_QUOTAS["total"]
+            or await db.total_active_confirms_sorted('monthly') >= MONTHLY_QUOTAS["total"]
+            or await db.total_active_attempts_sorted('monthly') >= MONTHLY_QUOTAS["total"]
         )
     else:
         return (
-            db.total_active_premium_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
-            or db.total_active_confirms_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
-            or db.total_active_attempts_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
+            await db.total_active_premium_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
+            or await db.total_active_confirms_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
+            or await db.total_active_attempts_sorted('monthly', bot_name) >= MONTHLY_QUOTAS.get(bot_name, 0)
         )
 
 # Function to check if daily quota is reached
-def is_daily_quota_reached(interval='daily', bot_name=None):
+async def is_daily_quota_reached(interval='daily', bot_name=None):
     if not BOT_NAME:
         return (
-            db.total_active_premium_sorted('daily') >= DAILY_QUOTAS["total"]
-            or db.total_active_confirms_sorted('daily') >= DAILY_QUOTAS["total"]
-            or db.total_active_attempts_sorted('daily') >= DAILY_QUOTAS["total"]
+            await db.total_active_premium_sorted('daily') >= DAILY_QUOTAS["total"]
+            or await db.total_active_confirms_sorted('daily') >= DAILY_QUOTAS["total"]
+            or await db.total_active_attempts_sorted('daily') >= DAILY_QUOTAS["total"]
         )
     else:
         return (
-            db.total_active_premium_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
-            or db.total_active_confirms_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
-            or db.total_active_attempts_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
+            await db.total_active_premium_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
+            or await db.total_active_confirms_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
+            or await db.total_active_attempts_sorted('daily', bot_name) >= DAILY_QUOTAS.get(bot_name, 0)
         )
 
 # Function to send a quota-reached message
 async def send_quota_reached_message(user_name, bot_name=None):
     totals = await count_totals()
     
-    if MONTHLY:  # Assuming MONTHLY is defined somewhere
+    if MONTHLY:  
         message = (
             f"Hey {user_name}, our monthly quota for {bot_name if BOT_NAME else 'All bots'} "
             "has been reached. Please try again next month or contact admin."
@@ -101,11 +101,11 @@ async def send_quota_reached_message(user_name, bot_name=None):
 # Function to check user's limit (monthly or daily)
 async def get_user_limit(user_name, bot_name=None):
     if MONTHLY:
-        if is_monthly_quota_reached(bot_name):
+        if await is_monthly_quota_reached(bot_name):
             await send_quota_reached_message(user_name, bot_name)
             return True
     else:
-        if is_daily_quota_reached(bot_name):
+        if await is_daily_quota_reached(bot_name):
             await send_quota_reached_message(user_name, bot_name)
             return True
 
@@ -114,27 +114,26 @@ async def count_totals(interval='', bot_name=None):
     if MONTHLY:
         if BOT_NAME:
             return {
-                "premiums": db.total_active_premium_sorted('monthly', bot_name),
-                "confirms": db.total_active_confirms_sorted('monthly', bot_name),
-                "attempts": db.total_active_attempts_sorted('monthly', bot_name)
+                "premiums": await db.total_active_premium_sorted('monthly', bot_name),
+                "confirms": await db.total_active_confirms_sorted('monthly', bot_name),
+                "attempts": await db.total_active_attempts_sorted('monthly', bot_name)
             }
         else:
             return {
-                "premiums": db.total_active_premium_sorted('monthly'),
-                "confirms": db.total_active_confirms_sorted('monthly'),
-                "attempts": db.total_active_attempts_sorted('monthly')
+                "premiums": await db.total_active_premium_sorted('monthly'),
+                "confirms": await db.total_active_confirms_sorted('monthly'),
+                "attempts": await db.total_active_attempts_sorted('monthly')
             }
     else:
         if BOT_NAME:
             return {
-                "premiums": db.total_active_premium_sorted('daily'),
-                "confirms": db.total_active_confirms_sorted('daily'),
-                "attempts": db.total_active_attempts_sorted('daily')
+                "premiums": await db.total_active_premium_sorted('daily'),
+                "confirms": await db.total_active_confirms_sorted('daily'),
+                "attempts": await db.total_active_attempts_sorted('daily')
             }
         else:
             return {
-                "premiums": db.total_active_premium_sorted('daily', bot_name),
-                "confirms": db.total_active_confirms_sorted('daily', bot_name),
-                "attempts": db.total_active_attempts_sorted('daily', bot_name)
+                "premiums": await db.total_active_premium_sorted('daily', bot_name),
+                "confirms": await db.total_active_confirms_sorted('daily', bot_name),
+                "attempts": await db.total_active_attempts_sorted('daily', bot_name)
             }
-
