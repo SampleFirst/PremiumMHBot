@@ -146,14 +146,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        caption = f"""*Hey {query.from_user.mention}, Good Choice!*
-            *Bot Name: {bot_name}*
-            *Today's Date: {now_date}*
-            *Current Time: {now_time}*
-            *Expiry Date: {expiry_date}*
-            *Expiry Time: {expiry_time}*
-            *Expires on: {expiry_name}*
-            """
+        caption = f"""✦ Hey {query.from_user.mention}, Best Choice!\n\n✦ Bot Name: {bot_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -172,7 +165,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
         _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
         expiry_name =  get_expiry_name("today_to_30d")
-        
         buttons = [
             [
                 InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
