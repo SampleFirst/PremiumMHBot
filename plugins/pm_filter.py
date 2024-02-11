@@ -142,7 +142,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         # Check if an attempt is already active for the user with the same bot_name
         if await db.is_attempt_active(user_id, bot_name):
-            await query.answer("You already have an active request for this bot.", show_alert=True)
+            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
             return
         else:
             # Add attempt to the database
