@@ -185,14 +185,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        caption = f"""*Hey {query.from_user.mention}, Good Choice!*
-            *Db Name: {db_name}*
-            *Today's Date: {now_date}*
-            *Current Time: {now_time}*
-            *Expiry Date: {expiry_date}*
-            *Expiry Time: {expiry_time}*
-            *Expires on: {expiry_name}*
-            """
+        reply_markup = InlineKeyboardMarkup(buttons)
+        caption = f"""✦ Hey {query.from_user.mention}, Best Choice!\n\n✦ Db Name: {db_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
