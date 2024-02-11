@@ -133,7 +133,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
         user_id = query.from_user.id
         user_name = query.from_user.username
-        db_name = get_db_name(query.data)
+        bot_name = get_bot_name(query.data)
         now_date = get_datetime(format_type=1)
         now_time = get_datetime(format_type=3)
         expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
