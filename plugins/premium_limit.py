@@ -7,12 +7,12 @@ from database.users_chats_db import db
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-MONTHLY = True
-BOT_NAME = True
+MONTHLY = False 
+BOT_NAME = False 
 
 # Define quotas
 MONTHLY_TOTAL_COUNT = 1000
-DAILY_TOTAL_COUNT = 50
+DAILY_TOTAL_COUNT = 4
 
 MONTHLY_SPECIFIC_COUNT = {
     "Movies Bot": 200,
@@ -22,10 +22,10 @@ MONTHLY_SPECIFIC_COUNT = {
 }
 
 DAILY_SPECIFIC_COUNT = {
-    "Movies Bot": 10,
-    "Anime Bot": 15,
-    "Rename Bot": 5,
-    "YT Downloader": 20,
+    "Movies Bot": 5,
+    "Anime Bot": 6,
+    "Rename Bot": 7,
+    "YT Downloader": 8,
 }
 
 MONTHLY_QUOTAS = {
