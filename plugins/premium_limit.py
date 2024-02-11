@@ -12,7 +12,7 @@ BOT_NAME = False
 
 # Define quotas
 MONTHLY_TOTAL_COUNT = 1000
-DAILY_TOTAL_COUNT = 4
+DAILY_TOTAL_COUNT = 1
 
 MONTHLY_SPECIFIC_COUNT = {
     "Movies Bot": 200,
@@ -22,10 +22,10 @@ MONTHLY_SPECIFIC_COUNT = {
 }
 
 DAILY_SPECIFIC_COUNT = {
-    "Movies Bot": 5,
-    "Anime Bot": 6,
-    "Rename Bot": 7,
-    "YT Downloader": 8,
+    "Movies Bot": 1,
+    "Anime Bot": 1,
+    "Rename Bot": 1,
+    "YT Downloader": 1,
 }
 
 MONTHLY_QUOTAS = {
