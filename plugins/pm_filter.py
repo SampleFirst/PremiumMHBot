@@ -140,6 +140,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
         _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
         expiry_name =  get_expiry_name("today_to_30d")
+        totals = await count_totals()
         
         if await get_user_limit(user_name, bot_name):
             return
@@ -167,6 +168,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 ]
                 reply_markup = InlineKeyboardMarkup(buttons)
                 caption = f"""✦ Hey {user_name}, Best Choice!\n\n✦ Bot Name: {bot_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
+                caption += f"""🏅 Premiums: {totals["premiums"]}\n🥈 Confirms: {totals["confirms"]}\n🥇 Attempts: {totals["attempts"]}"""
                 await client.edit_message_media(
                     query.message.chat.id,
                     query.message.id,
