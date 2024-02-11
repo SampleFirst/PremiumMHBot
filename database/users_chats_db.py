@@ -295,7 +295,7 @@ class Database:
         })
         return count
 
-    async def total_active_attempts_sorted(self, interval='daily', bot_name=None):
+    async def total_active_confirms_sorted(self, interval='daily', bot_name=None):
         start_date, end_date = await get_date_range(interval)
 
         # Define filter parameters based on bot_name if provided
@@ -445,7 +445,7 @@ class Database:
         cancel_stats = user.get('cancel_stats', {})
         return cancel_stats
         
-    async def total_attempts_sorted(self, interval='daily', bot_name=None):
+    async def total_cancel_sorted(self, interval='daily', bot_name=None):
         start_date, end_date = await get_date_range(interval)
 
         # Define filter parameters based on bot_name if provided
