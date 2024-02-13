@@ -27,7 +27,7 @@ VERIFIED_ONLY = True
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
-    if VERIFIED_ONLY
+    if VERIFIED_ONLY:
         try:
             chatIDx = message.chat.id
             lazy_chatIDx = await db.get_chat(int(chatIDx))
