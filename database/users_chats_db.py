@@ -129,22 +129,24 @@ class Database:
         })
         return count
         
-    async def daily_attempts_count(self, today):
+    async def daily_attempts_count(self, today, att_name=None):
         tz = pytz.timezone('Asia/Kolkata')
         start = tz.localize(datetime.combine(today, datetime.min.time()))
         end = tz.localize(datetime.combine(today, datetime.max.time()))
-        count = await self.att.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
+        query = {'timestamp': {'$gte': start, '$lt': end}}
+        if att_name:
+            query['att_name'] = att_name
+        count = await self.att.count_documents(query)
         return count
     
-    async def monthly_attempts_count(self, month, year):
+    async def monthly_attempts_count(self, month, year, att_name=None):
         tz = pytz.timezone('Asia/Kolkata')
         start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
         end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
-        count = await self.att.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
+        query = {'timestamp': {'$gte': start, '$lt': end}}
+        if att_name:
+            query['att_name'] = att_name
+        count = await self.att.count_documents(query)
         return count
         
     async def daily_confirms_count(self, today):
@@ -269,3 +271,4 @@ class Database:
 
 
 db = Database(DATABASE_URI, DATABASE_NAME)
+
