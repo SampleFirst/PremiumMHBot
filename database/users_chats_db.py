@@ -102,10 +102,28 @@ class Database:
         })
         return count
     
+    async def monthly_users_count(self, month, year):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
+        end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
+        count = await self.col.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+        
     async def daily_chats_count(self, today):
         tz = pytz.timezone('Asia/Kolkata')
         start = tz.localize(datetime.combine(today, datetime.min.time()))
         end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.grp.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+        
+    async def monthly_chats_count(self, month, year):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
+        end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
         count = await self.grp.count_documents({
             'timestamp': {'$gte': start, '$lt': end}
         })
@@ -120,6 +138,15 @@ class Database:
         })
         return count
     
+    async def monthly_attempts_count(self, month, year):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
+        end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
+        count = await self.att.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+        
     async def daily_confirms_count(self, today):
         tz = pytz.timezone('Asia/Kolkata')
         start = tz.localize(datetime.combine(today, datetime.min.time()))
@@ -129,10 +156,28 @@ class Database:
         })
         return count
         
+    async def monthly_confirms_count(self, month, year):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
+        end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
+        count = await self.con.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+        
     async def daily_premiums_count(self, today):
         tz = pytz.timezone('Asia/Kolkata')
         start = tz.localize(datetime.combine(today, datetime.min.time()))
         end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.pre.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+    
+    async def monthly_premiums_count(self, month, year):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
+        end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
         count = await self.pre.count_documents({
             'timestamp': {'$gte': start, '$lt': end}
         })
