@@ -1,4 +1,6 @@
 # users_chats_db.py
+import pytz
+from datetime import date, datetime
 import motor.motor_asyncio
 from info import DATABASE_NAME, DATABASE_URI
 
@@ -14,6 +16,7 @@ class Database:
         self.pre = self.db.premium
 
     def new_user(self, id, name):
+        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
         return dict(
             id=id,
             name=name,
@@ -21,9 +24,11 @@ class Database:
                 is_banned=False,
                 ban_reason="",
             ),
+            timestamp=datetime.now(tz)
         )
 
     def new_group(self, id, title):
+        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
         return dict(
             id=id,
             title=title,
@@ -31,9 +36,11 @@ class Database:
                 is_disabled=False,
                 reason="",
             ),
+            timestamp=datetime.now(tz)
         )
 
     def new_attempt(self, id, name, is_att, att_active, att_name, att_type, att_date, att_validity):
+        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
         return dict(
             id=id,
             name=name,
@@ -47,9 +54,11 @@ class Database:
                 is_cancel=False,
                 ban_reason="",
             ),
+            timestamp=datetime.now(tz)
         )
 
     def new_confirm(self, id, name, is_con, con_active, con_name, con_type, con_date, con_validity):
+        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
         return dict(
             id=id,
             name=name,
@@ -63,9 +72,11 @@ class Database:
                 is_cancel=False,
                 ban_reason="",
             ),
+            timestamp=datetime.now(tz)
         )
 
     def new_premium(self, id, name, is_pre, pre_active, pre_name, pre_type, pre_date, pre_validity):
+        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
         return dict(
             id=id,
             name=name,
@@ -79,7 +90,53 @@ class Database:
                 is_cancel=False,
                 ban_reason="",
             ),
+            timestamp=datetime.now(tz)
         )
+        
+    async def daily_users_count(self, today):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.col.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+    
+    async def daily_chats_count(self, today):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.grp.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+        
+    async def daily_attempts_count(self, today):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.att.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+    
+    async def daily_confirms_count(self, today):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.con.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
+        
+    async def daily_premiums_count(self, today):
+        tz = pytz.timezone('Asia/Kolkata')
+        start = tz.localize(datetime.combine(today, datetime.min.time()))
+        end = tz.localize(datetime.combine(today, datetime.max.time()))
+        count = await self.pre.count_documents({
+            'timestamp': {'$gte': start, '$lt': end}
+        })
+        return count
         
     async def add_user(self, id, name):
         user = self.new_user(id, name)
