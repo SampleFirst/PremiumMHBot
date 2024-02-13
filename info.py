@@ -88,6 +88,7 @@ FILE_CHANNEL = int(environ.get('FILE_CHANNEL', 0))
 PAYMENT_CHAT = int(environ.get('PAYMENT_CHAT', 0))
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', 0))
 LOG_CHANNEL_PM = int(environ.get('LOG_CHANNEL_PM', 0))
+GROUP_LOGS = int(environ.get('GROUP_LOGS', 0)) # Request Verification => S - 3
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'PremiumMHSupport')
 P_TTI_SHOW_OFF = is_enabled((environ.get('P_TTI_SHOW_OFF', "False")), False)
 IMDB = is_enabled((environ.get('IMDB', "True")), True)
