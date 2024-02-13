@@ -14,6 +14,8 @@ import asyncio
 import logging
 import os
 
+VERIFIED_ONLY = True 
+
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
     r_j_check = [u.id for u in message.new_chat_members]
@@ -33,36 +35,50 @@ async def save_group(bot, message):
    
 
         if message.chat.id in temp.BANNED_CHATS:
-            buttons = [
-                [InlineKeyboardButton('Support', url=f'https://t.me/{SUPPORT_CHAT}')]
-            ]
+            buttons = [[
+                InlineKeyboardButton('Support', url=f'https://t.me/{SUPPORT_CHAT}')
+            ]]
             reply_markup = InlineKeyboardMarkup(buttons)
             k = await message.reply(
-                text='<b>CHAT NOT ALLOWED 🐞\n\nMy admins have restricted me from working here! If you want to know more about it, contact support.</b>',
+                text='<b>CHAT NOT ALLOWED 🐞\n\nMy admins has restricted me from working here ! If you want to know more about it contact support..</b>',
                 reply_markup=reply_markup,
             )
-
             try:
                 await k.pin()
             except:
                 pass
             await bot.leave_chat(message.chat.id)
             return
-
-        buttons = [
-            [
-                InlineKeyboardButton('Support Group', url=GRP_LNK),
-                InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
-            ],
-            [
-                InlineKeyboardButton("⚡ How to Download ⚡", url="https://t.me/How_To_Verify_PMH/2")
+        
+        # GROUP ACTIONS IN CONTROL => Coded By YT@LazyDeveloperr with love ❣️
+        # Request Verification => S - 4
+        if VERIFIED_ONLY:
+            chatID = message.chat.id
+            chatTitle = message.chat.title
+            buttons = [
+                [
+                    InlineKeyboardButton('🎉 Mark Verified 💞', callback_data=f"verify_chats:{chatTitle}:{chatID}")
+                ],[
+                    InlineKeyboardButton('⚙ Ban Chat', callback_data=f"banchat:{chatTitle}:{chatID}")
+                ],[
+                    InlineKeyboardButton('🚮 Close', callback_data="close_data")
+                ]
             ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_text(
-            text=f"<b>Thank you for adding me to {message.chat.title}!\n\nIf you have any questions or doubts about using me, please check the '⚡ How to Download ⚡' button.</b>",
-            reply_markup=reply_markup
-        )
+            markup = InlineKeyboardMarkup(buttons)
+            await bot.send_message(GROUP_LOGS,
+                                   text=f"Hey babe.\n I am added forcefully to this group named **{chatTitle}** Please tell me if you like to restrict this group...",
+                                   reply_markup=markup)
+        else:
+            buttons = [[
+                InlineKeyboardButton('🤥 Help', url=f"https://t.me/{temp.U_NAME}?start=help"),
+                InlineKeyboardButton('🔔 Updates', url='https://t.me/')
+            ]]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await message.reply_text(
+                text=f"<b>Thank you For Adding Me In {message.chat.title} ❣️\n\nIf you have any questions & doubts about using me contact support.</b>",
+                reply_markup=reply_markup
+            )
+
     else:
         settings = await get_settings(message.chat.id)
         if settings["welcome"]:
