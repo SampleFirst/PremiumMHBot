@@ -135,51 +135,57 @@ async def cb_handler(client: Client, query: CallbackQuery):
         user_id = query.from_user.id
         user_name = query.from_user.username
         bot_name = get_bot_name(query.data)
+        type = "Bot"
         now_date = get_datetime(format_type=1)
         now_time = get_datetime(format_type=3)
         expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
         _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
-        expiry_name =  get_expiry_name("today_to_30d")
+        expiry_name = get_expiry_name("today_to_30d")
         totals = await count_totals()
-        
-        if await get_user_limit(user_name, bot_name):
+
+        # Check if an attempt is already active for the user with the same bot_name
+        if await db.is_attempt_active(user_id, bot_name, type):
+            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
             return
         else:
-            # Check if an attempt is already active for the user with the same bot_name
-            if await db.is_attempt_active(user_id, bot_name):
-                await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
-                return
-            else:
-                # Add attempt to the database
-                await db.add_attempt(user_id, bot_name, now_date, expiry_date)
-                
-                USER_SELECTED[user_id] = bot_name
-                
-                buttons = [
-                    [
-                        InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
-                    ],
-                    [
-                        InlineKeyboardButton('Go Back', callback_data='bots'),
-                    ],
-                    [
-                        InlineKeyboardButton('Cancel', callback_data='cancel')
-                    ]
+            # Add attempt to the database
+            await db.add_attempt(user_id, bot_name, type, now_date, expiry_date)
+
+            today = datetime.now().date()
+            month = datetime.now().month
+            year = datetime.now().year
+            
+            total_daily_attempt = await db.daily_attempts_count(today)
+            total_monthly_attempt = await db.monthly_attempts_count(month, year)
+            total_daily_bot_attempt = await db.daily_attempts_count(today, bot_name)
+            total_monthly_bot_attempt = await db.monthly_attempts_count(month, year, bot_name)
+
+            buttons = [
+                [
+                    InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
+                ],
+                [
+                    InlineKeyboardButton('Go Back', callback_data='bots'),
+                ],
+                [
+                    InlineKeyboardButton('Cancel', callback_data='cancel')
                 ]
-                reply_markup = InlineKeyboardMarkup(buttons)
-                caption = f"""✦ Hey {user_name}, Best Choice!\n\n✦ Bot Name: {bot_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
-                caption += f"""🏅 Premiums: {totals["premiums"]}\n🥈 Confirms: {totals["confirms"]}\n🥇 Attempts: {totals["attempts"]}"""
-                await client.edit_message_media(
-                    query.message.chat.id,
-                    query.message.id,
-                    InputMediaPhoto(random.choice(PICS))
-                )
-                await query.message.edit_text(
-                    text=caption,
-                    reply_markup=reply_markup,
-                    parse_mode=enums.ParseMode.HTML
-                )
-                USER_STATS[user_id] = True
+            ]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            caption = f"""✦ Hey {user_name}, Best Choice!\n\n✦ Bot Name: {bot_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
+            caption += f"""\n\n✦ Today Total Attempts: {total_daily_attempt}\n✦ Month Total Attempts: {total_monthly_attempt}\n✦ Total {bot_name} Daily Attempts: {total_daily_bot_attempt}\n✦ Total {bot_name} Monthly Attempts: {total_monthly_bot_attempt}"""
+            caption += f"""\n\n🏅 Premiums: {totals["premiums"]}\n🥈 Confirms: {totals["confirms"]}\n🥇 Attempts: {totals["attempts"]}"""
+            caption += f"""\n\nToday: {today}\nMonth: {month}\nYear: {year}"""
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
+            )
+            await query.message.edit_text(
+                text=caption,
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
         
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         db_name = get_db_name(query.data)
