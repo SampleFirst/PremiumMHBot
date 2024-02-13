@@ -1,63 +1,86 @@
 # users_chats_db.py
 import motor.motor_asyncio
 from info import DATABASE_NAME, DATABASE_URI
-from interval_functions import get_date_range
-
 
 class Database:
-
+    
     def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
         self.col = self.db.users
         self.grp = self.db.groups
+        self.att = self.db.attempt
+        self.con = self.db.confirm
+        self.pre = self.db.premium
 
     def new_user(self, id, name):
         return dict(
             id=id,
             name=name,
-            file_id=None,
-            bot_name=None,
             ban_status=dict(
                 is_banned=False,
                 ban_reason="",
             ),
-            attempt_status=dict(
-                is_attempt=False,
-                attempt_active=False,
-                attempt_date=None,
-                attempt_validity=None,
-            ),
-            confirm_status=dict(
-                is_confirm=False,
-                confirm_active=False,
-                confirm_date=None,
-                confirm_validity=None,
-            ),
-            premium_status=dict(
-                is_premium=False,
-                premium_active=False,
-                premium_date=None,
-                premium_validity=None,
-            ),
-            cancel_status=dict(
-                is_cancel=False,
-                cancel_date=None,
-            ),
         )
 
-    def new_group(self, id, title, username):
+    def new_group(self, id, title):
         return dict(
             id=id,
             title=title,
-            username=username,
             chat_status=dict(
                 is_disabled=False,
                 reason="",
             ),
         )
 
-    # All col related functions
+    def new_attempt(self, id, name, is_att, att_active, att_name, att_type, att_date, att_validity):
+        return dict(
+            id=id,
+            name=name,
+            is_att=is_att,
+            att_active=att_active,
+            att_name=att_name,
+            att_type=att_type,
+            att_date=att_date,
+            att_validity=att_validity,
+            cancel_status=dict(
+                is_cancel=False,
+                ban_reason="",
+            ),
+        )
+
+    def new_confirm(self, id, name, is_con, con_active, con_name, con_type, con_date, con_validity):
+        return dict(
+            id=id,
+            name=name,
+            is_con=is_con,
+            con_active=con_active,
+            con_name=con_name,
+            con_type=con_type,
+            con_date=con_date,
+            con_validity=con_validity,
+            cancel_status=dict(
+                is_cancel=False,
+                ban_reason="",
+            ),
+        )
+
+    def new_premium(self, id, name, is_pre, pre_active, pre_name, pre_type, pre_date, pre_validity):
+        return dict(
+            id=id,
+            name=name,
+            is_pre=is_pre,
+            pre_active=pre_active,
+            pre_name=pre_name,
+            pre_type=pre_type,
+            pre_date=pre_date,
+            pre_validity=pre_validity,
+            cancel_status=dict(
+                is_cancel=False,
+                ban_reason="",
+            ),
+        )
+        
     async def add_user(self, id, name):
         user = self.new_user(id, name)
         await self.col.insert_one(user)
@@ -69,422 +92,78 @@ class Database:
     async def total_users_count(self):
         count = await self.col.count_documents({})
         return count
-
-    async def remove_ban(self, id):
-        ban_status = dict(
-            is_banned=False,
-            ban_reason=''
-        )
-        await self.col.update_one({'id': id}, {'$set': {'ban_status': ban_status}})
-
-    async def ban_user(self, id, ban_reason="No Reason"):
-        ban_status = dict(
-            is_banned=True,
-            ban_reason=ban_reason
-        )
-        await self.col.update_one({'id': id}, {'$set': {'ban_status': ban_status}})
-
-    async def get_ban_status(self, id):
-        default = dict(
-            is_banned=False,
-            ban_reason=''
-        )
-        user = await self.col.find_one({'id': int(id)})
-        if not user:
-            return default
-        return user.get('ban_status', default)
-
+       
     async def get_all_users(self):
         return self.col.find({})
-
-    async def delete_user(self, id):
-        await self.col.delete_many({'id': int(id)})
-
-    async def get_banned(self):
-        users = self.col.find({'ban_status.is_banned': True})
-        chats = self.grp.find({'chat_status.is_disabled': True})
-        b_chats = [chat['id'] async for chat in chats]
-        b_users = [user['id'] async for user in users]
-        return b_users, b_chats
-
-    # All grp related functions
-    async def add_chat(self, chat, title, username):
-        new_group_data = self.new_group(chat, title, username)
-        await self.grp.insert_one(new_group_data)
-
-    async def get_chat(self, chat):
-        chat = await self.grp.find_one({'id': int(chat)})
-        return False if not chat else chat.get('chat_status')
-
-    async def re_enable_chat(self, id):
-        chat_status = dict(
-            is_disabled=False,
-            reason="",
-        )
-        await self.grp.update_one({'id': int(id)}, {'$set': {'chat_status': chat_status}})
-
-    async def disable_chat(self, chat, reason="No Reason"):
-        chat_status = dict(
-            is_disabled=True,
-            reason=reason,
-        )
-        await self.grp.update_one({'id': int(chat)}, {'$set': {'chat_status': chat_status}})
-
-    async def total_chat_count(self):
-        count = await self.grp.count_documents({})
-        return count
-
-    async def get_all_chats(self):
-        return self.grp.find({})
-
-    # New functions for attempt status
-    async def add_attempt(self, id, bot_name, attempt_date, attempt_validity):
-        attempt_status = dict(
-            is_attempt=True, 
-            attempt_active=True, 
-            bot_name=bot_name, 
-            attempt_date=attempt_date, 
-            attempt_validity=attempt_validity,
-        )
-        await self.col.update_one({"id": id}, {"$set": {"attempt_status": attempt_status}})
-
-    async def clear_attempt(self, id):
-        attempt_status = dict(attempt_active=False)
-        await self.col.update_one({"id": id}, {"$set": {"attempt_status": attempt_status}})
-
-    async def is_attempt_active(self, id, bot_name):
-        user = await self.col.find_one({"id": id, "attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
-        return bool(user)
-
-    async def get_user_attempts(self, id, bot_name=None):
-        if bot_name:
-            filter_params = {'id': id, 'bot_name': bot_name}
-        else:
-            filter_params = {'id': id}
-
-        attempts = await self.dot.count_documents(filter_params)
-        return attempts
-
-    async def get_latest_attempt(self, id):
-        latest_attempt = await self.dot.find_one(
-            {'id': id},
-            sort=[('attempt_date', -1)]  # Sort by attempt date in descending order
-        )
-        return latest_attempt
         
-    async def total_attempts(self, bot_name=None):
-        if bot_name:
-            count = await self.col.count_documents({"attempt_status.is_attempt": True, "attempt_status.bot_name": bot_name})
-        else:
-            count = await self.col.count_documents({"attempt_status.is_attempt": True})
-        return count
+    async def add_attempt(self, id, name, is_att, att_active, att_name, att_type, att_date, att_validity):
+        attempt = self.new_attempt(id, name, is_att, att_active, att_name, att_type, att_date, att_validity)
+        await self.att.insert_one(attempt)
 
-    async def total_active_attempts(self, bot_name=None):
-        if bot_name:
-            count = await self.col.count_documents({"attempt_status.attempt_active": True, "attempt_status.bot_name": bot_name})
-        else:
-            count = await self.col.count_documents({"attempt_status.attempt_active": True})
-        return count
+    async def is_attempt_active(self, id, att_name, att_type):
+        last_attempt = await self.att.find_one({'att_name': att_name, 'att_type': att_type}, sort=[('_id', -1)])
+        if last_attempt:
+            return last_attempt['att_active']
+        return None
 
-    async def get_user_attempt_stats(self, id):
-        user = await self.col.find_one({'id': int(id)})
-        if not user:
-            return None
-        attempt_stats = user.get('attempt_stats', {})
-        return attempt_stats
-        
-    async def total_attempts_sorted(self, interval='daily', bot_name=None):
-        start_date, end_date = await get_date_range(interval)
-
-        # Define filter parameters based on bot_name if provided
-        filter_params = {"attempt_status.is_attempt": True}
-        if bot_name:
-            filter_params["attempt_status.bot_name"] = bot_name
-
-        # Count documents within the specified date range
-        count = await self.col.count_documents({
-            "attempt_status.attempt_date": {"$gte": start_date, "$lt": end_date},
-            **filter_params
-        })
-        return count
-
-    async def total_active_attempts_sorted(self, interval='daily', bot_name=None):
-        start_date, end_date = await get_date_range(interval)
-
-        # Define filter parameters based on bot_name if provided
-        filter_params = {"attempt_status.attempt_active": True}
-        if bot_name:
-            filter_params["attempt_status.bot_name"] = bot_name
-
-        # Count documents within the specified date range
-        count = await self.col.count_documents({
-            "attempt_status.attempt_date": {"$gte": start_date, "$lt": end_date},
-            **filter_params
-        })
+    async def total_attempts_count(self, att_name=None, att_type=None):
+        query = {}
+        if att_name:
+            query['att_name'] = att_name
+        if att_type:
+            query['att_type'] = att_type
+        count = await self.att.count_documents(query)
         return count
         
-    # New functions for confirm status
-    async def add_confirm(self, id, bot_name, file_id, confirm_date, confirm_validity):
-        confirm_status = dict(
-            is_confirm=True,
-            confirm_active=True,
-            bot_name=bot_name,
-            file_id=file_id,
-            confirm_date=confirm_date,
-            confirm_validity=confirm_validity,
-        )
-        await self.col.update_one({"id": id}, {"$set": {"confirm_status": confirm_status}})
-
-    async def clear_confirm(self, id):
-        confirm_status = dict(confirm_active=False)
-        await self.col.update_one({"id": id}, {"$set": {"confirm_status": confirm_status}})
-
-    async def is_confirm_active(self, id, bot_name):
-        user = await self.col.find_one({"id": id, "confirm_status.confirm_active": True, "confirm_status.bot_name": bot_name})
-        return bool(user)
-
-    async def get_user_confirms(self, id, bot_name=None):
-        if bot_name:
-            filter_params = {'id': id, 'bot_name': bot_name}
-        else:
-            filter_params = {'id': id}
-
-        attempts = await self.col.count_documents(filter_params)
-        return attempts
-
-    async def get_latest_confirm(self, id):
-        latest_attempt = await self.col.find_one(
-            {'id': id},
-            sort=[('confirm_date', -1)]  
-        )
-        return latest_attempt
-
-    async def total_confirms(self, bot_name=None):
-        if bot_name:
-            count = await self.col.count_documents({"confirm_status.is_attempt": True, "confirm_status.bot_name": bot_name})
-        else:
-            count = await self.col.count_documents({"confirm_status.is_attempt": True})
-        return count
-
-    async def total_active_confirms(self, bot_name=None):
-        if bot_name:
-            count = await self.col.count_documents({"confirm_status.confirm_active": True, "confirm_status.bot_name": bot_name})
-        else:
-            count = await self.col.count_documents({"confirm_status.confirm_active": True})
-        return count
-    
-    async def get_user_confirm_stats(self, id):
-        user = await self.col.find_one({'id': int(id)})
-        if not user:
-            return None
-        confirm_stats = user.get('confirm_stats', {})
-        return confirm_stats
+    async def get_all_attempts(self):
+        return self.att.find({})
         
-    async def total_confirms_sorted(self, interval='daily', bot_name=None):
-        start_date, end_date = await get_date_range(interval)
+    async def add_confirm(self, id, name, is_con, con_active, con_name, con_type, con_date, con_validity):
+        confirm = self.new_confirm(id, name, is_con, con_active, con_name, con_type, con_date, con_validity)
+        await self.con.insert_one(confirm)
 
-        # Define filter parameters based on bot_name if provided
-        filter_params = {"confirm_status.is_attempt": True}
-        if bot_name:
-            filter_params["confirm_status.bot_name"] = bot_name
+    async def is_confirm_active(self, id, con_name, con_type):
+        last_confirm = await self.con.find_one({'con_name': con_name, 'con_type': con_type}, sort=[('_id', -1)])
+        if last_confirm:
+            return last_confirm['con_active']
+        return None
 
-        # Count documents within the specified date range
-        count = await self.col.count_documents({
-            "confirm_status.confirm_date": {"$gte": start_date, "$lt": end_date},
-            **filter_params
-        })
-        return count
-
-    async def total_active_confirms_sorted(self, interval='daily', bot_name=None):
-        start_date, end_date = await get_date_range(interval)
-
-        # Define filter parameters based on bot_name if provided
-        filter_params = {"confirm_status.confirm_active": True}
-        if bot_name:
-            filter_params["confirm_status.bot_name"] = bot_name
-
-        # Count documents within the specified date range
-        count = await self.col.count_documents({
-            "confirm_status.confirm_date": {"$gte": start_date, "$lt": end_date},
-            **filter_params
-        })
+    async def total_confirms_count(self, con_name=None, con_type=None):
+        query = {}
+        if con_name:
+            query['con_name'] = con_name
+        if con_type:
+            query['con_type'] = con_type
+        count = await self.con.count_documents(query)
         return count
         
-    # New functions for premium status
-    async def add_premium(self, id, bot_name, file_id, premium_date, premium_validity):
-        premium_status = dict(
-            is_premium=True,
-            premium_active=True,
-            bot_name=bot_name,
-            file_id=file_id,
-            premium_date=premium_date,
-            premium_validity=premium_validity,
-        )
-        await self.col.update_one({"id": id}, {"$set": {"premium_status": premium_status}})
-
-    async def clear_premium(self, id):
-        premium_status = dict(premium_active=False)
-        await self.col.update_one({"id": id}, {"$set": {"premium_status": premium_status}})
-
-    async def is_premium_active(self, id, bot_name):
-        user = await self.col.find_one({"id": id, "premium_status.premium_active": True, "premium_status.bot_name": bot_name})
-        return bool(user)
-
-    async def get_user_premiums(self, id, bot_name=None):
-        if bot_name:
-            filter_params = {'id': id, 'bot_name': bot_name}
-        else:
-            filter_params = {'id': id}
-
-        attempts = await self.col.count_documents(filter_params)
-        return attempts
-
-    async def get_latest_premium(self, id):
-        latest_attempt = await self.col.find_one(
-            {'id': id},
-            sort=[('premium_date', -1)]  
-        )
-        return latest_attempt
-
-    async def total_premium(self, bot_name=None):
-        if bot_name:
-            count = await self.col.count_documents({"premium_status.is_premium": True, "premium_status.bot_name": bot_name})
-        else:
-            count = await self.col.count_documents({"premium_status.is_premium": True})
-        return count
-
-    async def total_active_premium(self, bot_name=None):
-        if bot_name:
-            count = await self.col.count_documents({"premium_status.premium_active": True, "premium_status.bot_name": bot_name})
-        else:
-            count = await self.col.count_documents({"premium_status.premium_active": True})
-        return count
-    
-    async def get_user_premium_stats(self, id):
-        user = await self.col.find_one({'id': int(id)})
-        if not user:
-            return None
-        premium_stats = user.get('premium_status', {})
-        return premium_stats
+    async def get_all_confirms(self):
+        return self.con.find({})
         
-    async def total_premium_sorted(self, interval='daily', bot_name=None):
-        start_date, end_date = await get_date_range(interval)
+    async def add_premium(self, id, name, is_pre, pre_active, pre_name, pre_type, pre_date, pre_validity):
+        premium = self.new_premium(id, name, is_pre, pre_active, pre_name, pre_type, pre_date, pre_validity)
+        await self.pre.insert_one(premium)
 
-        # Define filter parameters based on bot_name if provided
-        filter_params = {"premium_status.is_premium": True}
-        if bot_name:
-            filter_params["premium_status.bot_name"] = bot_name
-
-        # Count documents within the specified date range
-        count = await self.col.count_documents({
-            "premium_status.premium_date": {"$gte": start_date, "$lt": end_date},
-            **filter_params
-        })
-        return count
-
-    async def total_active_premium_sorted(self, interval='daily', bot_name=None):
-        start_date, end_date = await get_date_range(interval)
-
-        # Define filter parameters based on bot_name if provided
-        filter_params = {"premium_status.premium_active": True}
-        if bot_name:
-            filter_params["premium_status.bot_name"] = bot_name
-
-        # Count documents within the specified date range
-        count = await self.col.count_documents({
-            "premium_status.premium_date": {"$gte": start_date, "$lt": end_date},
-            **filter_params
-        })
+    async def is_premium_active(self, id, pre_name, pre_type):
+        last_premium = await self.pre.find_one({'pre_name': pre_name, 'pre_type': pre_type}, sort=[('_id', -1)])
+        if last_premium:
+            return last_premium['pre_active']
+        return None
+        
+    async def total_premiums_count(self, pre_name=None, pre_type=None):
+        query = {}
+        if pre_name:
+            query['pre_name'] = pre_name
+        if pre_type:
+            query['pre_type'] = pre_type
+        count = await self.pre.count_documents(query)
         return count
         
-    # New functions for cancel status
-    async def add_cancel(self, id, bot_name, file_id, cancel_date):
-        cancel_status = dict(
-            is_cancel=True,
-            bot_name=bot_name,
-            file_id=file_id,
-            cancel_date=cancel_date,
-        )
-        await self.col.update_one({"id": id}, {"$set": {"cancel_status": cancel_status}})
-
-    async def clear_cancel(self, id):
-        cancel_status = dict(is_cancel=False)
-        await self.col.update_one({"id": id}, {"$set": {"cancel_status": cancel_status}})
-
-    async def is_cancel_active(self, id, bot_name):
-        user = await self.col.find_one({"id": id, "cancel_status.is_cancel": True, "cancel_status.bot_name": bot_name})
-        return bool(user)
-
-    async def get_user_cancel(self, id, bot_name=None):
-        if bot_name:
-            filter_params = {'id': id, 'bot_name': bot_name}
-        else:
-            filter_params = {'id': id}
-
-        cancels = await self.col.count_documents(filter_params)
-        return cancels
-
-    async def get_latest_cancel(self, id):
-        latest_cancel = await self.col.find_one(
-            {'id': id},
-            sort=[('cancel_date', -1)]  
-        )
-        return latest_cancel
-
-    async def total_cancel(self, bot_name=None):
-        if bot_name:
-            count = await self.col.count_documents({"cancel_status.is_cancel": True, "cancel_status.bot_name": bot_name})
-        else:
-            count = await self.col.count_documents({"cancel_status.is_cancel": True})
-        return count
-
-    async def get_user_cancel_stats(self, id):
-        user = await self.col.find_one({'id': int(id)})
-        if not user:
-            return None
-        cancel_stats = user.get('cancel_stats', {})
-        return cancel_stats
+    async def get_all_premiums(self):
+        return self.pre.find({})
         
-    async def total_cancel_sorted(self, interval='daily', bot_name=None):
-        start_date, end_date = await get_date_range(interval)
-
-        # Define filter parameters based on bot_name if provided
-        filter_params = {"cancel_status.is_cancel": True}
-        if bot_name:
-            filter_params["cancel_status.bot_name"] = bot_name
-
-        # Count documents within the specified date range
-        count = await self.col.count_documents({
-            "cancel_status.cancel_date": {"$gte": start_date, "$lt": end_date},
-            **filter_params
-        })
-        return count
-        
-    async def get_user_status(self, id):
-        user = await self.col.find_one({'id': int(id)})
-        if not user:
-            return None
-        return user
-
-    async def get_latest_user_update(self, id):
-        latest_update = await self.col.find_one(
-            {'id': int(id)},
-            sort=[('_id', -1)]  # Sort by ObjectId in descending order
-        )
-        return latest_update
-
-    async def set_maintenance_mode(self, mode):
-        await self.db.config.update_one({}, {'$set': {'maintenance_mode': mode}}, upsert=True)
-
-    async def get_maintenance_mode(self):
-        config = await self.db.config.find_one({})
-        if not config:
-            return False
-        return config.get('maintenance_mode', False)
-
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
-
 
 
 db = Database(DATABASE_URI, DATABASE_NAME)
