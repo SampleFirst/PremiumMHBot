@@ -1,6 +1,7 @@
 import os
 import requests
 from pyrogram import Client, filters, enums
+from info import ADMINS 
 
 # Set your token here
 GITHUB_TOKEN = "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"
@@ -11,9 +12,9 @@ headers = {
     "Authorization": f"Bearer {GITHUB_TOKEN}",
 }
 
+
 @Client.on_message(filters.command("github_repos") & filters.user(ADMINS))
 async def github_repository(client, message):
-    # Split the message text and check if there are enough elements
     # Check if the user is an admin
     if message.from_user.id in ADMINS:
         command_parts = message.text.split("/github_repos ", 1)
@@ -25,7 +26,7 @@ async def github_repository(client, message):
 
                 if response.status_code == 200:
                     data = response.json()
-                    if 
+                    if data:
                         repos_text = "**GitHub Repositories**\n\n"
                         for index, repo in enumerate(data, start=1):
                             repo_name = repo["full_name"]
@@ -64,5 +65,4 @@ async def github_repository(client, message):
             await client.send_message(message.chat.id, "Invalid usage. Provide a GitHub user ID after /github_repos command.")
     else:
         await client.send_message(message.chat.id, "This feature is only available for admins.")
-        
-        
+
