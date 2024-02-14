@@ -15,7 +15,6 @@ from utils import temp
 from plugins.datetime import get_datetime 
 from plugins.expiry_datetime import get_expiry_datetime, get_expiry_name
 from plugins.get_name import get_bot_name, get_db_name
-from plugins.premium_limit import get_user_limit, count_totals
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
