@@ -20,48 +20,58 @@ async def github_repository(client, message):
         command_parts = message.text.split("/github_repos ", 1)
         if len(command_parts) > 1:
             query = command_parts[1]
-            if query.isdigit():
-                url = f"https://api.github.com/users/{query}/repos?per_page=100&type=all"
-                response = requests.get(url, headers=headers)
+            url = f"https://api.github.com/users/{query}"
+            response = requests.get(url, headers=headers)
 
-                if response.status_code == 200:
-                    data = response.json()
-                    if data:
-                        repos_text = "**GitHub Repositories**\n\n"
-                        for index, repo in enumerate(data, start=1):
-                            repo_name = repo["full_name"]
-                            repo_url = repo["html_url"]
-                            description = repo.get("description", "No description available")
-                            private = repo.get("private", False)
-                            language = repo.get("language", "Not specified")
-                            license = repo.get("license", {}).get("spdx_id", "Not specified")
-                            forks = repo["forks_count"]
-                            size = repo["size"] / 1024  # Convert size to KB
-                            branches_url = f"{repo['html_url']}/branches"
-                            repo_status = "[Public]" if not private else "[Private]"
-                            repos_text += (
-                                f"{index}. **{repo_name}** {repo_status}\n"
-                                f"- Description: {description}\n"
-                                f"- Language: {language}\n"
-                                f"- License: {license}\n"
-                                f"- Forks: {forks}\n"
-                                f"- Size: {size:.2f} KB\n"
-                                f"- Branches: [{branches_url}]({branches_url})\n"
-                                f"---------------------------------\n"
+            if response.status_code == 200:
+                user_data = response.json()
+                if user_data.get("login"):
+                    user_login = user_data["login"]
+                    user_id = user_data["id"]
+                    url = f"https://api.github.com/users/{user_login}/repos?per_page=100&type=all"
+                    response = requests.get(url, headers=headers)
+
+                    if response.status_code == 200:
+                        data = response.json()
+                        if data:
+                            repos_text = f"**GitHub Repositories for {user_login}**\n\n"
+                            for index, repo in enumerate(data, start=1):
+                                repo_name = repo["full_name"]
+                                repo_url = repo["html_url"]
+                                description = repo.get("description", "No description available")
+                                private = repo.get("private", False)
+                                language = repo.get("language", "Not specified")
+                                license = repo.get("license", {}).get("spdx_id", "Not specified")
+                                forks = repo["forks_count"]
+                                size = repo["size"] / 1024  # Convert size to KB
+                                branches_url = f"{repo['html_url']}/branches"
+                                repo_status = "[Public]" if not private else "[Private]"
+                                repos_text += (
+                                    f"{index}. **{repo_name}** {repo_status}\n"
+                                    f"- Description: {description}\n"
+                                    f"- Language: {language}\n"
+                                    f"- License: {license}\n"
+                                    f"- Forks: {forks}\n"
+                                    f"- Size: {size:.2f} KB\n"
+                                    f"- Branches: [{branches_url}]({branches_url})\n"
+                                    f"---------------------------------\n"
+                                )
+                            await message.reply_text(
+                                repos_text,
+                                parse_mode=types.ParseMode.MARKDOWN,
+                                disable_web_page_preview=True
                             )
-                        await message.reply_text(
-                            repos_text,
-                            parse_mode=types.ParseMode.MARKDOWN,
-                            disable_web_page_preview=True
-                        )
+                        else:
+                            await message.reply_text("No repositories found for this user.")
                     else:
-                        await message.reply_text("No repositories found for this user.")
+                        await message.reply_text("An error occurred while fetching data.")
                 else:
-                    await message.reply_text("An error occurred while fetching data.")
+                    await message.reply_text("User not found on GitHub.")
             else:
-                await message.reply_text("Invalid usage. Provide a GitHub user ID after /github_repos command.")
+                await message.reply_text("An error occurred while fetching user data.")
         else:
-            await message.reply_text("Invalid usage. Provide a GitHub user ID after /github_repos command.")
+            await message.reply_text("Invalid usage. Provide a GitHub username or user ID after /github_repos command.")
     else:
         await message.reply_text("This feature is only available for admins.")
-
+        
+        
