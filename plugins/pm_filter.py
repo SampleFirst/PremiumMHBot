@@ -220,8 +220,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
         _, expiry_time = get_expiry_datetime(format_type=3, expiry_option="today_to_30d")
         expiry_name = get_expiry_name("today_to_30d")
-        totals = await count_totals()
-
+        
         # Check if an attempt is already active for the user with the same bot_name
         if await db.is_attempt_active(user_id, bot_name, type):
             await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
@@ -253,7 +252,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup = InlineKeyboardMarkup(buttons)
             caption = f"""✦ Hey {user_name}, Best Choice!\n\n✦ Bot Name: {bot_name}\n✦ Today's Date: {now_date}\n✦ Current Time: {now_time}\n✦ Expiry Date: {expiry_date}\n✦ Expiry Time: {expiry_time}\n✦ Expires on: {expiry_name}"""
             caption += f"""\n\n✦ Today Total Attempts: {total_daily_attempt}\n✦ Month Total Attempts: {total_monthly_attempt}\n✦ Total {bot_name} Daily Attempts: {total_daily_bot_attempt}\n✦ Total {bot_name} Monthly Attempts: {total_monthly_bot_attempt}"""
-            caption += f"""\n\n🏅 Premiums: {totals["premiums"]}\n🥈 Confirms: {totals["confirms"]}\n🥇 Attempts: {totals["attempts"]}"""
             caption += f"""\n\nToday: {today}\nMonth: {month}\nYear: {year}"""
             await client.edit_message_media(
                 query.message.chat.id,
