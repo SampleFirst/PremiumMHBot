@@ -270,8 +270,17 @@ class Database:
         count = await self.grp.count_documents({})
         return count
         
-    async def add_attempt(self, id, name, is_att, att_active, att_name, att_type, att_date, att_validity):
-        attempt = self.new_attempt(id, name, is_att, att_active, att_name, att_type, att_date, att_validity)
+    async def add_attempt(self, id, name, att_name, att_type, att_date, att_validity):
+        attempt = self.new_attempt(
+            id=id, 
+            name=name,
+            is_att=True,
+            att_active=True,
+            att_name=att_name, 
+            att_type=att_type, 
+            att_date=att_date,
+            att_validity=att_validity,
+        )
         await self.att.insert_one(attempt)
 
     async def is_attempt_active(self, id, att_name, att_type):
