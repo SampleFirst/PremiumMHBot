@@ -47,6 +47,8 @@ async def restrict_entity(client, message):
     for entity in message.entities:
         if entity.type in allowed_entity_types:  # Use a defined list
             deleted_entities.append(entity.type)  # Track deleted entities
+        else:
+            return  # Skip processing if message contains entities not in allowed_entity_types
 
     if deleted_entities:
         # Construct formatted log message with specific information
@@ -67,4 +69,3 @@ async def restrict_entity(client, message):
             await client.send_message(LOG_CHANNEL, log_message)
         except Exception as e:
             logging.error(f"Error deleting message: {e}")
-            
