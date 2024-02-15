@@ -1,8 +1,8 @@
 import asyncio
-from pyrogram import Client, filters, enums
-from info import ADMINS, LOG_CHANNEL  
 import logging
-from pyrogram.enums import MessageEntityType
+from pyrogram import Client, filters, enums
+from pyrogram.types import MessageEntityType
+from info import ADMINS, LOG_CHANNEL
 
 # Define allowed entity types (adjust as needed)
 allowed_entity_types = [
@@ -30,7 +30,7 @@ allowed_entity_types = [
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def restrict_entity(client, message):
     """
-    Restricts links and logs deleted messages in a group.
+    Restricts links and logs deleted messages in a group, including additional information.
 
     Args:
         client: The Pyrogram client instance.
@@ -45,23 +45,27 @@ async def restrict_entity(client, message):
 
     deleted_entities = []
     for entity in message.entities:
-        if entity.type in allowed_entity_types:  # Use a defined list
-            deleted_entities.append(entity.type)  # Track deleted entities
+        if entity.type not in allowed_entity_types:
+            deleted_entities.append(entity)  # Track deleted entities
 
     if deleted_entities:
-        # Construct formatted log message with specific entity types
-        log_message = f"Deleted message from chat {message.chat.title} (ID: {message.chat.id}) containing:"
-        for entity_type in deleted_entities:
-            log_message += f" '{entity_type}'"
+        # Construct formatted log message with specific information
+        log_message = (
+            f"🗑 #message_delete \n\n"
+            f"● Chat title: {message.chat.title}\n"
+            f"● Chat id: #{message.chat.id}\n\n"
+            f"● User id: #{message.from_user.id},\n"
+            f"● User name: @{message.from_user.username}\n\n"
+        )
+        for entity in deleted_entities:
+            log_message += f"● Entity type: {entity.type}\n\n"
+
+        log_message += f"● Message text: {message.text}"
 
         try:
             # Delete the message, handling potential exceptions
             await message.delete()
-            await client.send_message(
-                LOG_CHANNEL,
-                log_message + f"\nThis message sent by {message.from_user.username}: \"{message.text}\"",
-            )
+            await client.send_message(LOG_CHANNEL, log_message)
         except Exception as e:
             logging.error(f"Error deleting message: {e}")
-
 
