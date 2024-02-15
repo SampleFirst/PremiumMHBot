@@ -214,7 +214,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         user_id = query.from_user.id
         user_name = query.from_user.username
         bot_name = get_bot_name(query.data)
-        type = "Bot"
+        attempt_type = "Bot"
         now_date = get_datetime(format_type=1)
         now_time = get_datetime(format_type=3)
         expiry_date, _ = get_expiry_datetime(format_type=1, expiry_option="today_to_30d")
@@ -222,12 +222,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         expiry_name = get_expiry_name("today_to_30d")
         
         # Check if an attempt is already active for the user with the same bot_name
-        if await db.is_attempt_active(user_id, bot_name, type):
+        if await db.is_attempt_active(user_id, bot_name, attempt_type):
             await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
             return
         else:
             # Add attempt to the database
-            await db.add_attempt(user_id, bot_name, type, now_date, expiry_date)
+            await db.add_attempt(user_id, user_name, bot_name, attempt_type, now_date, expiry_date)
 
             today = datetime.now().date()
             month = datetime.now().month
