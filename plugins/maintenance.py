@@ -44,7 +44,7 @@ async def maintenance_mode_info(client, callback_query):
         show_alert=True
     )
 
-@Client.on_message(filters.chat & filters.command & filters.group)
-async def handle_user_messages(client, message):
+@Client.on_message(filters.group & filters.command)
+async def handle_maintenance(client, message):
     if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
         await message.reply_text("Sorry, the bot is currently under maintenance. Please try again later.")
