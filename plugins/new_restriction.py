@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from pyrogram import Client, filters, enums
-from pyrogram.types import MessageEntityType
+from pyrogram.enums import MessageEntityType
 from info import ADMINS, LOG_CHANNEL
 
 # Define allowed entity types (adjust as needed)
