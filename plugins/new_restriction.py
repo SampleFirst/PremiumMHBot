@@ -36,6 +36,8 @@ async def restrict_entity(client, message):
         client: The Pyrogram client instance.
         message: The incoming message object.
     """
+    if message.entities is None:
+        return  # Skip processing if there are no entities
 
     if message.from_user.id in ADMINS or message.from_user.status in (
         enums.ChatMemberStatus.ADMINISTRATOR,
@@ -53,15 +55,15 @@ async def restrict_entity(client, message):
     if deleted_entities:
         # Construct formatted log message with specific information
         log_message = (
-            f"🗑 #message_delete\n\n"
-            f"● Chat title: @{message.chat.username}\n"
-            f"● Chat id: <code>{message.chat.id}</code>\n\n"
-            f"● User id: <code>{message.from_user.id}</code>\n"
-            f"● User name: @{message.from_user.username}\n\n"
-            f"● Message text: {message.text}"
+            f"#message_delete 🗑\n\n"
+            f"● C-id: <code>{message.chat.id}</code>\n"
+            f"● Chat: @{message.chat.username}\n\n"
+            f"● U-id: <code>{message.from_user.id}</code>\n"
+            f"● User: @{message.from_user.username}\n\n"
+            f"● Text: {message.text}"
         )
         for entity_type in deleted_entities:
-            log_message += f"\n\n● Entity type: {entity_type}"
+            log_message += f"\n\n● E-Type: {entity_type}"
 
         try:
             # Delete the message, handling potential exceptions
@@ -69,3 +71,4 @@ async def restrict_entity(client, message):
             await client.send_message(LOG_CHANNEL, log_message)
         except Exception as e:
             logging.error(f"Error deleting message: {e}")
+            
