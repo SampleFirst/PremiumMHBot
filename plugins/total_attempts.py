@@ -40,7 +40,7 @@ async def daily_attempts_count(client, message):
         today = datetime.now().date()
         for name in bot_names:
             daily_count = await db.daily_attempts_count(today, att_name=name)
-            response += f"Daily attempts for {name}: {daily_count}\n"
+            response += f"Today Date: {today}\nDaily attempts for {name}: {daily_count}\n"
         for name in db_names:
             daily_count = await db.daily_attempts_count(today, att_name=name)
             response += f"Daily attempts for {name}: {daily_count}\n"
