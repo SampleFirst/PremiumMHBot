@@ -45,8 +45,8 @@ async def restrict_entity(client, message):
 
     deleted_entities = []
     for entity in message.entities:
-        if entity.type not in allowed_entity_types:
-            deleted_entities.append(entity)  # Track deleted entities
+        if entity.type in allowed_entity_types:  # Use a defined list
+            deleted_entities.append(entity.type)  # Track deleted entities
 
     if deleted_entities:
         # Construct formatted log message with specific information
@@ -57,7 +57,7 @@ async def restrict_entity(client, message):
             f"● User id: #{message.from_user.id},\n"
             f"● User name: @{message.from_user.username}\n\n"
         )
-        for entity in deleted_entities:
+        for entity_type in deleted_entities:
             log_message += f"● Entity type: {entity.type}\n\n"
 
         log_message += f"● Message text: {message.text}"
