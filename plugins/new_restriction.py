@@ -39,11 +39,17 @@ async def restrict_entity(client, message):
     if message.entities is None:
         return  # Skip processing if there are no entities
 
-    if message.from_user.id in ADMINS or message.from_user.status in (
-        enums.ChatMemberStatus.ADMINISTRATOR,
-        enums.ChatMemberStatus.OWNER,
+    grp_id = message.chat.id
+    title = message.chat.title
+    user_id = message.from_user.id
+
+    st = await client.get_chat_member(grp_id, userid)
+    if (
+        st.status != enums.ChatMemberStatus.ADMINISTRATOR
+        and st.status != enums.ChatMemberStatus.OWNER
+        and str(userid) not in ADMINS
     ):
-        return  # Skip processing for admins or owners
+    return  # Skip processing for admins or owners
 
     deleted_entities = []
     for entity in message.entities:
@@ -56,9 +62,10 @@ async def restrict_entity(client, message):
         # Construct formatted log message with specific information
         log_message = (
             f"#message_delete 🗑\n\n"
-            f"● Chat id: <code>{message.chat.id}</code>\n"
-            f"● Chat: @{message.chat.username}\n\n"
-            f"● User id: <code>{message.from_user.id}</code>\n"
+            f"● Chat id: <code>{grp_id}</code>\n"
+            f"● Chat: @{message.chat.username}\n"
+            f"● Chat title: {title}\n\n"
+            f"● User id: <code>{user_id}</code>\n"
             f"● User: @{message.from_user.username}\n\n"
             f"● Text: {message.text}"
         )
