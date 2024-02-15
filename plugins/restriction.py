@@ -1,158 +1,84 @@
+# restriction.py
+
 import asyncio
-import time
+import logging
 from pyrogram import Client, filters, enums
+from pyrogram.enums import MessageEntityType
 from info import ADMINS, LOG_CHANNEL
-from datetime import datetime as date
 
-BANNED_WORDS = ["join", "bio", "spam"]
+# Define allowed entity types (adjust as needed)
+allowed_entity_types = [
+    MessageEntityType.MENTION,
+    MessageEntityType.HASHTAG,
+    MessageEntityType.CASHTAG,
+    MessageEntityType.BOT_COMMAND,
+    MessageEntityType.URL,
+    MessageEntityType.EMAIL,
+    MessageEntityType.PHONE_NUMBER,
+    MessageEntityType.BOLD,
+    MessageEntityType.ITALIC,
+    MessageEntityType.UNDERLINE,
+    MessageEntityType.STRIKETHROUGH,
+    MessageEntityType.SPOILER,
+    MessageEntityType.CODE,
+    MessageEntityType.PRE,
+    MessageEntityType.BLOCKQUOTE,
+    MessageEntityType.TEXT_LINK,
+    MessageEntityType.TEXT_MENTION,
+    MessageEntityType.CUSTOM_EMOJI,
+]
 
-user_violat = {}
 
-@Client.on_message(filters.group & filters.text & filters.regex(r"https?://[^\s]+"))
-async def restrict_links(client, message):
-    if message.from_user.id in ADMINS or message.from_user.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):
-        return
+@Client.on_message(filters.group & filters.text & filters.incoming)
+async def restrict_entity(client, message):
+    """
+    Restricts links and logs deleted messages in a group, including additional information.
+
+    Args:
+        client: The Pyrogram client instance.
+        message: The incoming message object.
+    """
+    if message.entities is None:
+        return  # Skip processing if there are no entities
+
+    grp_id = message.chat.id
+    title = message.chat.title
+    user_id = message.from_user.id
+
+    st = await client.get_chat_member(grp_id, userid)
+    if (
+        st.status != enums.ChatMemberStatus.ADMINISTRATOR
+        and st.status != enums.ChatMemberStatus.OWNER
+        and str(userid) not in ADMINS
+    ):
+        return  # Skip processing for admins or owners
         
-    link = message.text
-    username = message.from_user.username
-    datetime = date.now().strftime("%Y-%m-%d %H:%M:%S")  # Fixed date formatting
-
-    try:
-        user_id = message.from_user.id
-        if user_id not in user_violat:
-            user_violat[user_id] = 1
-            ban_duration = 1 * 3600  # Ban for 1 hour
+    deleted_entities = []
+    for entity in message.entities:
+        if entity.type in allowed_entity_types:  # Use a defined list
+            deleted_entities.append(entity.type)  # Track deleted entities
         else:
-            user_violat[user_id] += 1
-            if user_violat[user_id] == 2:
-                ban_duration = 6 * 3600  # Ban for 6 hours
-            elif user_violat[user_id] >= 3:  # Fixed syntax error in this line
-                ban_duration = 0  # Permanent ban
+            return  # Skip processing if message contains entities not in allowed_entity_types
 
-        await message.delete()
-        if ban_duration > 0:
-            await message.reply_text(f"Sending third-party links is not allowed in this group. You are banned for {ban_duration} hours.")
-            await client.restrict_chat_member(
-                chat_id=message.chat.id,
-                user_id=message.from_user.id,
-                ban_duration=ban_duration  # Fixed parameter name
-            )
-        else:
-            await message.reply_text("Sending third-party links is not allowed in this group. You are permanently banned.")
-            await client.ban_chat_member(
-                chat_id=message.chat.id,
-                user_id=message.from_user.id
-            )
-
-        await client.send_message(
-            LOG_CHANNEL,
-            f"**Third-party link detected:**\n"
-            f"Link: {link}\n"
-            f"User: @{username}\n"
-            f"Ban Count: {ban_duration}\n"
-            f"Date and Time: {datetime}",
+    if deleted_entities:
+        # Construct formatted log message with specific information
+        log_message = (
+            f"#message_delete 🗑\n\n"
+            f"● Chat id: <code>{grp_id}</code>\n"
+            f"● Chat: @{message.chat.username}\n"
+            f"● Chat title: {title}\n\n"
+            f"● User id: <code>{user_id}</code>\n"
+            f"● User: @{message.from_user.username}\n\n"
+            f"● Text: {message.text}"
         )
+        for entity_type in deleted_entities:
+            log_message += f"\n\n● Entity Type: {entity_type}"
 
-    except Exception as e:
-        print(f"Error restricting link: {e}")
-
-
-@Client.on_message(filters.group & filters.text & filters.incoming)
-async def restrict_username_links(client, message):
-    if message.from_user.id in ADMINS or message.from_user.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):
-        return
-        
-    text = message.text
-    username = message.from_user.username
-    datetime = date.now().strftime("%Y-%m-%d %H:%M:%S")  # Fixed date formatting
-
-    if "@" in text or "t.me/" in text:
         try:
-            user_id = message.from_user.id
-            if user_id not in user_violat:
-                user_violat[user_id] = 1
-                ban_duration = 1 * 3600  # Ban for 6 hours
-            else:
-                user_violat[user_id] += 1
-                if user_violat[user_id] == 2:
-                    ban_duration = 6 * 3600  # Ban for 6 hours
-                elif user_violat[user_id] >= 3:  # Fixed syntax error in this line
-                    ban_duration = 0  # Permanent ban
-
+            # Delete the message, handling potential exceptions
             await message.delete()
-            if ban_duration > 0:
-                await message.reply_text(f"Sending usernames or Telegram links is not allowed here. You are banned for {ban_duration} hours.")
-                await client.restrict_chat_member(
-                    chat_id=message.chat.id,
-                    user_id=message.from_user.id,
-                    ban_duration=ban_duration  # Fixed parameter name
-                )
-            else:
-                await message.reply_text("Sending usernames or Telegram links is not allowed here. You are permanently banned.")
-                await client.ban_chat_member(
-                    chat_id=message.chat.id,
-                    user_id=message.from_user.id
-                )
-
-            link = text if "t.me/" in text else None
-            await client.send_message(
-                LOG_CHANNEL,
-                f"**Telegram Username or link detected:**\n"
-                f"Link: {link}\n"
-                f"User: @{username}\n"
-                f"Ban Count: {ban_duration}\n"
-                f"Date and Time: {datetime}",
-            )
+            await client.send_message(LOG_CHANNEL, log_message)
         except Exception as e:
-            print(f"Error: {e}")
-
-
-@Client.on_message(filters.group & filters.text & filters.incoming)
-async def restrict_ban_words(client, message):
-    if message.from_user.id in ADMINS or message.from_user.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):
-        return
-        
-    text = message.text.lower()
-    username = message.from_user.username
-    datetime = date.now().strftime("%Y-%m-%d %H:%M:%S")  # Fixed date formatting
-
-    for banned_word in BANNED_WORDS:
-        if banned_word in text:
-            try:
-                user_id = message.from_user.id
-                if user_id not in user_violat:
-                    user_violat[user_id] = 1
-                    ban_duration = 1 * 3600  # Ban for 6 hours
-                else:
-                    user_violat[user_id] += 1
-                    if user_violat[user_id] == 2:
-                        ban_duration = 6 * 3600  # Ban for 6 hours
-                    elif user_violat[user_id] >= 3:  # Fixed syntax error in this line
-                        ban_duration = 0  # Permanent ban
-
-                await message.delete()
-                if ban_duration > 0:
-                    await message.reply_text(f"⚠️ Warning: Please refrain from using banned words. You are banned for {ban_duration} hours.")
-                    await client.restrict_chat_member(
-                        chat_id=message.chat.id,
-                        user_id=message.from_user.id,
-                        ban_duration=ban_duration  # Fixed parameter name
-                    )
-                else:
-                    await message.reply_text("⚠️ Warning: Please refrain from using banned words. You are permanently banned.")
-                    await client.ban_chat_member(
-                        chat_id=message.chat.id,
-                        user_id=message.from_user.id
-                    )
-
-                await client.send_message(
-                    LOG_CHANNEL,
-                    f"**Ban Word detected:**\n"
-                    f"Ban Word: {banned_word}\n"
-                    f"User: @{username}\n"
-                    f"Ban Count: {ban_duration}\n"
-                    f"Date and Time: {datetime}",
-                )
-            except Exception as e:
-                print(f"Error: {e}")
-                
+            logging.error(f"Error deleting message: {e}")
+            
+            
