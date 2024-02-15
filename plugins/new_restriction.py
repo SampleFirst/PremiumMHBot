@@ -56,14 +56,14 @@ async def restrict_entity(client, message):
         # Construct formatted log message with specific information
         log_message = (
             f"#message_delete 🗑\n\n"
-            f"● C-id: <code>{message.chat.id}</code>\n"
+            f"● Chat id: <code>{message.chat.id}</code>\n"
             f"● Chat: @{message.chat.username}\n\n"
-            f"● U-id: <code>{message.from_user.id}</code>\n"
+            f"● User id: <code>{message.from_user.id}</code>\n"
             f"● User: @{message.from_user.username}\n\n"
             f"● Text: {message.text}"
         )
         for entity_type in deleted_entities:
-            log_message += f"\n\n● E-Type: {entity_type}"
+            log_message += f"\n\n● Entity Type: {entity_type}"
 
         try:
             # Delete the message, handling potential exceptions
