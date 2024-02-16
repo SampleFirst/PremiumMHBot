@@ -11,7 +11,7 @@ async def maintenance_mode_options(client, message):
         markup = InlineKeyboardMarkup(
             [[
                 InlineKeyboardButton("Mode", callback_data="mode_info"),
-                InlineKeyboardButton("ON" if await db.get_maintenance_mode() else "OFF", callback_data="set_mode")
+                InlineKeyboardButton("ON" if MAINTENANCE_MODE else "OFF", callback_data="set_mode")
             ]]
         )
 
@@ -48,3 +48,5 @@ async def maintenance_mode_info(client, callback_query):
 async def handle_maintenance(client, message):
     if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
         await message.reply_text("Sorry, the bot is currently under maintenance. Please try again later.")
+        
+        
