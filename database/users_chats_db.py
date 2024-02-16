@@ -299,6 +299,20 @@ class Database:
         count = await self.att.count_documents(query)
         return count
         
+    async def expire_attempts(self):
+        tz = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(tz)
+        expired_attempts = await self.att.find({'att_expiry': {'$lte': now}, 'att_active': True}).to_list(None)
+        
+        for attempt in expired_attempts:
+            await self.att.update_one({'_id': attempt['_id']}, {'$set': {'att_active': False}})
+            
+    async def remove_attempt_active(self, user_id):
+        await self.att.update_one({'id': user_id, 'att_active': True}, {'$set': {'att_active': False}})
+
+    async def remove_all_attempt_active(self):
+        await self.att.update_many({'att_active': True}, {'$set': {'att_active': False}})
+        
     async def get_all_attempts(self):
         return self.att.find({})
         
