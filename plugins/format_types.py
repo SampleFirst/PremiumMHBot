@@ -38,6 +38,9 @@ def format_types(obj, format_type):
         return str(obj.isocalendar()[1])  # Week number
     elif format_type == 13:
         return obj.isoformat()  # ISO 8601 date and time
+    elif format_type == 14:
+        return obj.strftime("%d %B %Y %H:%M:%S")  # Day month year hour minute second
     else:
-        raise ValueError("Invalid format_type. Please choose a number between 1 and 13.")
-
+        raise ValueError("Invalid format_type. Please choose a number between 1 and 14.")
+        
+        
