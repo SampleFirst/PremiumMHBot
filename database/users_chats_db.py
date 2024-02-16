@@ -59,42 +59,7 @@ class Database:
             ),
             timestamp=datetime.now(tz)
         )
-
-    def new_confirm(self, id, name, is_con, con_active, con_name, con_type, con_date, con_validity):
-        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
-        return dict(
-            id=id,
-            name=name,
-            is_con=is_con,
-            con_active=con_active,
-            con_name=con_name,
-            con_type=con_type,
-            con_date=con_date,
-            con_validity=con_validity,
-            cancel_status=dict(
-                is_cancel=False,
-                ban_reason="",
-            ),
-            timestamp=datetime.now(tz)
-        )
-
-    def new_premium(self, id, name, is_pre, pre_active, pre_name, pre_type, pre_date, pre_validity):
-        tz = pytz.timezone('Asia/Kolkata')  # Define tz here
-        return dict(
-            id=id,
-            name=name,
-            is_pre=is_pre,
-            pre_active=pre_active,
-            pre_name=pre_name,
-            pre_type=pre_type,
-            pre_date=pre_date,
-            pre_validity=pre_validity,
-            cancel_status=dict(
-                is_cancel=False,
-                ban_reason="",
-            ),
-            timestamp=datetime.now(tz)
-        )
+        
         
     async def daily_users_count(self, today):
         tz = pytz.timezone('Asia/Kolkata')
@@ -152,42 +117,7 @@ class Database:
         count = await self.att.count_documents(query)
         return count
         
-    async def daily_confirms_count(self, today):
-        tz = pytz.timezone('Asia/Kolkata')
-        start = tz.localize(datetime.combine(today, datetime.min.time()))
-        end = tz.localize(datetime.combine(today, datetime.max.time()))
-        count = await self.con.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
-        
-    async def monthly_confirms_count(self, month, year):
-        tz = pytz.timezone('Asia/Kolkata')
-        start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
-        end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
-        count = await self.con.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
-        
-    async def daily_premiums_count(self, today):
-        tz = pytz.timezone('Asia/Kolkata')
-        start = tz.localize(datetime.combine(today, datetime.min.time()))
-        end = tz.localize(datetime.combine(today, datetime.max.time()))
-        count = await self.pre.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
     
-    async def monthly_premiums_count(self, month, year):
-        tz = pytz.timezone('Asia/Kolkata')
-        start = tz.localize(datetime.combine(datetime(year, month, 1), datetime.min.time()))
-        end = tz.localize(datetime.combine(datetime(year, month, calendar.monthrange(year, month)[1]), datetime.max.time()))
-        count = await self.pre.count_documents({
-            'timestamp': {'$gte': start, '$lt': end}
-        })
-        return count
-        
     async def add_user(self, id, name):
         user = self.new_user(id, name)
         await self.col.insert_one(user)
@@ -290,6 +220,14 @@ class Database:
             return last_attempt['att_active']
         return None
 
+    async def expired_attempts(self):
+        tz = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(tz)
+        expired_attempts = await self.att.find({'att_validity': {'$lte': now}, 'att_active': True}).to_list(None)
+        
+        for attempt in expired_attempts:
+            await self.att.update_one({'_id': attempt['_id']}, {'$set': {'att_active': False}})
+    
     async def total_attempts_count(self, att_name=None, att_type=None):
         query = {}
         if att_name:
@@ -307,62 +245,17 @@ class Database:
         for attempt in expired_attempts:
             await self.att.update_one({'_id': attempt['_id']}, {'$set': {'att_active': False}})
             
-    async def update_user_attempts(self, user_id):
-        await self.att.update_many({'id': user_id, 'att_active': True}, {'$set': {'att_active': False}})
-    
-    async def update_all_attempts(self):
+    async def remove_attempt_active(self, user_id):
+        await self.att.update_one({'id': user_id, 'att_active': True}, {'$set': {'att_active': False}})
+
+    async def remove_all_attempt_active(self):
         await self.att.update_many({'att_active': True}, {'$set': {'att_active': False}})
         
     async def get_all_attempts(self):
         return self.att.find({})
-        
-    async def add_confirm(self, id, name, is_con, con_active, con_name, con_type, con_date, con_validity):
-        confirm = self.new_confirm(id, name, is_con, con_active, con_name, con_type, con_date, con_validity)
-        await self.con.insert_one(confirm)
-
-    async def is_confirm_active(self, id, con_name, con_type):
-        last_confirm = await self.con.find_one({'con_name': con_name, 'con_type': con_type}, sort=[('_id', -1)])
-        if last_confirm:
-            return last_confirm['con_active']
-        return None
-
-    async def total_confirms_count(self, con_name=None, con_type=None):
-        query = {}
-        if con_name:
-            query['con_name'] = con_name
-        if con_type:
-            query['con_type'] = con_type
-        count = await self.con.count_documents(query)
-        return count
-        
-    async def get_all_confirms(self):
-        return self.con.find({})
-        
-    async def add_premium(self, id, name, is_pre, pre_active, pre_name, pre_type, pre_date, pre_validity):
-        premium = self.new_premium(id, name, is_pre, pre_active, pre_name, pre_type, pre_date, pre_validity)
-        await self.pre.insert_one(premium)
-
-    async def is_premium_active(self, id, pre_name, pre_type):
-        last_premium = await self.pre.find_one({'pre_name': pre_name, 'pre_type': pre_type}, sort=[('_id', -1)])
-        if last_premium:
-            return last_premium['pre_active']
-        return None
-        
-    async def total_premiums_count(self, pre_name=None, pre_type=None):
-        query = {}
-        if pre_name:
-            query['pre_name'] = pre_name
-        if pre_type:
-            query['pre_type'] = pre_type
-        count = await self.pre.count_documents(query)
-        return count
-        
-    async def get_all_premiums(self):
-        return self.pre.find({})
         
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
 
 
 db = Database(DATABASE_URI, DATABASE_NAME)
-
