@@ -299,12 +299,14 @@ Available commands:
 • /plink - <code>Just like /link, but the file will be sent with forward restrictions. 🚫🔗</code>"""
 
     RESTART_TXT = """
-<b>🔄 Bot Restarted!
-
-📅 Date: <code>{}</code>
-⏰ Time: <code>{}</code>
+<b> #Restarted 
+🔄 Bot Restarted!
+📅 Date: <code>{a}</code>
+⏰ Time: <code>{b}</code>
 🌐 Timezone: <code>Asia/Kolkata</code>
-🛠️ Build Status: <code>v1.0.0 [Stable]</code></b>"""
+🛠️ Build Status: <code>v1.0.0 [Stable]</code></b>
+#{c}
+#Restart_{c}"""
 
     LOGO = """
 
