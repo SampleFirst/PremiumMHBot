@@ -105,3 +105,15 @@ async def log_file(bot, message):
     except Exception as e:
         await message.reply(str(e))
 
+@Client.on_message(filters.command('remove_attempts'))
+async def update_attempts(bot, message):
+    """Updates active attempts for the user who sent the command."""
+    user_id = message.from_user.id
+
+    try:
+        await db.update_active_attempts(user_id)
+        await message.reply_text("All active attempts have been updated.")
+    except Exception as e:
+        logger.error(f"Error updating attempts: {e}")
+        await message.reply_text(f"An error occurred: {e}")
+        
