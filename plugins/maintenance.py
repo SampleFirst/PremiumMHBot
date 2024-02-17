@@ -56,4 +56,6 @@ async def maintenance_mode_handler(client, message):
 
     if MAINTENANCE_MODE and user_id not in ADMINS:
         await message.reply_text("♻️ Maintenance mode is enabled.", quote=True)
-   
+    else:
+        return
+
