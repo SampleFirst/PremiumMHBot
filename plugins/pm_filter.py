@@ -9,7 +9,6 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 
 from info import ADMINS, PICS, LOG_CHANNEL
 from database.users_chats_db import db
-from database.attempt_db import db
 
 from Script import script
 from utils import temp
