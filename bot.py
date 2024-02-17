@@ -7,19 +7,18 @@ logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 
+from aiohttp import web
+from typing import Union, Optional, AsyncGenerator
+from pyrogram import types
 from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, PORT
+from info import ADMINS, SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, PORT
 from utils import temp
-from typing import Union, Optional, AsyncGenerator
-from pyrogram import types
 from Script import script 
-from datetime import date, datetime 
-import pytz
-from aiohttp import web
 from plugins import web_server
+from plugins.datetime import get_datetime
 
 class Bot(Client):
 
@@ -35,10 +34,10 @@ class Bot(Client):
         )
 
     async def start(self):
-        b_users, b_chats , lz_verified = await db.get_banned() # Request Verification => S - 2
+        b_users, b_chats , v_chats = await db.get_banned() # Request Verification => S - 2
         temp.BANNED_USERS = b_users
         temp.BANNED_CHATS = b_chats
-        temp.VERIFIED_CHATS = lz_verified # Request Verification => S - 2
+        temp.VERIFIED_CHATS = v_chats # Request Verification => S - 2
         await super().start()
         await Media.ensure_indexes()
         me = await self.get_me()
@@ -49,11 +48,13 @@ class Bot(Client):
         logging.info(f"{me.first_name} with for Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
         logging.info(script.LOGO)
-        tz = pytz.timezone('Asia/Kolkata')
-        today = date.today()
-        now = datetime.now(tz)
-        time = now.strftime("%H:%M:%S %p")
-        await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
+        today = get_datetime(format_type=1)
+        time = get_datetime(format_type=3)
+        await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(a=today, b=time, c=temp.U_NAME))
+        
+        for admin_id in ADMINS:
+            await self.send_message(chat_id=admin_id, text=script.RESTART_TXT.format(a=today, b=time, c=temp.U_NAME))
+        
         app = web.AppRunner(await web_server())
         await app.setup()
         bind_address = "0.0.0.0"
@@ -105,3 +106,4 @@ class Bot(Client):
 
 app = Bot()
 app.run()
+
