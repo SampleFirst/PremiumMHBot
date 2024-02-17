@@ -300,11 +300,13 @@ Available commands:
 
     RESTART_TXT = """
 <b> #Restarted 
+
 🔄 Bot Restarted!
 📅 Date: <code>{a}</code>
 ⏰ Time: <code>{b}</code>
 🌐 Timezone: <code>Asia/Kolkata</code>
 🛠️ Build Status: <code>v1.0.0 [Stable]</code></b>
+
 #{c}
 #Restart_{c}"""
 
