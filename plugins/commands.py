@@ -6,7 +6,6 @@ from pyrogram import Client, filters, enums
 from pyrogram.errors import ChatAdminRequired
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from database.users_chats_db import db
-
 from info import ADMINS, AUTH_CHANNEL, LOG_CHANNEL, PICS
 from utils import is_subscribed, temp
 from datetime import date, datetime
@@ -15,15 +14,8 @@ import pytz
 
 logger = logging.getLogger(__name__)
 
-MAINTENANCE_MODE = True 
-
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
-        await message.reply_text("Sorry, the bot is currently under maintenance. Please try again later.")
-    else:
-        return
-        
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
             [
