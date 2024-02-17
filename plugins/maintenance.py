@@ -49,7 +49,7 @@ async def maintenance_mode_info(client, callback_query):
     )
 
 
-@Client.on_message(filters.text)
+@Client.on_message(filters.text & filters.command)
 async def maintenance_mode_handler(client, message):
     global MAINTENANCE_MODE
 
