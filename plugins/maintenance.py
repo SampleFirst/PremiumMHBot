@@ -48,8 +48,7 @@ async def maintenance_mode_info(client, callback_query):
         show_alert=True
     )
 
-
-@Client.on_message(filters.text & filters.command)
+@Client.on_message(filters.text | filters.command)
 async def maintenance_mode_handler(client, message):
     global MAINTENANCE_MODE
 
@@ -57,3 +56,4 @@ async def maintenance_mode_handler(client, message):
         await message.reply_text("♻️ Maintenance mode is enabled.", quote=True)
     else:
         return
+
