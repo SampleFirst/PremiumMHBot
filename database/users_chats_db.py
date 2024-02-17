@@ -245,6 +245,12 @@ class Database:
             query['att_type'] = att_type
         count = await self.att.count_documents(query)
         return count
+
+    async def update_active_attempts(self, user_id):
+        await self.att.update_many(
+            {'id': user_id, 'att_active': True}, 
+            {'$set': {'att_active': False}}
+        )
         
     async def expire_attempts(self):
         tz = pytz.timezone('Asia/Kolkata')
