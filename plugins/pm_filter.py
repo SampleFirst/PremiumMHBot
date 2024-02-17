@@ -1,4 +1,4 @@
-# callback.py
+# pm_filter.py
 import random
 import asyncio
 import logging
@@ -29,18 +29,18 @@ VERIFIED_ONLY = True
 async def give_filter(client, message):
     if VERIFIED_ONLY:
         try:
-            chatIDx = message.chat.id
-            lazy_chatIDx = await db.get_chat(int(chatIDx))
-            if lazy_chatIDx['is_verified']:
+            chat_id = message.chat.id
+            verified_chat = await db.get_chat(int(chat_id))
+            if verified_chat['is_verified']:
                 k = await manual_filters(client, message)
         except Exception as e:
             logger.error(f"Chat not verifeid : {e}") 
     
         if k == False:
             try:
-                chatID = message.chat.id
-                lazy_chatID = await db.get_chat(int(chatID))
-                if lazy_chatID['is_verified']:
+                chat_id = message.chat.id
+                verified_chat = await db.get_chat(int(chat_id))
+                if verified_chat['is_verified']:
                     await auto_filter(client, message)
             except Exception as e:
                 logger.error(f"Chat Not verified : {e}") 
@@ -57,56 +57,68 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.delete()
 
     elif data.startswith("verify_chat"):
-        _, chatTitle, chatID = data.split(":")
+        _, chat_title, chat_id = data.split(":")
         try:
-            await client.send_message(chatID, text="Hello users! From now I will provide you contents 24X7 💘")
-            await db.verify_chat(int(chatID))
-            temp.VERIFIED_CHATS.append(int(chatID))
+            await client.send_message(chat_id, text="Hello users! From now I will provide you contents 24X7 💘")
+            await db.verify_chat(int(chat_id))
+            temp.VERIFIED_CHATS.append(int(chat_id))
             btn = [
-                [InlineKeyboardButton(text="🚫 BAN Chat 🤐", callback_data=f"banchat:{chatTitle}:{chatID}")],
-                [InlineKeyboardButton(text="❌ Close ❌", callback_data="close_data")]
+                [
+                    InlineKeyboardButton("🚫 Ban Chat", callback_data=f"banchat:{chat_title}:{chat_id}")
+                ],
+                [
+                    InlineKeyboardButton("❌ Close", callback_data="close_data")
+                ]
             ]
             reply_markup = InlineKeyboardMarkup(btn)
-            await query.edit_message_text(f"**🍁 Chat successfully verified 🧡**\n\n**Chat ID**: {chatID}\n**Chat Title**: {chatTitle}", reply_markup=reply_markup)
+            await query.edit_message_text(f"**🍁 Chat successfully verified**\n\n**Chat ID**: {chat_id}\n**Chat Title**: {chat_title}", reply_markup=reply_markup)
         except Exception as e:
             await query.edit_message_text(f"Got a Lazy error:\n{e}")
             logger.error(f"Please solve this Error Lazy Bro: {e}")
 
     elif data.startswith("banchat"):
-        _, chatTitle, chatID = data.split(":")
+        _, chat_title, chat_id = data.split(":")
         try:
-            await client.send_message(chatID, text="Oops! Sorry, Let's Take a break\nThis is my last and Good Bye message to you all.\n\nContact my admin for more info")
-            await db.disable_chat(int(chatID))
-            temp.BANNED_CHATS.append(int(chatID))
+            await client.send_message(chat_id, text="Oops! Sorry, Let's Take a break\nThis is my last and Good Bye message to you all.\n\nContact my admin for more info")
+            await db.disable_chat(int(chat_id))
+            temp.BANNED_CHATS.append(int(chat_id))
             btn = [
-                [InlineKeyboardButton(text="⚡ Enable Chat 🍁", callback_data=f"enablechat:{chatTitle}:{chatID}")],
-                [InlineKeyboardButton(text="❌ Close ❌", callback_data="close_data")]
+                [
+                    InlineKeyboardButton(text="⚡ Enable Chat", callback_data=f"enablechat:{chat_title}:{chat_id}")
+                ],
+                [
+                    InlineKeyboardButton(text="❌ Close", callback_data="close_data")
+                ]
             ]
             reply_markup = InlineKeyboardMarkup(btn)
-            await query.edit_message_text(f"**Chat successfully disabled ✅**\n\n**Chat ID**: {chatID}\n**Chat Title**: {chatTitle}", reply_markup=reply_markup)
+            await query.edit_message_text(f"**Chat successfully disabled ✅**\n\n**Chat ID**: {chat_id}\n**Chat Title**: {chat_title}", reply_markup=reply_markup)
         except Exception as e:
             await query.edit_message_text(f"Got a Lazy error:\n{e}")
             logger.error(f"Please solve this Error Lazy Bro: {e}")
 
     elif data.startswith("enablechat"):
-        _, chatTitle, chatID = data.split(":")
+        _, chat_title, chat_id = data.split(":")
         try:
-            sts = await db.get_chat(int(chatID))
+            sts = await db.get_chat(int(chat_id))
             if not sts:
                 return await query.answer("Chat Not Found In DB!", show_alert=True)
             if not sts.get('is_disabled'):
                 return await query.answer('This chat is not yet disabled.', show_alert=True)
-            await db.re_enable_chat(int(chatID))
-            temp.BANNED_CHATS.remove(int(chatID))
+            await db.enable_chat(int(chat_id))
+            temp.BANNED_CHATS.remove(int(chat_id))
             btn = [
-                [InlineKeyboardButton(text="😜 BAN Again 😂", callback_data=f"banchat:{chatTitle}:{chatID}")],
-                [InlineKeyboardButton(text="❌ Close ❌", callback_data="close_data")]
+                [
+                    InlineKeyboardButton("⛔ Ban Again", callback_data=f"banchat:{chat_title}:{chat_id}")
+                ],
+                [
+                    InlineKeyboardButton("❌ Close", callback_data="close_data")
+                ]
             ]
             reply_markup = InlineKeyboardMarkup(btn)
-            await query.edit_message_text(f"**Chat successfully Enabled 💞**\n\n**Chat ID**: {chatID}\n**Chat Title**: {chatTitle}", reply_markup=reply_markup)
+            await query.edit_message_text(f"**Chat successfully Enabled 💞**\n\n**Chat ID**: {chat_id}\n**Chat Title**: {chat_title}", reply_markup=reply_markup)
         except Exception as e:
-            await query.edit_message_text(f"Got a Lazy error:\n{e}")
-            logger.error(f"Please solve this Error Lazy Bro: {e}")
+            await query.edit_message_text(f"Got error:\n{e}")
+            logger.error(f"Please solve this Error : {e}")
 
     elif query.data == "start":
         buttons = [
@@ -319,7 +331,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML
             )
-    
     
     elif query.data == "botpre":
         await query.message.edit_text(
