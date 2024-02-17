@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from info import ADMINS
 
-MAINTENANCE_MODE = False  # Default maintenance mode status (case-sensitive)
+MAINTENANCE_MODE = True   # Default maintenance mode status (case-sensitive)
 
 
 @Client.on_message(filters.command("mode") & filters.user(ADMINS))
