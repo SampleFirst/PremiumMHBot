@@ -8,43 +8,40 @@ url_list = {}
 
 
 @Client.on_message(filters.command("mkvcinemas"))
-def mkvcinemas(client, message):
+async def mkvcinemas(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
-        message.reply_text("Please provide a movie name to search.")
+        await message.reply_text("Please provide a movie name to search.")
         return
     query = query[1]
-    search_results = message.reply_text("Processing...")
+    search_results = await message.reply_text("Processing...")
     movies_list = search_movies(query)
     if movies_list:
         keyboards = []
         for movie in movies_list:
-            keyboard = InlineKeyboardButton(movie["title"], callback_data=movie["id"])
-            keyboards.append([keyboard])
+            keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
+            keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        search_results.edit_text('Search Results...', reply_markup=reply_markup)
+        await search_results.edit_text('Search Results...', reply_markup=reply_markup)
     else:
-        search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+        await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
 
-@Client.on_callback_query()
-def movie_result(client, callback_query):
+@Client.on_callback_query(filters.regex('^link'))
+async def movie_result(client, callback_query):
     query = callback_query
-    if query.data.startswith("link"):
-        movie_id = query.data
-        s = get_movie(url_list[movie_id])
-        response = requests.get(s["img"])
-        img = BytesIO(response.content)
-        query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
-        link = ""
-        links = s["links"]
-        for i in links:
-            link += "🎬" + i + "\n" + links[i] + "\n\n"
-        caption = f"⚡ Download Links :-\n\n{link}"
-        query.message.reply_text(text=caption)
-        await query.answer("Sended movies link")
-    else:
-        query.message.reply_text("Showing answers...")
+    movie_id = query.data
+    s = get_movie(url_list[movie_id])
+    response = requests.get(s["img"])
+    img = BytesIO(response.content)
+    await query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
+    link = ""
+    links = s["links"]
+    for i in links:
+        link += "🎬" + i + "\n" + links[i] + "\n\n"
+    caption = f"⚡ Download Links :-\n\n{link}"
+    await query.message.reply_text(text=caption)
+    await query.answer("Sent movie links")
 
 
 def search_movies(query):
@@ -60,8 +57,8 @@ def search_movies(query):
                 movies_details["id"] = f"link{movies.index(movie)}"
                 movies_details["title"] = movie.find("span", {'class': 'mli-info'}).text
                 url_list[movies_details["id"]] = movie['href']
-            movies_list.append(movies_details)
-            movies_details = {}
+                movies_list.append(movies_details)
+                movies_details = {}
     return movies_list
 
 
@@ -81,4 +78,3 @@ def get_movie(movie_page_url):
             final_links[f"{i.text}"] = i['href']
         movie_details["links"] = final_links
     return movie_details
-
