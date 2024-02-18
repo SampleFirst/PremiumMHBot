@@ -44,18 +44,32 @@ async def skymovie_result(client, callback_query):
 def search_movies(query):
     movies_list = []
     movies_details = {}
-    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
+    
+    # Updated to use the provided website for searching movies
+    website = requests.get(f"[1](https://skymovieshd.ngo/search.php?search=){query.replace(' ', '+')}&cat=All")
+    
     if website.status_code == 200:
         website = website.text
-        website = BeautifulSoup(website, "html.parser")
-        movies = website.find_all("div", {'class': 'mv-item'})
+        soup = BeautifulSoup(website, "html.parser")
+        
+        # Finding all movie names before 'file folder' icon 
+        movies = soup.find_all("div", class_="main")
+        
         for movie in movies:
-            movies_details["id"] = f"link{movies.index(movie)}"
-            movies_details["title"] = movie.find("a", {'class': 'text-primary'}).text
-            url_list[movies_details["id"]] = movie.find("a", {'class': 'text-primary'})['href']
-            movies_list.append(movies_details)
-            movies_details = {}
+            title_text = movie.find("a").text
+            
+            if title_text:  # Checking if the text is not empty or None
+                
+                # Creating a dictionary with movie details and appending it to the list of movies
+                movie_details["id"] = f"link{len(movies_list)}"
+                movie_details["title"] = title_text.strip()
+                
+                url_list[movie_details["id"]] = movie.find("a")['href']
+                
+                movies_list.append(movie_details.copy())  # Using copy() to avoid overwriting dictionary content
+    
     return movies_list
+
 
 def get_movie(movie_page_url):
     movie_details = {}
