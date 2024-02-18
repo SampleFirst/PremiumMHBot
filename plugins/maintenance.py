@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from info import ADMINS
 
-MAINTENANCE_MODE = True   # Default maintenance mode status (case-sensitive)
+MAINTENANCE_MODE = False    # Default maintenance mode status (case-sensitive)
 
 
 @Client.on_message(filters.command("mode") & filters.user(ADMINS))
@@ -48,12 +48,12 @@ async def maintenance_mode_info(client, callback_query):
         show_alert=True
     )
 
-@Client.on_message(filters.text | filters.command)
-async def maintenance_mode_handler(client, message):
-    global MAINTENANCE_MODE
+# @Client.on_message(filters.text | filters.command)
+# async def maintenance_mode_handler(client, message):
+    # global MAINTENANCE_MODE
 
-    if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
-        await message.reply_text("♻️ Maintenance mode is enabled.", quote=True)
-    else:
-        return
+    # if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
+        # await message.reply_text("♻️ Maintenance mode is enabled.", quote=True)
+    # else:
+        # return
 
