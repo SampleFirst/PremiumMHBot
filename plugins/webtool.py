@@ -2,57 +2,49 @@ from pyrogram import Client, filters
 import requests
 from bs4 import BeautifulSoup
 
-# Function to web text and links from a website
-async def extract_text_links(website_url):
+
+@Client.on_message(filters.command("rebook"))
+async def rebook(client, message):
+    query = message.text.split(maxsplit=1)
+    if len(query) == 1:
+        await message.reply_text("Please provide a movie name to search.")
+        return
+    query = query[1]
+    search_results = await message.reply_text("Processing...")
     try:
-        # Make a GET request to the website
+        extracted_text = await extract_text_links(query)
+        await message.reply_text(extracted_text, disable_web_page_preview=True)  # Prevent automatic link preview
+    except Exception as e:
+        await message.reply_text(f"An error occurred: {e}")
+
+async def extract_text_links(query):
+    try:
+        website_url = f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All"
         response = requests.get(website_url, timeout=10)  # Set a timeout to prevent hanging requests
         response.raise_for_status()  # Raise an exception if request fails
-
-        # Extract text and links using Beautiful Soup
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Get all text content that is not within script or style tags
-        text = soup.get_text(strip=True, separator=' ')
-        text = " ".join(text.split('\n'))  # Join lines with spaces to improve readability
+        # Find the starting and ending points for extraction
+        start_text = "Search Results for " + query
+        end_text = "Home"
+        start_tag = soup.find(text=start_text)
+        end_tag = soup.find(text=end_text)
 
-        # Find all anchor tags (links)
-        links = []
-        for link in soup.find_all('a'):
-            href = link.get('href')
-            if href and href.startswith('http'):  # Filter valid links
-                links.append(href)
+        # Extract text and links within the specified range
+        text_links = []
+        for tag in start_tag.find_next_siblings():
+            if tag == end_tag:
+                break
+            if tag.name == 'a' and tag.get('href') and tag.get('href').startswith('http'):
+                text_links.append(f"* [{tag.text}]({tag.get('href')})")
+            elif tag.name == 'p' or tag.name == 'div':
+                text_links.append(tag.text.strip())
 
-        # Combine extracted text and links, ensuring links open in Telegram
-        combined_text = text + "\n\n".join(f"* [{link}]({link})" for link in links)
-
+        # Combine extracted text and links
+        combined_text = "\n\n".join(text_links)
         return combined_text
 
     except Exception as e:
-        # Handle errors gracefully and send an informative message to the user
-        print(f"Error extracting content from {website_url}: {e}")
+        print(f"Error extracting content for {query}: {e}")
         return f"An error occurred while processing the website. Please try again later."
 
-# Filter for messages starting with a slash followed by any word (command-like format)
-@Client.on_message(filters.command(["webtool"]))
-async def web_extarct_command(client, message):
-    try:
-        command, query = message.text.split(' ', 1)
-    except ValueError:
-        await message.reply_text("Please provide a query to search.")
-        return
-
-    if command.lower() == "/web":
-        # Check if a query is provided
-        if not query:
-            await message.reply_text("Please provide a query to search.")
-            return
-
-        website_url = f"https://skymovieshd.ngo/search.php?search={query}&cat=All"
-
-        # Extract text and links concurrently to improve performance
-        try:
-            extracted_text = await extract_text_links(website_url)
-            await message.reply_text(extracted_text, disable_web_page_preview=True)  # Prevent automatic link preview
-        except Exception as e:
-            await message.reply_text(f"An error occurred: {e}")
