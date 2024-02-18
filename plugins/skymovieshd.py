@@ -49,7 +49,7 @@ def movie_result(client, callback_query):
 def search_movies(query):
     movies_list = []
     movies_details = {}
-    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
+    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '&cat=All')}")
     if website.status_code == 200:
         website = website.text
         website = BeautifulSoup(website, "html.parser")
