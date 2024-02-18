@@ -48,7 +48,7 @@ def search_movies(query):
     movies_list = []
     movies_details = {}    
     # Change this part to use skymovieshd.ngo instead of mkvcinemas.dev 
-    website=requests.get(f"[1](https://skymovieshd.ngo/search.php?search=){query.replace(' ', '+')}&cat=All")    
+    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
     if website.status_code == 200:
         website = website.text
         website = BeautifulSoup(website, "html.parser")
