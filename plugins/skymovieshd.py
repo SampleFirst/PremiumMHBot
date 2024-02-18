@@ -1,63 +1,86 @@
-import requests
-from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+import requests
+from bs4 import BeautifulSoup
+from io import BytesIO
 
-# Command to search for movies
+url_list = {}
+api_key = "3269bf2096dd8aec64d201398176d3db93ce68db"
+
+
+
 @Client.on_message(filters.command("skymovies"))
-async def search_command(client, message):
-    # Extract query from command
-    query = message.text.split(" ", 1)[1]
-    link = f"https://skymovieshd.ngo/search.php?search={query}&cat=All"
+def sky_movies(client, message):
+    query = message.text.split(maxsplit=1)
+    if len(query) == 1:
+        message.reply_text("Please provide a movie name to search.")
+        return
+    query = query[1]
+    search_results = message.reply_text("Processing...")
+    movies_list = search_movies(query)
+    if movies_list:
+        keyboards = []
+        for movie in movies_list:
+            keyboard = InlineKeyboardButton(movie["title"], callback_data=movie["id"])
+            keyboards.append([keyboard])
+        reply_markup = InlineKeyboardMarkup(keyboards)
+        search_results.edit_text('Search Results...', reply_markup=reply_markup)
+    else:
+        search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
-    try:
-        response = requests.get(link)
-        response.raise_for_status()  
-
-        soup = BeautifulSoup(response.content, "html.parser")
-        file_links = [item.a["href"] for item in soup.find_all("div", class_="item") if item.a]
-
-        buttons = []
-        for file_link in file_links:
-            buttons.append([InlineKeyboardButton(text=file_link.split("/")[-1], callback_data=file_link)])
-
-        await message.reply("Choose a file:", reply_markup=InlineKeyboardMarkup(buttons))
-
-    except requests.exceptions.RequestException as e:
-        await message.reply(f"Error fetching results: {e}")
-
-# Callback query handler
 @Client.on_callback_query()
-async def callback_query_handler(client, callback_query):
-    file_link = callback_query.data
+def movie_result(client, callback_query):
+    query = callback_query
+    s = get_movie(query.data)
+    response = requests.get(s["img"])
+    img = BytesIO(response.content)
+    query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
+    link = ""
+    links = s["links"]
+    for i in links:
+        link += "🎬" + i + "\n" + links[i] + "\n\n"
+    caption = f"⚡ Fast Download Links :-\n\n{link}"
+    if len(caption) > 4095:
+        for x in range(0, len(caption), 4095):
+            query.message.reply_text(text=caption[x:x+4095])
+    else:
+        query.message.reply_text(text=caption)
 
-    try:
-        response = requests.get(file_link)
-        response.raise_for_status()
+def search_movies(query):
+    movies_list = []
+    movies_details = {}
+    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
+    if website.status_code == 200:
+        website = website.text
+        website = BeautifulSoup(website, "html.parser")
+        movies = website.find_all("a", {'class': 'ml-mask jt'})
+        for movie in movies:
+            if movie:
+                movies_details["id"] = f"link{movies.index(movie)}"
+                movies_details["title"] = movie.find("span", {'class': 'mli-info'}).text
+                url_list[movies_details["id"]] = movie['href']
+            movies_list.append(movies_details)
+            movies_details = {}
+    return movies_list
 
-        soup = BeautifulSoup(response.content, "html.parser")
-        drive_link_element = soup.find("a", text="Google Drive Direct Links")
-        drive_link = drive_link_element["href"] if drive_link_element else None
+def get_movie(query):
+    movie_details = {}
+    movie_page_link = requests.get(f"{url_list[query]}")
+    if movie_page_link.status_code == 200:
+        movie_page_link = movie_page_link.text
+        movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
+        title = movie_page_link.find("div", {'class': 'mvic-desc'}).h3.text
+        movie_details["title"] = title
+        img = movie_page_link.find("div", {'class': 'mvic-thumb'})['data-bg']
+        movie_details["img"] = img
+        links = movie_page_link.find_all("a", {'rel': 'noopener', 'data-wpel-link': 'internal'})
+        final_links = {}
+        for i in links:
+            url = f"https://urlshortx.com/api?api={api_key}&url={i['href']}"
+            response = requests.get(url)
+            link = response.json()
+            final_links[f"{i.text}"] = link['shortenedUrl']
+        movie_details["links"] = final_links
+    return movie_details
 
-        if drive_link:
-            try:
-                drive_response = requests.get(drive_link)
-                drive_response.raise_for_status()
-
-                drive_soup = BeautifulSoup(drive_response.content, "html.parser")
-                download_links = [item.a["href"] for item in drive_soup.find_all("div", class_="download") if item.a]
-
-                buttons = []
-                for download_link in download_links:
-                    buttons.append([InlineKeyboardButton(text="Download", url=download_link)])
-
-                await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
-
-            except requests.exceptions.RequestException as e:
-                await callback_query.answer(f"Error fetching drive links: {e}")
-        else:
-            await callback_query.answer("Drive links not found.")
-
-    except requests.exceptions.RequestException as e:
-        await callback_query.answer(f"Error opening file: {e}")
 
