@@ -5,8 +5,6 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 
 url_list = {}
-api_key = "3269bf2096dd8aec64d201398176d3db93ce68db"
-
 
 
 @Client.on_message(filters.command("mkvcinemas"))
@@ -28,23 +26,26 @@ def mkvcinemas(client, message):
     else:
         search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
+
 @Client.on_callback_query()
 def movie_result(client, callback_query):
     query = callback_query
-    s = get_movie(query.data)
-    response = requests.get(s["img"])
-    img = BytesIO(response.content)
-    query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
-    link = ""
-    links = s["links"]
-    for i in links:
-        link += "🎬" + i + "\n" + links[i] + "\n\n"
-    caption = f"⚡ Fast Download Links :-\n\n{link}"
-    if len(caption) > 4095:
-        for x in range(0, len(caption), 4095):
-            query.message.reply_text(text=caption[x:x+4095])
-    else:
+    if query.data.startswith("link"):
+        movie_id = query.data
+        s = get_movie(url_list[movie_id])
+        response = requests.get(s["img"])
+        img = BytesIO(response.content)
+        query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
+        link = ""
+        links = s["links"]
+        for i in links:
+            link += "🎬" + i + "\n" + links[i] + "\n\n"
+        caption = f"⚡ Download Links :-\n\n{link}"
         query.message.reply_text(text=caption)
+        await query.answer("Sended movies link")
+    else:
+        query.message.reply_text("Showing answers...")
+
 
 def search_movies(query):
     movies_list = []
@@ -63,9 +64,10 @@ def search_movies(query):
             movies_details = {}
     return movies_list
 
-def get_movie(query):
+
+def get_movie(movie_page_url):
     movie_details = {}
-    movie_page_link = requests.get(f"{url_list[query]}")
+    movie_page_link = requests.get(movie_page_url)
     if movie_page_link.status_code == 200:
         movie_page_link = movie_page_link.text
         movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
@@ -76,11 +78,7 @@ def get_movie(query):
         links = movie_page_link.find_all("a", {'rel': 'noopener', 'data-wpel-link': 'internal'})
         final_links = {}
         for i in links:
-            url = f"https://urlshortx.com/api?api={api_key}&url={i['href']}"
-            response = requests.get(url)
-            link = response.json()
-            final_links[f"{i.text}"] = link['shortenedUrl']
+            final_links[f"{i.text}"] = i['href']
         movie_details["links"] = final_links
     return movie_details
-
 
