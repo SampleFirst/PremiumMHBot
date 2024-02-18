@@ -7,10 +7,8 @@ from io import BytesIO
 url_list = {}
 api_key = "3269bf2096dd8aec64d201398176d3db93ce68db"
 
-
-
-@Client.on_message(filters.command("skymovies"))
-def sky_movies(client, message):
+@Client.on_message(filters.command("skymovieshd"))
+def skymovieshd(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
         message.reply_text("Please provide a movie name to search.")
@@ -48,17 +46,18 @@ def movie_result(client, callback_query):
 
 def search_movies(query):
     movies_list = []
-    movies_details = {}
-    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '&cat=All')}")
+    movies_details = {}    
+    # Change this part to use skymovieshd.ngo instead of mkvcinemas.dev 
+    website=requests.get(f"[1](https://skymovieshd.ngo/search.php?search=){query.replace(' ', '+')}&cat=All")    
     if website.status_code == 200:
         website = website.text
         website = BeautifulSoup(website, "html.parser")
-        movies = website.find_all("a", {'class': 'ml-mask jt'})
+        movies = website.find_all("div", {'class': 'list-item'})
         for movie in movies:
             if movie:
                 movies_details["id"] = f"link{movies.index(movie)}"
-                movies_details["title"] = movie.find("span", {'class': 'mli-info'}).text
-                url_list[movies_details["id"]] = movie['href']
+                movies_details["title"] = movie.find("div", {'class': 'item-head'}).text
+                url_list[movies_details["id"]] = movie.find("a", {'class': 'item-head'})['href']
             movies_list.append(movies_details)
             movies_details = {}
     return movies_list
@@ -69,11 +68,11 @@ def get_movie(query):
     if movie_page_link.status_code == 200:
         movie_page_link = movie_page_link.text
         movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
-        title = movie_page_link.find("div", {'class': 'mvic-desc'}).h3.text
+        title = movie_page_link.find("div", {'class': 'post-title'}).h1.text
         movie_details["title"] = title
-        img = movie_page_link.find("div", {'class': 'mvic-thumb'})['data-bg']
+        img = movie_page_link.find("div", {'class': 'post-thumbnail'})['style'].split("'")[1]
         movie_details["img"] = img
-        links = movie_page_link.find_all("a", {'rel': 'noopener', 'data-wpel-link': 'internal'})
+        links = movie_page_link.find_all("a", {'class': 'btn btn-success'})
         final_links = {}
         for i in links:
             url = f"https://urlshortx.com/api?api={api_key}&url={i['href']}"
@@ -82,5 +81,3 @@ def get_movie(query):
             final_links[f"{i.text}"] = link['shortenedUrl']
         movie_details["links"] = final_links
     return movie_details
-
-
