@@ -34,7 +34,7 @@ async def extract_text_links(website_url):
         return f"An error occurred while processing the website. Please try again later."
 
 # Filter for messages starting with a slash followed by any word (command-like format)
-@Client.on_message(filters.command(["web"]))
+@Client.on_message(filters.command(["webtool"]))
 async def web_extarct_command(client, message):
     try:
         command, query = message.text.split(' ', 1)
