@@ -81,4 +81,7 @@ def get_movie(movie_page_url):
         final_links = {}
         for i in links:
             final_links[i.text.strip()] = i['href']
-        movie_details["links"] =
+        movie_details["links"] = final_links
+    return movie_details
+
+
