@@ -46,7 +46,7 @@ def search_movies(query):
     movies_details = {}
     
     # Updated to use the provided website for searching movies
-    website = requests.get(f"[1](https://skymovieshd.ngo/search.php?search=){query.replace(' ', '+')}&cat=All")
+    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
     
     if website.status_code == 200:
         website = website.text
