@@ -5,9 +5,11 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 
 url_list = {}
+api_key = "3269bf2096dd8aec64d201398176d3db93ce68db"
 
 
-@Client.on_message(filters.command("mk"))
+
+@Client.on_message(filters.command("mkvcinemas"))
 def find_movie(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
@@ -74,8 +76,6 @@ def get_movie(query):
         links = movie_page_link.find_all("a", {'rel': 'noopener', 'data-wpel-link': 'internal'})
         final_links = {}
         for i in links:
-            # Assuming you have an API key defined somewhere
-            api_key = "your_api_key_here"
             url = f"https://urlshortx.com/api?api={api_key}&url={i['href']}"
             response = requests.get(url)
             link = response.json()
