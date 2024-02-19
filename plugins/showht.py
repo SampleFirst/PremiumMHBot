@@ -7,9 +7,11 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 def get_domain(webpage):
     return webpage.split("//")[1].split("/")[0]
 
+
+
 # Function to handle inline keyboard button presses
 @Client.on_callback_query()
-async def handle_callback_query(Client, callback_query):
+async def handle_callback_webpage_query(client, callback_query):
     webpage = callback_query.data
     await callback_query.message.edit_text(
         f"Fetching HTML code for {webpage}...", reply_markup=InlineKeyboardMarkup()
@@ -34,7 +36,7 @@ async def handle_callback_query(Client, callback_query):
 
 # Function to handle messages containing URLs
 @Client.on_message(filters.text & filters.regex(r"https?://\S+"))
-async def handle_url_message(Client, message):
+async def handle_url_message(client, message):
     webpage = message.text
 
     # Check if the domain is allowed (add any restrictions as needed)
