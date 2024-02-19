@@ -1,16 +1,55 @@
+import os
+import requests
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-import requests
 
+# Function to extract the domain name from a URL
+def get_domain(url):
+    return url.split("//")[1].split("/")[0]
 
-@Client.on_message(filters.command("showhtml"))
-async def show_html(client, message):
+# Function to handle inline keyboard button presses
+@Client.on_callback_query()
+async def handle_callback_query(Client, callback_query):
+    url = callback_query.data
+    await callback_query.message.edit_text(
+        f"Fetching HTML code for {url}...", reply_markup=InlineKeyboardMarkup()
+    )
+
     try:
-        url = message.text.split(" ", 1)[1]  # Extract the URL from the message
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception if the request fails
         html_code = response.text
 
-        await message.reply_text(f"HTML code for {url}:\n`html\n{html_code}\n`")
+        # Replace domain_name with the actual domain extracted from the URL
+        file_path = f"html_code_{domain_name}.txt"
+        with open(file_path, "w") as f:
+            f.write(html_code)
+
+        await callback_query.message.edit_text(
+            f"HTML code fetched successfully! Saved to: {file_path}\nFeel free to send another website link or press /start to restart."
+        )
+
     except requests.exceptions.RequestException as e:
-        await message.reply_text(f"Error fetching HTML code: {e}")
+        await callback_query.message.edit_text(f"Error fetching HTML code: {e}")
+
+# Function to handle messages containing URLs
+@Client.on_message(filters.text & filters.regex(r"https?://\S+"))
+async def handle_url_message(Client, message):
+    url = message.text
+
+    # Check if the domain is allowed (add any restrictions as needed)
+    if get_domain(url) not in ("https://skymovieshd.ngo"):  # Adjust this list as required
+        await message.reply_text(
+            "This website is not currently allowed. Please send a link from a supported website."
+        )
+        return
+
+    keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Fetch HTML", callback_data=url)]]
+    )
+
+    await message.reply_text(
+        f"Detected website link: {url}\nPress the button below to fetch the HTML code:",
+        reply_markup=keyboard,
+    )
+
