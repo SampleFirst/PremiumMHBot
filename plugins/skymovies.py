@@ -44,7 +44,8 @@ def search_movies(query):
 @Client.on_callback_query(filters.regex('^linkx'))
 async def movie_result(client, callback_query):
     query = callback_query
-    movie_id = query.data
+    movie_id = query.data  # Get the movie ID from the callback query data
+    movie_id = movie_id.replace('linkx', '')  # Remove the 'linkx' prefix to get the actual movie ID
     download_links = get_download_links(movie_id)
     if download_links:
         keyboards = []
@@ -55,7 +56,7 @@ async def movie_result(client, callback_query):
         await query.message.edit_text('Download Links...', reply_markup=reply_markup)
     else:
         await query.message.edit_text('Sorry 🙏, No download links found for this movie.')
-
+        
 def get_download_links(movie_id):
     movie_link = url_list.get(movie_id)
     download_links = []
