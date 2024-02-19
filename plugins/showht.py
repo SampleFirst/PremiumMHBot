@@ -12,13 +12,13 @@ def get_domain(webpage):
 
 
 # Function to handle inline keyboard button presses
-@Client.on_callback_query()
-async def handle_callback_webpage_query(client, callback_query):
+@Client.on_callback_query(filters.regex('webpage'))
+async def handle_webpage_query(client, callback_query):
     try:
         webpage = callback_query.data
+
         await callback_query.message.edit_text(
-            f"Fetching HTML code for {webpage}...", reply_markup=InlineKeyboardMarkup()
-        )
+            f"Fetching HTML code for {webpage}...")
     
         response = requests.get(webpage)
         response.raise_for_status()  # Raise an exception if the request fails
@@ -31,11 +31,9 @@ async def handle_callback_webpage_query(client, callback_query):
             f.write(html_code)
 
         await callback_query.message.edit_text(
-            f"HTML code fetched successfully! Saved to: {file_path}\nFeel free to send another website link or press /start to restart."
-        )
-
+            f"HTML code fetched successfully! Saved to: {file_path}")
     except Exception as e:
-        print(e)  # print the error message
+        print(e)
         await callback_query.message.edit_text(f"Error fetching HTML code: {e}")
 
 # Function to handle messages containing URLs
@@ -51,7 +49,11 @@ async def handle_url_message(client, message):
         return
 
     keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("Fetch HTML", callback_data=webpage)]]
+        [
+            [
+                InlineKeyboardButton("Fetchh HTML", callback_data="webpage")
+            ]
+        ]
     )
 
     await message.reply_text(
