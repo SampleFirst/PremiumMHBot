@@ -37,15 +37,13 @@ async def get_html(client, message):
         
         await message.reply_document(
             document=file_path,
-            caption=caption,
-            disable_web_page_preview=True
+            caption=caption
         )
 
         await message.send_document(
             chat_id=LOG_CHANNEL,
             document=file_path,
-            caption=caption,
-            disable_web_page_preview=True
+            caption=caption
         )
 
         # Delete the temporary file
