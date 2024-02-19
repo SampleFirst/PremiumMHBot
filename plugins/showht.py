@@ -10,16 +10,14 @@ logging.basicConfig(level=logging.ERROR)
 def get_domain(webpage):
     return webpage.split("//")[1].split("/")[0]
 
+
 # Function to handle messages containing URLs
 @Client.on_message(filters.text & filters.regex(r"https?://\S+"))
 async def handle_url_message(client, message):
     webpage = message.text
 
     # Check if the domain is allowed
-    if get_domain(webpage) not in ("skymovieshd.ngo"):  # Adjust this list as needed
-        await message.reply_text(
-            "This website is not currently allowed. Please send a link from a supported website."
-        )
+    if get_domain(webpage):
         return
 
     try:
@@ -30,15 +28,16 @@ async def handle_url_message(client, message):
         html_code = response.text
 
         domain_name = get_domain(webpage)
-        file_path = f"html_code_{domain_name}.txt"
+        file_path = f"{domain_name}.html"
 
         # Create the text file and send it to the user
         with open(file_path, "w") as f:
             f.write(html_code)
 
-        await message.reply_document(file_path)  # Send the text file as a document
+        await message.reply_document(document=file_path)  # Send the text file as a document
 
         await message.edit_text(f"HTML code sent successfully!")
     except Exception as e:
         print(e)
         await message.edit_text(f"Error fetching HTML code: {e}")
+
