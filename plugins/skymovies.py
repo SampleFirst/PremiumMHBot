@@ -6,6 +6,7 @@ from io import BytesIO
 
 url_list = {}
 
+
 @Client.on_message(filters.command("skymovies"))
 async def skymovies(client, message):
     query = message.text.split(maxsplit=1)
@@ -25,8 +26,9 @@ async def skymovies(client, message):
     else:
         await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
+
 @Client.on_callback_query(filters.regex('^link'))
-async def skymovie_result(client, callback_query):
+async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
     s = get_movie(url_list[movie_id])
@@ -41,33 +43,21 @@ async def skymovie_result(client, callback_query):
     await query.message.reply_text(text=caption)
     await query.answer("Sent movie links")
 
+
 def search_movies(query):
     movies_list = []
-    movies_details = {}
-    
-    # Updated to use the provided website for searching movies
     website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
-    
     if website.status_code == 200:
-        website = website.text
-        soup = BeautifulSoup(website, "html.parser")
-        
-        # Finding all movie names before 'file folder' icon 
-        movies = soup.find_all("div", class_="main")
-        
+        soup = BeautifulSoup(website.text, "html.parser")
+        movies = soup.find_all("div", class_="L")
         for movie in movies:
-            title_text = movie.find("a").text
-            
-            if title_text:  # Checking if the text is not empty or None
-                
-                # Creating a dictionary with movie details and appending it to the list of movies
-                movie_details["id"] = f"link{len(movies_list)}"
-                movie_details["title"] = title_text.strip()
-                
-                url_list[movie_details["id"]] = movie.find("a")['href']
-                
-                movies_list.append(movie_details.copy())  # Using copy() to avoid overwriting dictionary content
-    
+            link = movie.find("a")
+            if link:
+                movie_details = {}
+                movie_details["id"] = f"link{movies.index(movie)}"
+                movie_details["title"] = link.text.strip()
+                url_list[movie_details["id"]] = link['href']
+                movies_list.append(movie_details)
     return movies_list
 
 
@@ -75,16 +65,15 @@ def get_movie(movie_page_url):
     movie_details = {}
     movie_page_link = requests.get(movie_page_url)
     if movie_page_link.status_code == 200:
-        movie_page_link = movie_page_link.text
-        movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
-        title = movie_page_link.find("h1", {'class': 'mt-lg-4'}).text
+        soup = BeautifulSoup(movie_page_link.text, "html.parser")
+        title = soup.find("div", class_='Text').text.strip()
         movie_details["title"] = title
-        img = movie_page_link.find("div", {'class': 'movie_img'})['data-bg']
+        img = soup.find("img")['src']
         movie_details["img"] = img
-        links = movie_page_link.find_all("a", {'class': 'download-btn'})
+        links = soup.find_all("a")
         final_links = {}
         for i in links:
-            final_links[f"{i.text}"] = i['href']
+            if i.has_attr('href'):
+                final_links[f"{i.text}"] = i['href']
         movie_details["links"] = final_links
     return movie_details
-
