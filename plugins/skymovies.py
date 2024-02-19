@@ -2,10 +2,8 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
-from io import BytesIO
 
 url_list = {}
-
 
 @Client.on_message(filters.command("skymovies"))
 async def skymovies(client, message):
@@ -26,24 +24,6 @@ async def skymovies(client, message):
     else:
         await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
-
-@Client.on_callback_query(filters.regex('^link'))
-async def movie_result(client, callback_query):
-    query = callback_query
-    movie_id = query.data
-    s = get_movie(url_list[movie_id])
-    response = requests.get(s["img"])
-    img = BytesIO(response.content)
-    await query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
-    link = ""
-    links = s["links"]
-    for i in links:
-        link += "🎬" + i + "\n" + links[i] + "\n\n"
-    caption = f"⚡ Download Links :-\n\n{link}"
-    await query.message.reply_text(text=caption)
-    await query.answer("Sent movie links")
-
-
 def search_movies(query):
     movies_list = []
     website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
@@ -60,20 +40,33 @@ def search_movies(query):
                 movies_list.append(movie_details)
     return movies_list
 
+@Client.on_callback_query()
+async def callback_query(client, query):
+    movie_id = query.data
+    download_links = get_download_links(movie_id)
+    if download_links:
+        keyboards = []
+        for download in download_links:
+            keyboard = [InlineKeyboardButton(download["title"], callback_data=download["url"])]
+            keyboards.append(keyboard)
+        reply_markup = InlineKeyboardMarkup(keyboards)
+        await query.message.edit_text('Download Links...', reply_markup=reply_markup)
+    else:
+        await query.message.edit_text('Sorry 🙏, No download links found for this movie.')
 
-def get_movie(movie_page_url):
-    movie_details = {}
-    movie_page_link = requests.get(movie_page_url)
-    if movie_page_link.status_code == 200:
-        soup = BeautifulSoup(movie_page_link.text, "html.parser")
-        title = soup.find("div", class_='Text').text.strip()
-        movie_details["title"] = title
-        img = soup.find("img")['src']
-        movie_details["img"] = img
-        links = soup.find_all("a")
-        final_links = {}
-        for i in links:
-            if i.has_attr('href'):
-                final_links[f"{i.text}"] = i['href']
-        movie_details["links"] = final_links
-    return movie_details
+def get_download_links(movie_id):
+    movie_link = url_list.get(movie_id)
+    download_links = []
+    if movie_link:
+        website = requests.get(movie_link)
+        if website.status_code == 200:
+            soup = BeautifulSoup(website.text, "html.parser")
+            downloads = soup.find_all("div", class_="Bolly")
+            for download in downloads:
+                link = download.find("a")
+                if link:
+                    download_details = {}
+                    download_details["url"] = link['href']
+                    download_details["title"] = link.text.strip()
+                    download_links.append(download_details)
+    return download_links
