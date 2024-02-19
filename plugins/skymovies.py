@@ -31,17 +31,19 @@ def search_movies(query):
         soup = BeautifulSoup(website.text, "html.parser")
         movies = soup.find_all("div", class_="L")
         for movie in movies:
-            link = movie.find("a")
-            if link:
+            linkx = movie.find("a")
+            if linkx:
                 movie_details = {}
-                movie_details["id"] = f"link{movies.index(movie)}"
-                movie_details["title"] = link.text.strip()
-                url_list[movie_details["id"]] = link['href']
+                movie_details["id"] = f"linkx{movies.index(movie)}"
+                movie_details["title"] = linkx.text.strip()
+                url_list[movie_details["id"]] = linkx['href']
                 movies_list.append(movie_details)
     return movies_list
-
-@Client.on_callback_query()
-async def callback_query(client, query):
+    
+    
+@Client.on_callback_query(filters.regex('^linkx'))
+async def movie_result(client, callback_query):
+    query = callback_query
     movie_id = query.data
     download_links = get_download_links(movie_id)
     if download_links:
@@ -63,10 +65,10 @@ def get_download_links(movie_id):
             soup = BeautifulSoup(website.text, "html.parser")
             downloads = soup.find_all("div", class_="Bolly")
             for download in downloads:
-                link = download.find("a")
-                if link:
+                linkz = download.find("a")
+                if linkz:
                     download_details = {}
-                    download_details["url"] = link['href']
-                    download_details["title"] = link.text.strip()
+                    download_details["url"] = linkz['href']
+                    download_details["title"] = linkz.text.strip()
                     download_links.append(download_details)
     return download_links
