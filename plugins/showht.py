@@ -23,7 +23,7 @@ async def handle_url_message(client, message):
         return
 
     try:
-        await message.edit_text(f"Fetching HTML code for {webpage}...")
+        await message.reply_text(f"Fetching HTML code for {webpage}...")
 
         response = requests.get(webpage)
         response.raise_for_status()  # Raise an exception if the request fails
