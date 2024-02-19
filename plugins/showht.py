@@ -4,19 +4,19 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 # Function to extract the domain name from a URL
-def get_domain(url):
-    return url.split("//")[1].split("/")[0]
+def get_domain(webpage):
+    return webpage.split("//")[1].split("/")[0]
 
 # Function to handle inline keyboard button presses
 @Client.on_callback_query()
 async def handle_callback_query(Client, callback_query):
-    url = callback_query.data
+    webpage = callback_query.data
     await callback_query.message.edit_text(
-        f"Fetching HTML code for {url}...", reply_markup=InlineKeyboardMarkup()
+        f"Fetching HTML code for {webpage}...", reply_markup=InlineKeyboardMarkup()
     )
 
     try:
-        response = requests.get(url)
+        response = requests.get(webpage)
         response.raise_for_status()  # Raise an exception if the request fails
         html_code = response.text
 
@@ -35,21 +35,21 @@ async def handle_callback_query(Client, callback_query):
 # Function to handle messages containing URLs
 @Client.on_message(filters.text & filters.regex(r"https?://\S+"))
 async def handle_url_message(Client, message):
-    url = message.text
+    webpage = message.text
 
     # Check if the domain is allowed (add any restrictions as needed)
-    if get_domain(url) not in ("https://skymovieshd.ngo"):  # Adjust this list as required
+    if get_domain(webpage) not in ("https://skymovieshd.ngo"):  # Adjust this list as required
         await message.reply_text(
             "This website is not currently allowed. Please send a link from a supported website."
         )
         return
 
     keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton("Fetch HTML", callback_data=url)]]
+        [[InlineKeyboardButton("Fetch HTML", callback_data=webpage)]]
     )
 
     await message.reply_text(
-        f"Detected website link: {url}\nPress the button below to fetch the HTML code:",
+        f"Detected website link: {webpage}\nPress the button below to fetch the HTML code:",
         reply_markup=keyboard,
     )
 
