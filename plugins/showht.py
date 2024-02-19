@@ -3,6 +3,7 @@ import requests
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import logging
+from info import ADMINS, LOG_CHANNEL 
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -10,18 +11,13 @@ logging.basicConfig(level=logging.ERROR)
 def get_domain(webpage):
     return webpage.split("//")[1].split("/")[0]
 
-
 # Function to handle messages containing URLs
-@Client.on_message(filters.text & filters.regex(r"https?://\S+"))
-async def handle_url_message(client, message):
-    webpage = message.text
-
-    # Check if the domain is allowed
-    if get_domain(webpage):
-        return
+@Client.on_message(filters.command("gethtml"))
+async def get_html(client, message):
+    webpage = message.text.split()[1]
 
     try:
-        await message.reply_text(f"Fetching HTML code for {webpage}...")
+        msg = await message.reply_text(f"Fetching HTML code for {webpage}...")
 
         response = requests.get(webpage)
         response.raise_for_status()  # Raise an exception if the request fails
@@ -30,14 +26,32 @@ async def handle_url_message(client, message):
         domain_name = get_domain(webpage)
         file_path = f"{domain_name}.html"
 
+        caption = f"HTML code sent successfully!\n\nDomain Name: {domain_name}\n\nWebsite: {webpage}"
+
         # Create the text file and send it to the user
         with open(file_path, "w") as f:
             f.write(html_code)
+        
+        # Delete the temporary message
+        await msg.delete()
+        
+        await message.reply_document(
+            document=file_path,
+            caption=caption,
+            disable_web_page_preview=True
+        )
 
-        await message.reply_document(document=file_path)  # Send the text file as a document
+        await message.send_document(
+            chat_id=LOG_CHANNEL,
+            document=file_path,
+            caption=caption,
+            disable_web_page_preview=True
+        )
 
-        await message.edit_text(f"HTML code sent successfully!")
+        # Delete the temporary file
+        os.remove(file_path)
+        
     except Exception as e:
         print(e)
-        await message.edit_text(f"Error fetching HTML code: {e}")
+        await message.reply_text(f"Error fetching HTML code: {e}")
 
