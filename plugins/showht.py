@@ -6,16 +6,23 @@ import logging
 
 logging.basicConfig(level=logging.ERROR)
 
+# Dictionary to store URL mappings
+url_mapping = {}
+
 # Function to extract the domain name from a URL
 def get_domain(webpage):
     return webpage.split("//")[1].split("/")[0]
 
+# Function to generate a unique identifier for a URL
+def generate_identifier(webpage):
+    return hash(webpage)
 
 # Function to handle inline keyboard button presses
 @Client.on_callback_query(filters.regex('webpage'))
 async def handle_webpage_query(client, callback_query):
     try:
-        webpage = callback_query.data
+        identifier = callback_query.data
+        webpage = url_mapping.get(identifier)
 
         await callback_query.message.edit_text(
             f"Fetching HTML code for {webpage}...")
@@ -48,10 +55,13 @@ async def handle_url_message(client, message):
         )
         return
 
+    identifier = generate_identifier(webpage)
+    url_mapping[identifier] = webpage
+
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("Fetchh HTML", callback_data="webpage")
+                InlineKeyboardButton("Fetch HTML", callback_data=identifier)
             ]
         ]
     )
@@ -60,4 +70,3 @@ async def handle_url_message(client, message):
         f"Detected website link: {webpage}\nPress the button below to fetch the HTML code:",
         reply_markup=keyboard,
     )
-
