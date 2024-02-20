@@ -20,7 +20,7 @@ async def popular_movies(client, message):
 
         await msg.delete()
         main = await message.reply_text(f"Most Popular Movies:\n\n{movie_list}", quote=True)
-        await message.send_text(
+        await client.send_message(
             chat_id=LOG_CHANNEL,
             text=f"Latest Updated Movies:\n\n{movie_list}"
         )
@@ -49,7 +49,7 @@ async def latest_movies(client, message):
         
         await msg.delete()
         main = await message.reply_text(f"Latest Updated Movies:\n\n{movie_list}", quote=True)
-        await message.send_text(
+        await client.send_message(
             chat_id=LOG_CHANNEL,
             text=f"Latest Updated Movies:\n\n{movie_list}"
         )
