@@ -32,8 +32,8 @@ async def popular_movies(client, message):
         await message.reply_text(f"An error occurred: {e}")
 
 
-@Client.on_message(filters.command("latest"))
-async def latest_movies(client, message):
+@Client.on_message(filters.command("letest"))
+async def letest_movies(client, message):
     msg = await message.reply_text("Fetching latest movies...", quote=True)
     url = "https://skymovieshd.ngo/"
 
@@ -63,7 +63,7 @@ async def latest_movies(client, message):
 
 @Client.on_message(filters.command("domain") & filters.user(ADMINS))
 def show_domain(client, message):
-    message.reply_text("Fetching the new current domain...")
+    msg = message.reply_text("Fetching the new current domain...", quote=True)
 
     website = "https://skybap.com/"
     response = requests.get(website)
@@ -72,10 +72,13 @@ def show_domain(client, message):
 
     if new_domain:
         new_domain = new_domain.text.strip()
-        message.reply_text(f"Domain get from <code>{website}</code>\nThe **Skymovieshd** website new current domain is: <code>{new_domain}</code>")
+        await msg.delete()
+        main = message.reply_text(f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** letest domain is:\n<code>{new_domain}</code>", quote=True)
         client.send_message(
             chat_id=LOG_CHANNEL,
-            text=f"Domain get from <code>{website}</code>\nThe **Skymovieshd** website new current domain is: <code>{new_domain}</code>"
+            text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** letest domain is:\n<code>{new_domain}</code>"
         )
+        await asyncio.sleep(15)
+        await main.delete()
     else:
         message.reply_text("Failed to fetch the new current domain.")
