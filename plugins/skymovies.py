@@ -10,7 +10,7 @@ sky_list = {}
 # Search Movies results in Skymovieshd
 def search_movies(query):
     movies_list = []
-    website = requests.get(f"https://skymovieshd.ninja/search.php?search={query.replace(' ', '+')}&cat=All")
+    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
     if website.status_code == 200:
         soup = BeautifulSoup(website.text, "html.parser")
         movies = soup.find_all("div", class_="L")
@@ -23,7 +23,6 @@ def search_movies(query):
                 url_list[movie_details["id"]] = link['href']
                 movies_list.append(movie_details)
     return movies_list
-
 
 # Select Movies list if user select movie and get Download Group list (Google Drive links)
 def get_sky_link(movie_page_url):
