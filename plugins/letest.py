@@ -2,7 +2,8 @@ import asyncio
 import requests
 from bs4 import BeautifulSoup
 from pyrogram import Client, filters
-from info import LOG_CHANNEL 
+from info import ADMINS, LOG_CHANNEL 
+
 
 @Client.on_message(filters.command("popular"))
 async def popular_movies(client, message):
@@ -58,3 +59,23 @@ async def latest_movies(client, message):
         await main.delete()
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
+
+
+@Client.on_message(filters.command("domain") & filters.user(ADMINS))
+def show_domain(client, message):
+    message.reply_text("Fetching the new current domain...")
+
+    website = "https://skybap.com/"
+    response = requests.get(website)
+    soup = BeautifulSoup(response.text, "html.parser")
+    new_domain = soup.find("span", {"class": "badge"})
+
+    if new_domain:
+        new_domain = new_domain.text.strip()
+        message.reply_text(f"Domain get from <code>{website}</code>\nThe **Skymovieshd** website new current domain is: <code>{new_domain}</code>")
+        client.send_message(
+            chat_id=LOG_CHANNEL,
+            text=f"Domain get from <code>{website}</code>\nThe **Skymovieshd** website new current domain is: <code>{new_domain}</code>"
+        )
+    else:
+        message.reply_text("Failed to fetch the new current domain.")
