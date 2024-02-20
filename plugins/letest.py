@@ -63,7 +63,7 @@ async def letest_movies(client, message):
 
 @Client.on_message(filters.command("domain") & filters.user(ADMINS))
 def show_domain(client, message):
-    msg = message.reply_text("Fetching the new current domain...", quote=True)
+    msg = await message.reply_text("Fetching the new current domain...", quote=True)
 
     website = "https://skybap.com/"
     response = requests.get(website)
@@ -72,9 +72,10 @@ def show_domain(client, message):
 
     if new_domain:
         new_domain = new_domain.text.strip()
+        
         await msg.delete()
-        main = message.reply_text(f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** letest domain is:\n<code>{new_domain}</code>", quote=True)
-        client.send_message(
+        main = await message.reply_text(f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** letest domain is:\n<code>{new_domain}</code>", quote=True)
+        await client.send_message(
             chat_id=LOG_CHANNEL,
             text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** letest domain is:\n<code>{new_domain}</code>"
         )
