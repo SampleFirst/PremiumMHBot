@@ -2,7 +2,7 @@ import asyncio
 import requests
 from bs4 import BeautifulSoup
 from pyrogram import Client, filters
-from info import ADMINS, LOG_CHANNEL 
+from info import ADMINS, LOG_CHANNEL
 
 
 @Client.on_message(filters.command("popular"))
@@ -32,8 +32,8 @@ async def popular_movies(client, message):
         await message.reply_text(f"An error occurred: {e}")
 
 
-@Client.on_message(filters.command("letest"))
-async def letest_movies(client, message):
+@Client.on_message(filters.command("latest"))
+async def latest_movies(client, message):
     msg = await message.reply_text("Fetching latest movies...", quote=True)
     url = "https://skymovieshd.ngo/"
 
@@ -62,7 +62,7 @@ async def letest_movies(client, message):
 
 
 @Client.on_message(filters.command("domain") & filters.user(ADMINS))
-def show_domain(client, message):
+async def show_domain(client, message):
     msg = await message.reply_text("Fetching the new current domain...", quote=True)
 
     website = "https://skybap.com/"
@@ -74,12 +74,12 @@ def show_domain(client, message):
         new_domain = new_domain.text.strip()
         
         await msg.delete()
-        main = await message.reply_text(f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** letest domain is:\n<code>{new_domain}</code>", quote=True)
+        main = await message.reply_text(f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>", quote=True)
         await client.send_message(
             chat_id=LOG_CHANNEL,
-            text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** letest domain is:\n<code>{new_domain}</code>"
+            text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>"
         )
         await asyncio.sleep(15)
         await main.delete()
     else:
-        message.reply_text("Failed to fetch the new current domain.")
+        await message.reply_text("Failed to fetch the new current domain.")
