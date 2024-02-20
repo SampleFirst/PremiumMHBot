@@ -1,30 +1,28 @@
 from pyrogram import Client, filters
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
 
-# Function to extract movie names from HTML
-def extract_movie_names(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
-    movie_names = []
-    for div in soup.find_all('div', class_='Fmvideo'):
-        movie_name = div.find('a').text.strip()
-        movie_names.append(movie_name)
-    return movie_names
-
-
-# Command handler
-@Client.on_message(filters.command(["latest"]))
-def latest_movies(client, message):
+@Client.on_message(filters.command("popular"))
+async def most_popular_movies(client, message):
     url = "https://skymovieshd.ngo/"
     response = requests.get(url)
     if response.status_code == 200:
-        html_content = response.text
-        movie_names = extract_movie_names(html_content)
-        if movie_names:
-            movie_list = "\n".join(movie_names)
-            message.reply_text(f"Latest Updated Movies:\n{movie_list}")
-        else:
-            message.reply_text("No latest movies found.")
+        soup = BeautifulSoup(response.text, 'html.parser')
+        popular_movies = soup.find('div', class_='Robiul').next_sibling.find_all('div', class_='Let')
+        movies_list = '\n'.join([movie.text.strip() for movie in popular_movies])
+        update.message.reply_text("Most Popular Movies:\n" + movies_list)
     else:
-        message.reply_text("Failed to fetch website content.")
+        update.message.reply_text("Failed to fetch data from the website.")
+
+@Client.on_message(filters.command("letest"))
+async def latest_updated_movies(client, message):
+    url = "https://skymovieshd.ngo/"
+    response = requests.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        latest_movies = soup.find('div', class_='Robiul').next_sibling.next_sibling.find_all('div', class_='Fmvideo')
+        movies_list = '\n'.join([movie.text.strip() for movie in latest_movies])
+        update.message.reply_text("Latest Updated Movies:\n" + movies_list)
+    else:
+        update.message.reply_text("Failed to fetch data from the website.")
 
