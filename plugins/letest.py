@@ -1,11 +1,12 @@
+import asyncio
 import requests
 from bs4 import BeautifulSoup
 from pyrogram import Client, filters
-
+from info import LOG_CHANNEL 
 
 @Client.on_message(filters.command("popular"))
 async def popular_movies(client, message):
-    msg = await message.reply_text("Fetching popular movies...")
+    msg = await message.reply_text("Fetching popular movies...", quote=True)
     url = "https://skymovieshd.ngo/"
 
     try:
@@ -15,18 +16,24 @@ async def popular_movies(client, message):
         movies = soup.find_all('div', class_='Let')
         movie_list = ""
         for movie in movies:
-            movie_list += f"{movie.text}\n\n"
+            movie_list += f"<code>{movie.text.strip()}</code>\n\n"  # Remove leading and trailing whitespace
 
         await msg.delete()
-        await message.reply_text(f"Most Popular Movies:\n\n<code>{movie_list}</code>")
-
+        main = await message.reply_text(f"Most Popular Movies:\n\n{movie_list}", quote=True)
+        await message.send_text(
+            chat_id=LOG_CHANNEL,
+            text=f"Latest Updated Movies:\n\n{movie_list}"
+        )
+        
+        await asyncio.sleep(15)
+        await main.delete()
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
 
 
 @Client.on_message(filters.command("latest"))
 async def latest_movies(client, message):
-    msg = await message.reply_text("Fetching latest movies...")
+    msg = await message.reply_text("Fetching latest movies...", quote=True)
     url = "https://skymovieshd.ngo/"
 
     try:
@@ -38,10 +45,16 @@ async def latest_movies(client, message):
         movies = soup.find_all('div', class_='Fmvideo')[3:]  # Start from the fourth Fmvideo div
         movie_list = ""
         for movie in movies:
-            movie_list += f"{movie.text}\n\n"
+            movie_list += f"<code>{movie.text.strip()}</code>\n\n"  # Remove leading and trailing whitespace
         
         await msg.delete()
-        await message.reply_text(f"Latest Updated Movies:\n\n<code>{movie_list}</code>")
-
+        main = await message.reply_text(f"Latest Updated Movies:\n\n{movie_list}", quote=True)
+        await message.send_text(
+            chat_id=LOG_CHANNEL,
+            text=f"Latest Updated Movies:\n\n{movie_list}"
+        )
+        
+        await asyncio.sleep(15)
+        await main.delete()
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
