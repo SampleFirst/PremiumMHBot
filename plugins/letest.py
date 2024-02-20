@@ -15,7 +15,7 @@ async def latest_movies(client, message):
         movies = soup.find_all('div', class_='Fmvideo')
         movie_list = ""
         for movie in movies:
-            movie_list += f"{movie.text} - {url}{movie['href']}\n"
+            movie_list += f"{movie.text}\n\n"
 
         await message.reply_text(f"Latest Updated Movies:\n{movie_list}")
 
