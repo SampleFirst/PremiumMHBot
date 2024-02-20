@@ -18,7 +18,7 @@ async def popular_movies(client, message):
             movie_list += f"{movie.text}\n\n"
 
         await msg.delete()
-        await message.reply_text(f"Most Popular Movies:\n{movie_list}")
+        await message.reply_text(f"Most Popular Movies:\n\n<code>{movie_list}</code>")
 
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
@@ -33,16 +33,15 @@ async def latest_movies(client, message):
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception for HTTP errors
         soup = BeautifulSoup(response.text, "html.parser")
-        movies = soup.find_all('div', class_='Fmvideo')
+        
+        # Extracting only the relevant movie information
+        movies = soup.find_all('div', class_='Fmvideo')[3:]  # Start from the fourth Fmvideo div
         movie_list = ""
         for movie in movies:
             movie_list += f"{movie.text}\n\n"
-
-        # Split the movie_list by "::" to remove unwanted sections
-        movie_list = movie_list.split("::")[1].strip()
-
+        
         await msg.delete()
-        await message.reply_text(f"Latest Updated Movies:\n{movie_list}")
+        await message.reply_text(f"Latest Updated Movies:\n\n<code>{movie_list}</code>")
 
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
