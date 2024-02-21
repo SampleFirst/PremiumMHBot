@@ -26,9 +26,11 @@ async def skymovies(client, message):
     else:
         await message.reply_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
+
 @Client.on_callback_query()
-def movie_result(client, callback_query):
+async def movie_result(client, callback_query):
     try:
+        await callback_query.message.edit_text('Searching Group links...')
         movie_id = callback_query.data
         groups_list = get_movie(url_list[movie_id])
         if groups_list:
@@ -60,6 +62,7 @@ def search_movies(query):
                 movies_list.append(movie_details)
     return movies_list
 
+
 def get_movie(movie_page_url):
     groups_list = []
     movie_page_link = requests.get(movie_page_url)
@@ -69,10 +72,9 @@ def get_movie(movie_page_url):
         for group in groups:
             link = group.find_all("a")
             if link:
-                group_details = {}                
+                group_details = {}
                 group_details["id"] = f"grp{groups.index(group)}"
-                group_details["title"] = link.text.strip()
-                grp_list[group_details["id"]] = link['href'] # Fixed variable name here
+                group_details["title"] = link[0].text.strip()  # Fixed index error here
+                grp_list[group_details["id"]] = link[0]['href']  # Fixed variable name here
                 groups_list.append(group_details)
     return groups_list
-
