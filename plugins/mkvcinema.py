@@ -80,4 +80,3 @@ def get_movie(movie_page_url):
     return movie_details
 
 
-
