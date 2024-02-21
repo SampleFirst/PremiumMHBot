@@ -26,8 +26,8 @@ async def skymovies(client, message):
     else:
         await message.reply_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
-@Client.on_callback_query(filters.regex('^link'))
-async def group_result(client, callback_query):
+@Client.on_callback_query()
+def movie_result(client, callback_query):
     try:
         await callback_query.message.edit_text('Searching Group links...')
         movie_id = callback_query.data
@@ -44,12 +44,6 @@ async def group_result(client, callback_query):
     except Exception as e:
         await callback_query.message.edit_text(text=f"An error occurred: {str(e)}")
 
-@Client.on_callback_query(filters.regex('^grp'))
-async def movie_result(client, callback_query):
-    try:
-        await callback_query.message.edit_text('Searching final download links...')
-    except Exception as e:
-        await callback_query.message.edit_text(text=f"An error occurred: {str(e)}")
 
 def search_movies(query):
     movies_list = []
