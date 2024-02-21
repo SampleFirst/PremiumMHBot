@@ -2,7 +2,6 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
-from io import BytesIO
 
 url_list = {}
 grp_list = {}
@@ -27,32 +26,30 @@ async def skymovies(client, message):
     else:
         await message.reply_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
-@Client.on_callback_query()
-async def callback_handlers(client, callback_query):
+@Client.on_callback_query(filters.regex('^link'))
+async def group_result(client, callback_query):
     try:
-        if callback_query.data.startswith("link"):        
-            movie_id = callback_query.data
-            if movie_page_url:
-                groups_list = get_movie(url_list[movie_id])
-                if groups_list:
-                    keyboards = []
-                    for group in groups_list:
-                        keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
-                        keyboards.append(keyboard)
-                    reply_markup = InlineKeyboardMarkup(keyboards)
-                    
-                    await query.message.edit_text('Download Groups Results...', reply_markup=reply_markup)
-                else:
-                    await query.message.edit_text('Sorry 🙏, No Result Found!')
-    
-        elif callback_query.data.startswith("grp"):
-            download_url = callback_query.data.split("_", 1)[1]
-            # Fetch the final download URL or handle as needed
-            await callback_query.answer(text="Processing download...")
-            # Handle the download process here
+        await callback_query.message.edit_text('Searching Group links...')
+        movie_id = callback_query.data
+        groups_list = get_movie(url_list[movie_id])
+        if groups_list:
+            keyboards = []
+            for group in groups_list:
+                keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
+                keyboards.append(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboards)
+            await callback_query.message.edit_text('Download Groups Results...', reply_markup=reply_markup)
+        else:
+            await callback_query.message.edit_text('Sorry 🙏, No Result Found!')
     except Exception as e:
         await callback_query.message.edit_text(text=f"An error occurred: {str(e)}")
 
+@Client.on_callback_query(filters.regex('^grp'))
+async def movie_result(client, callback_query):
+    try:
+        await callback_query.message.edit_text('Searching final download links...')
+    except Exception as e:
+        await callback_query.message.edit_text(text=f"An error occurred: {str(e)}")
 
 def search_movies(query):
     movies_list = []
@@ -70,7 +67,6 @@ def search_movies(query):
                 movies_list.append(movie_details)
     return movies_list
 
-
 def get_movie(movie_page_url):
     groups_list = []
     movie_page_link = requests.get(movie_page_url)
@@ -83,7 +79,7 @@ def get_movie(movie_page_url):
                 group_details = {}                
                 group_details["id"] = f"grp{groups.index(group)}"
                 group_details["title"] = link.text.strip()
-                grp_list[movie_details["id"]] = link['href']
+                grp_list[group_details["id"]] = link['href'] # Fixed variable name here
                 groups_list.append(group_details)
     return groups_list
-    
+
