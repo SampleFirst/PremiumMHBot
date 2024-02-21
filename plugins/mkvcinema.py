@@ -47,13 +47,13 @@ def search_movies(query):
     if website.status_code == 200:
         website = website.text
         website = BeautifulSoup(website, "html.parser")
-        movies = website.find_all("div", {'class': 'Bolly'})
+        movies = website.find_all("div", {'class': 'L'})
         for movie in movies:
             movie_details = {}
             movie_link = movie.find("a", href=True)
             if movie_link:
                 movie_details["id"] = f"len{movies.index(movie)}"
-                movie_details["title"] = movie_link.find("span", {'class': 'mli-info'}).text
+                movie_details["title"] = movie_link.text.strip()
                 len_list[movie_details["id"]] = movie_link['href']
                 movies_list.append(movie_details)
     return movies_list
