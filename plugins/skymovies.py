@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 
 url_list = {}
+grp_list = {}
 
 
 @Client.on_message(filters.command("skymovies"))
@@ -32,17 +33,18 @@ async def callback_handlers(client, callback_query):
         movie_id = callback_query.data
         movie_page_url = url_list.get(movie_id)
         if movie_page_url:
-            download_groups = get_movie(movie_page_url)
-            if download_groups:
+            groups_list = get_movie(movie_page_url)
+            if groups_list:
                 keyboards = []
-                for group in download_groups:
-                    keyboard = []
-                    for link in group["links"]:
-                        keyboard.append(InlineKeyboardButton(link["title"], callback_data=f"download_{link['url']}"))
+                for group in groups_list:
+                    keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
                     keyboards.append(keyboard)
                 reply_markup = InlineKeyboardMarkup(keyboards)
-                await callback_query.message.edit_text(group["title"], reply_markup=reply_markup)
-    elif callback_query.data.startswith("download"):
+                await search_results.edit_text('Download Groups Results...', reply_markup=reply_markup)
+            else:
+                await search_results.edit_text('Sorry 🙏, No Result Found!')
+
+    elif callback_query.data.startswith("grp"):
         download_url = callback_query.data.split("_", 1)[1]
         # Fetch the final download URL or handle as needed
         await callback_query.answer(text="Processing download...")
@@ -67,18 +69,19 @@ def search_movies(query):
 
 
 def get_movie(movie_page_url):
-    downloads_list = []
+    groups_list = []
     movie_page_link = requests.get(movie_page_url)
     if movie_page_link.status_code == 200:
         soup = BeautifulSoup(movie_page_link.text, "html.parser")
-        download_groups = soup.find_all("div", class_="Bolly")  # Assuming download groups are in divs with class "Bolly"
-        for group in download_groups:
-            group_details = {}
-            links = group.find_all("a")
-            if links:
-                group_details["title"] = group.find("b").text.strip()
-                group_details["links"] = []
-                for link in links:
-                    group_details["links"].append({"title": link.text.strip(), "url": link['href']})
-                downloads_list.append(group_details)
-    return downloads_list
+        groups = soup.find_all("div", class_="Bolly")  # Assuming download groups are in divs with class "Bolly"
+        for group in groups:
+            link = group.find_all("a")
+            if link:
+                group_details = {}                
+                group_details["id"] = f"grp{groups.index(group)}"
+                group_details["title"] = link.text.strip()
+                grp_list[movie_details["id"]] = link['href']
+                groups_list.append(group_details)
+    return groups_list
+
+    
