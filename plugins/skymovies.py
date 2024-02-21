@@ -8,28 +8,32 @@ url_list = {}
 
 @Client.on_message(filters.command("skymovies"))
 async def skymovies(client, message):
-    query = message.text.split(maxsplit=1)
-    if len(query) == 1:
-        await message.reply_text("Please provide a movie name to search.")
-        return
-    query = query[1]
-    search_results = await message.reply_text("Processing...")
-    movies_list = search_movies(query)
-    if movies_list:
-        keyboards = []
-        for movie in movies_list:
-            keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
-            keyboards.append(keyboard)
-        reply_markup = InlineKeyboardMarkup(keyboards)
-        await search_results.edit_text('Search Results...', reply_markup=reply_markup)
-    else:
-        await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+    try:
+        query = message.text.split(maxsplit=1)
+        if len(query) == 1:
+            await message.reply_text("Please provide a movie name to search.")
+            return
+        query = query[1]
+        search_results = await message.reply_text("Processing...")
+        movies_list = search_movies(query)
+        if movies_list:
+            keyboards = []
+            for movie in movies_list:
+                keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
+                keyboards.append(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboards)
+            await search_results.edit_text('Search Results...', reply_markup=reply_markup)
+        else:
+            await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+    except Exception as e:
+        await message.reply_text(f"An error occurred: {str(e)}")
 
 @Client.on_callback_query(filters.regex('^link'))
 async def movie_result(client, callback_query):
     try:
         query = callback_query
         movie_id = query.data
+        await query.message.reply_text("Processing...")
         movie_links = get_movie(url_list[movie_id])  # Get movie links
         if movie_links:
             link_buttons = []
@@ -41,7 +45,7 @@ async def movie_result(client, callback_query):
             await query.message.reply_text("Sorry, no download links found for this movie.")
             await query.answer("Sent movie links")
     except Exception as e:
-        await message.reply_text(f"An error occurred: {str(e)}")
+        await query.message.reply_text(f"An error occurred: {str(e)}")
 
 def search_movies(query):
     movies_list = []
@@ -74,4 +78,3 @@ def get_movie(movie_page_url):
                 final_links[link.text] = link["href"]
         movie_details["download_links"] = final_links
     return movie_details
-    
