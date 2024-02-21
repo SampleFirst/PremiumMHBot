@@ -7,8 +7,8 @@ from io import BytesIO
 len_list = {}
 
 
-@Client.on_message(filters.command("mkvcinema"))
-async def mkvcinema(client, message):
+@Client.on_message(filters.command("skymovies"))
+async def skymovies(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
         await message.reply_text("Please provide a movie name to search.")
@@ -44,11 +44,11 @@ async def movie_result(client, callback_query):
 def search_movies(query):
     movies_list = []
     movies_details = {}
-    website = requests.get(f"https://mkvcinemas.dev/?s={query.replace(' ', '+')}")
+    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
     if website.status_code == 200:
         website = website.text
         website = BeautifulSoup(website, "html.parser")
-        movies = website.find_all("a", {'class': 'ml-mask jt'})
+        movies = website.find_all("div", {'class': 'Bolly'}).find_all("a", href=True)
         for movie in movies:
             if movie:
                 movies_details["id"] = f"len{movies.index(movie)}"
@@ -65,9 +65,16 @@ def get_movie(movie_page_url):
     if movie_page_link.status_code == 200:
         movie_page_link = movie_page_link.text
         movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
-        links = movie_page_link.find_all("a", {'rel': 'noopener', 'data-wpel-link': 'internal'})
+        
+        # Extracting Watch Online link
+        watch_online_link = movie_page_link.find("a", href=True, text="WATCH ONLINE")
+        if watch_online_link:
+            movie_details["Watch Online"] = watch_online_link['href']
+        
+        # Extracting Download links
+        download_links = movie_page_link.find("div", {'class': 'Bolly'}).find_all("a", href=True)
         final_links = {}
-        for i in links:
-            final_links[f"{i.text}"] = i['href']
-        movie_details["links"] = final_links
+        for download in download_links:
+            final_links[download.text.strip()] = download['href']
+        movie_details["Download Links"] = final_links
     return movie_details
