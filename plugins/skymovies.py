@@ -29,7 +29,6 @@ async def skymovies(client, message):
 @Client.on_callback_query()
 def movie_result(client, callback_query):
     try:
-        await callback_query.message.edit_text('Searching Group links...')
         movie_id = callback_query.data
         groups_list = get_movie(url_list[movie_id])
         if groups_list:
