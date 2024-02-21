@@ -43,19 +43,19 @@ async def movie_result(client, callback_query):
 
 def search_movies(query):
     movies_list = []
-    movies_details = {}
     website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
     if website.status_code == 200:
         website = website.text
         website = BeautifulSoup(website, "html.parser")
-        movies = website.find_all("div", {'class': 'Bolly'}).find_all("a", href=True)
+        movies = website.find_all("div", {'class': 'Bolly'})
         for movie in movies:
-            if movie:
-                movies_details["id"] = f"len{movies.index(movie)}"
-                movies_details["title"] = movie.find("span", {'class': 'mli-info'}).text
-                len_list[movies_details["id"]] = movie['href']
-                movies_list.append(movies_details)
-                movies_details = {}
+            movie_details = {}
+            movie_link = movie.find("a", href=True)
+            if movie_link:
+                movie_details["id"] = f"len{movies.index(movie)}"
+                movie_details["title"] = movie_link.find("span", {'class': 'mli-info'}).text
+                len_list[movie_details["id"]] = movie_link['href']
+                movies_list.append(movie_details)
     return movies_list
 
 
@@ -78,3 +78,6 @@ def get_movie(movie_page_url):
             final_links[download.text.strip()] = download['href']
         movie_details["Download Links"] = final_links
     return movie_details
+
+
+
