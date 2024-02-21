@@ -23,35 +23,35 @@ async def skymovies(client, message):
             keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await search_results.edit_text('Search Results...', reply_markup=reply_markup)
+        await message.reply_text('Search Results...', reply_markup=reply_markup)
     else:
-        await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+        await message.reply_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
 @Client.on_callback_query()
 async def callback_handlers(client, callback_query):
-    if callback_query.data.startswith("link"):
-        movie_id = callback_query.data
-        movie_page_url = url_list.get(movie_id)
-        if movie_page_url:
-            groups_list = get_movie(movie_page_url)
-            if groups_list:
-                keyboards = []
-                for group in groups_list:
-                    keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
-                    keyboards.append(keyboard)
-                reply_markup = InlineKeyboardMarkup(keyboards)
-                # Send the updated keyboard as a message, because `search_results` isn't defined here
-                await client.send_message(callback_query.message.chat.id, 'Download Groups Results...', reply_markup=reply_markup)
-            else:
-                # Send a message indicating no results found
-                await client.send_message(callback_query.message.chat.id, 'Sorry 🙏, No Result Found!')
-        # Answer the callback query to remove the "Processing..." status
-        await callback_query.answer()
-    elif callback_query.data.startswith("grp"):
-        download_url = callback_query.data.split("_", 1)[1]
-        # Fetch the final download URL or handle as needed
-        await callback_query.answer(text="Processing download...")
-        # Handle the download process here
+    try:
+        if callback_query.data.startswith("link"):        
+            movie_id = callback_query.data
+            if movie_page_url:
+                groups_list = get_movie(url_list[movie_id])
+                if groups_list:
+                    keyboards = []
+                    for group in groups_list:
+                        keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
+                        keyboards.append(keyboard)
+                    reply_markup = InlineKeyboardMarkup(keyboards)
+                    
+                    await query.message.edit_text('Download Groups Results...', reply_markup=reply_markup)
+                else:
+                    await query.message.edit_text('Sorry 🙏, No Result Found!')
+    
+        elif callback_query.data.startswith("grp"):
+            download_url = callback_query.data.split("_", 1)[1]
+            # Fetch the final download URL or handle as needed
+            await callback_query.answer(text="Processing download...")
+            # Handle the download process here
+    except Exception as e:
+        await callback_query.message.edit_text(text=f"An error occurred: {str(e)}")
 
 
 def search_movies(query):
@@ -86,5 +86,4 @@ def get_movie(movie_page_url):
                 grp_list[movie_details["id"]] = link['href']
                 groups_list.append(group_details)
     return groups_list
-
     
