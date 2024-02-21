@@ -40,10 +40,13 @@ async def callback_handlers(client, callback_query):
                     keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
                     keyboards.append(keyboard)
                 reply_markup = InlineKeyboardMarkup(keyboards)
-                await search_results.edit_text('Download Groups Results...', reply_markup=reply_markup)
+                # Send the updated keyboard as a message, because `search_results` isn't defined here
+                await client.send_message(callback_query.message.chat.id, 'Download Groups Results...', reply_markup=reply_markup)
             else:
-                await search_results.edit_text('Sorry 🙏, No Result Found!')
-
+                # Send a message indicating no results found
+                await client.send_message(callback_query.message.chat.id, 'Sorry 🙏, No Result Found!')
+        # Answer the callback query to remove the "Processing..." status
+        await callback_query.answer()
     elif callback_query.data.startswith("grp"):
         download_url = callback_query.data.split("_", 1)[1]
         # Fetch the final download URL or handle as needed
