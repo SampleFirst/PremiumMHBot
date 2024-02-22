@@ -2,9 +2,9 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
+import re
 
-len_list = {}
-
+movie_links = {}
 
 @Client.on_message(filters.command("skymovies"))
 async def skymovies(client, message):
@@ -25,23 +25,35 @@ async def skymovies(client, message):
     else:
         await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
-
 @Client.on_callback_query(filters.regex('^len'))
 async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
-    s = get_movie(len_list[movie_id])
+    s = get_movie(movie_links[movie_id])
     if "Download Links" in s:
-        link = ""
         links = s["Download Links"]
+        keyboards = []
         for title, download_link in links.items():
-            link += f"🎬 {title}\n{download_link}\n\n"
-        caption = f"⚡ Download Links :-\n\n{link}"
-        await query.answer("Sent movie links")
-        await query.message.reply_text(text=caption)
+            keyboard = [InlineKeyboardButton(title, callback_data=download_link)]
+            keyboards.append(keyboard)
+        reply_markup = InlineKeyboardMarkup(keyboards)
+        await query.answer("Sent movie download links")
+        await query.message.reply_text(text="Choose Download Link:", reply_markup=reply_markup)
     else:
         await query.answer("No download links available for this movie.")
 
+@Client.on_callback_query(filters.regex('^http'))
+async def open_link_and_extract(client, callback_query):
+    query = callback_query
+    link = query.data
+    extracted_links = extract_links_from_page(link)
+    keyboards = []
+    for extracted_link in extracted_links:
+        keyboard = [InlineKeyboardButton(extracted_link, callback_data=extracted_link)]
+        keyboards.append(keyboard)
+    reply_markup = InlineKeyboardMarkup(keyboards)
+    await query.answer("Extracted download links")
+    await query.message.reply_text(text="Extracted Links:", reply_markup=reply_markup)
 
 def search_movies(query):
     movies_list = []
@@ -56,10 +68,9 @@ def search_movies(query):
             if movie_link:
                 movie_details["id"] = f"len{movies.index(movie)}"
                 movie_details["title"] = movie_link.text.strip()
-                len_list[movie_details["id"]] = movie_link['href']
+                movie_links[movie_details["id"]] = movie_link['href']
                 movies_list.append(movie_details)
     return movies_list
-
 
 def get_movie(movie_page_url):
     movie_details = {}
@@ -84,4 +95,15 @@ def get_movie(movie_page_url):
             movie_details["Download Links"] = final_links
     return movie_details
 
-
+def extract_links_from_page(url):
+    extracted_links = []
+    webpage = requests.get(url)
+    if webpage.status_code == 200:
+        webpage = webpage.text
+        webpage = BeautifulSoup(webpage, "html.parser")
+        links = webpage.find_all("a", href=True)
+        for link in links:
+            href = link['href']
+            if re.match(r'^https?://', href):
+                extracted_links.append(href)
+    return extracted_links
