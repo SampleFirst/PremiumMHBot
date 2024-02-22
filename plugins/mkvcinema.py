@@ -34,8 +34,8 @@ async def movie_result(client, callback_query):
     s = get_movie(movie_links[movie_id])
     if s:
         keyboards = []
-        for download in ddl_links.items():
-            keyboard = [InlineKeyboardButton(download["title"], callback_data=download["id"])]
+        for download_id, download_link in ddl_links.items():  # Fix: Unpack tuple into key and value
+            keyboard = [InlineKeyboardButton(download_link["title"], callback_data=download_id)]  # Fix: Use download_id as the callback_data
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
         await query.answer("Sent movie download links")
@@ -103,4 +103,5 @@ def extract_links_from_page(url):
             if href.startswith("https://"):
                 extracted_links.append(href)
     return extracted_links
-
+    
+    
