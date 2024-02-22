@@ -75,7 +75,6 @@ def search_movies(query):
 
 def get_movie(movie_page_url):
     download_list = []
-    movie_details = {}
     movie_page = "https://skymovieshd.ngo" + movie_page_url
     movie_page_link = requests.get(movie_page)
     if movie_page_link.status_code == 200:
@@ -87,11 +86,13 @@ def get_movie(movie_page_url):
         if download_links:
             download_links = download_links.find_all("a", href=True)
             for download in download_links:
-                movie_details["link"] = f"ddl{download_links.index(download)}"
-                movie_details["text"] = download.text.strip()
-                ddl_links[movie_details["link"]] = download['href']
-                download_list.append(movie_details)
+                load_details = {}  # Create a new dictionary for each download link
+                load_details["link"] = f"ddl{download_links.index(download)}"
+                load_details["text"] = download.text.strip()
+                ddl_links[load_details["link"]] = download['href']
+                download_list.append(load_details)
     return download_list
+
 
 def extract_links_from_page(download_page_url):
     extracted_links = []
