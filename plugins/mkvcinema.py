@@ -7,7 +7,6 @@ movie_links = {}
 ddl_links = {}
 
 
-
 @Client.on_message(filters.command("skymovies"))
 async def skymovies(client, message):
     query = message.text.split(maxsplit=1)
@@ -46,8 +45,8 @@ async def movie_result(client, callback_query):
 @Client.on_callback_query(filters.regex('^ddl'))
 async def open_link_and_extract(client, callback_query):
     query = callback_query
-    link = query.data
-    extracted_links = extract_links_from_page(ddl_links[download_link])
+    download_link = query.data
+    extracted_links = final_link_page(ddl_links[download_link])
     keyboards = []
     for extracted_link in extracted_links:
         keyboard = [InlineKeyboardButton(extracted_link, url=extracted_link)]
@@ -64,13 +63,13 @@ def search_movies(query):
         website = BeautifulSoup(website, "html.parser")
         movies = website.find_all("div", {'class': 'L'})
         for movie in movies:
-            movie_details = {}
+            load_details = {}
             movie_link = movie.find("a", href=True)
             if movie_link:
-                movie_details["id"] = f"len{movies.index(movie)}"
-                movie_details["title"] = movie_link.text.strip()
-                movie_links[movie_details["id"]] = movie_link['href']
-                movies_list.append(movie_details)
+                load_details["id"] = f"len{movies.index(movie)}"
+                load_details["title"] = movie_link.text.strip()
+                movie_links[load_details["id"]] = movie_link['href']
+                movies_list.append(load_details)
     return movies_list
 
 def get_movie(movie_page_url):
@@ -80,21 +79,18 @@ def get_movie(movie_page_url):
     if movie_page_link.status_code == 200:
         movie_page_link = movie_page_link.text
         movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
-           
-        # Extracting Download links
         download_links = movie_page_link.find("div", {'class': 'Bolly'})
         if download_links:
             download_links = download_links.find_all("a", href=True)
             for download in download_links:
-                load_details = {}  # Create a new dictionary for each download link
+                load_details = {}
                 load_details["link"] = f"ddl{download_links.index(download)}"
                 load_details["text"] = download.text.strip()
                 ddl_links[load_details["link"]] = download['href']
                 download_list.append(load_details)
     return download_list
 
-
-def extract_links_from_page(download_page_url):
+def final_link_page(download_page_url):
     extracted_links = []
     download_page = download_page_url
     webpage = requests.get(download_page)
@@ -107,7 +103,4 @@ def extract_links_from_page(download_page_url):
             if href.startswith("https://"):
                 extracted_links.append(href)
     return extracted_links
-    
-    
-    
-    
+       
