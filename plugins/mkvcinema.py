@@ -35,7 +35,7 @@ async def movie_result(client, callback_query):
     if download_list:
         keyboards = []
         for download in download_list:
-            keyboard = [InlineKeyboardButton(download["title"], callback_data=download["id"])]
+            keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
         await query.answer("Sent movie download links")
@@ -47,7 +47,7 @@ async def movie_result(client, callback_query):
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     link = query.data
-    extracted_links = extract_links_from_page(link)
+    extracted_links = extract_links_from_page(ddl_links[download_link])
     keyboards = []
     for extracted_link in extracted_links:
         keyboard = [InlineKeyboardButton(extracted_link, url=extracted_link)]
@@ -87,15 +87,16 @@ def get_movie(movie_page_url):
         if download_links:
             download_links = download_links.find_all("a", href=True)
             for download in download_links:
-                movie_details["id"] = f"ddl{download_links.index(download)}"
-                movie_details["title"] = download.text.strip()
-                ddl_links[movie_details["id"]] = download['href']
+                movie_details["link"] = f"ddl{download_links.index(download)}"
+                movie_details["text"] = download.text.strip()
+                ddl_links[movie_details["link"]] = download['href']
                 download_list.append(movie_details)
     return download_list
 
-def extract_links_from_page(url):
+def extract_links_from_page(download_page_url):
     extracted_links = []
-    webpage = requests.get(url)
+    download_page = download_page_url
+    webpage = requests.get(download_page)
     if webpage.status_code == 200:
         webpage = webpage.text
         webpage = BeautifulSoup(webpage, "html.parser")
