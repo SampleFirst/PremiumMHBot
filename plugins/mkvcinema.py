@@ -46,10 +46,10 @@ async def movie_result(client, callback_query):
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     download_id = query.data
-    extracted_links = final_link_page(ddl_links[download_id])
+    finale_list = final_link_page(ddl_links[download_id])
     keyboards = []
-    for extracted_link in extracted_links:
-        keyboard = [InlineKeyboardButton(extracted_link, url=extracted_link)]
+    for link in finale_list:
+        keyboard = [InlineKeyboardButton(link, url=link)]
         keyboards.append(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboards)
     await query.answer("Extracted download links")
@@ -91,7 +91,7 @@ def get_movie(movie_page_url):
     return download_list
 
 def final_link_page(download_page_url):
-    extracted_links = []
+    finale_list = []
     download_page = download_page_url
     webpage = requests.get(download_page)
     if webpage.status_code == 200:
@@ -101,6 +101,6 @@ def final_link_page(download_page_url):
         for link in links:
             href = link['href']
             if href.startswith("https://"):
-                extracted_links.append(href)
-    return extracted_links
+                finale_list.append(href)
+    return finale_list
        
