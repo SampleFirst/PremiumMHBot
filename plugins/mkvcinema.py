@@ -1,7 +1,11 @@
+import logging
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 movie_links = {}
 ddl_links = {}
@@ -26,10 +30,12 @@ async def skymovies(client, message):
     else:
         await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
+
 @Client.on_callback_query(filters.regex('^len'))
 async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
+    logger.info(f"Getting download links for movie with ID: {movie_id}")
     download_list = get_movie(movie_links[movie_id])
     if download_list:
         keyboards = []
@@ -42,10 +48,12 @@ async def movie_result(client, callback_query):
     else:
         await query.answer("No download links available for this movie.")
 
+
 @Client.on_callback_query(filters.regex('^ddl'))
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     download_id = query.data
+    logger.info(f"Extracting final download links for download ID: {download_id}")
     finale_list = final_link_page(ddl_links[download_id])
     keyboards = []
     for link in finale_list:
@@ -55,7 +63,9 @@ async def open_link_and_extract(client, callback_query):
     await query.answer(f"Extracted download {link}")
     await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
 
+
 def search_movies(query):
+    logger.info(f"Searching for movies with query: {query}")
     movies_list = []
     website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
     if website.status_code == 200:
@@ -72,7 +82,9 @@ def search_movies(query):
                 movies_list.append(load_details)
     return movies_list
 
+
 def get_movie(movie_page_url):
+    logger.info(f"Getting download links for movie page: {movie_page_url}")
     download_list = []
     movie_page = "https://skymovieshd.ngo" + movie_page_url
     movie_page_link = requests.get(movie_page)
@@ -88,9 +100,12 @@ def get_movie(movie_page_url):
                 load_details["text"] = download.text.strip()
                 ddl_links[load_details["link"]] = download['href']
                 download_list.append(load_details)
+                logger.info(f"Getting download links for movie page: {load_details}")
     return download_list
 
+
 def final_link_page(download_page_url):
+    logger.info(f"Extracting final links from download page: {download_page_url}")
     finale_list = []
     download_page = download_page_url
     webpage = requests.get(download_page)
@@ -103,4 +118,3 @@ def final_link_page(download_page_url):
             if href.startswith("https://"):
                 finale_list.append(href)
     return finale_list
-       
