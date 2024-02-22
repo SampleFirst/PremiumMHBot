@@ -60,7 +60,7 @@ async def open_link_and_extract(client, callback_query):
     for link in finale_list:
         domain = link.split("//")[-1].split("/")[0]
         keyboard = [InlineKeyboardButton(domain, url=link)]
-        keyboards.append(keyboard)
+        keyboards.append([keyboard])
     reply_markup = InlineKeyboardMarkup(keyboards)
     await msg.delete()
     await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
