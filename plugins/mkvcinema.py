@@ -35,7 +35,7 @@ async def skymovies(client, message):
 async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
-    logger.info(f"Getting download links for movie with ID: {movie_id}")
+    msg = await query.message.reply_text("Processing...")
     download_list = get_movie(movie_links[movie_id])
     if download_list:
         keyboards = []
@@ -43,7 +43,7 @@ async def movie_result(client, callback_query):
             keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await query.answer(download_list[0]["link"])  # Update here to show the first link
+        await msg.delete()
         await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
     else:
         await query.answer("No download links available for this movie.")
@@ -53,14 +53,14 @@ async def movie_result(client, callback_query):
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     download_id = query.data
-    logger.info(f"Extracting final download links for download ID: {download_id}")
+    msg = await query.message.reply_text("Processing...")
     finale_list = final_link_page(ddl_links[download_id])
     keyboards = []
     for link in finale_list:
         keyboard = [InlineKeyboardButton(link, url=link)]
         keyboards.append(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboards)
-    await query.answer(f"Extracted download {link}")
+    await msg.delete()
     await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
 
 
@@ -73,18 +73,17 @@ def search_movies(query):
         website = BeautifulSoup(website, "html.parser")
         movies = website.find_all("div", {'class': 'L'})
         for movie in movies:
-            load_details = {}
+            movie_details = {}
             movie_link = movie.find("a", href=True)
             if movie_link:
-                load_details["id"] = f"len{movies.index(movie)}"
-                load_details["title"] = movie_link.text.strip()
-                movie_links[load_details["id"]] = movie_link['href']
-                movies_list.append(load_details)
+                movie_details["id"] = f"len{movies.index(movie)}"
+                movie_details["title"] = movie_link.text.strip()
+                movie_links[movie_details["id"]] = movie_link['href']
+                movies_list.append(movie_details)
     return movies_list
 
 
 def get_movie(movie_page_url):
-    logger.info(f"Getting download links for movie page: {movie_page_url}")
     download_list = []
     movie_page = "https://skymovieshd.ngo" + movie_page_url
     movie_page_link = requests.get(movie_page)
@@ -100,16 +99,13 @@ def get_movie(movie_page_url):
                 load_details["text"] = download.text.strip()
                 ddl_links[load_details["link"]] = download['href']
                 download_list.append(load_details)
-                logger.info(f"Getting download links for movie page: {load_details}")
     return download_list
 
 
 def final_link_page(download_page_url):
-    logger.info(f"Extracting final links from download page: {download_page_url}")
     finale_list = []
     download_page = download_page_url
     webpage = requests.get(download_page)
-    logger.info(f"Extracting final links from download page: {download_page}")
     if webpage.status_code == 200:
         webpage = webpage.text
         webpage = BeautifulSoup(webpage, "html.parser")
