@@ -2,9 +2,11 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
-import re
 
 movie_links = {}
+ddl_links = {}
+
+
 
 @Client.on_message(filters.command("skymovies"))
 async def skymovies(client, message):
@@ -30,11 +32,10 @@ async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
     s = get_movie(movie_links[movie_id])
-    if "Download Links" in s:
-        links = s["Download Links"]
+    if s:
         keyboards = []
-        for title, download_link in links.items():
-            keyboard = [InlineKeyboardButton(title, callback_data=download_link)]
+        for download in ddl_links.items():
+            keyboard = [InlineKeyboardButton(download["title"], callback_data=download["id"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
         await query.answer("Sent movie download links")
@@ -42,7 +43,7 @@ async def movie_result(client, callback_query):
     else:
         await query.answer("No download links available for this movie.")
 
-@Client.on_callback_query(filters.regex('^http'))
+@Client.on_callback_query(filters.regex('^download'))
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     link = query.data
@@ -79,20 +80,15 @@ def get_movie(movie_page_url):
     if movie_page_link.status_code == 200:
         movie_page_link = movie_page_link.text
         movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
-        
-        # Extracting Watch Online link
-        watch_online_link = movie_page_link.find("a", href=True, text="WATCH ONLINE")
-        if watch_online_link:
-            movie_details["Watch Online"] = watch_online_link['href']
-        
+           
         # Extracting Download links
         download_links = movie_page_link.find("div", {'class': 'Bolly'})
         if download_links:
             download_links = download_links.find_all("a", href=True)
-            final_links = {}
             for download in download_links:
-                final_links[download.text.strip()] = download['href']
-            movie_details["Download Links"] = final_links
+                movie_details["id"] = f"ddl{download_links.index(download)}"
+                movie_details["title"] = download.text.strip()
+                ddl_links[movie_details["id"]] = download['href']
     return movie_details
 
 def extract_links_from_page(url):
@@ -107,4 +103,4 @@ def extract_links_from_page(url):
             if href.startswith("https://"):
                 extracted_links.append(href)
     return extracted_links
-    
+
