@@ -13,10 +13,10 @@ ddl_links = {}
 async def skymovies(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
-        await message.reply_text("Please provide a movie name to search.", quote=True)
+        await message.reply_text("Please provide a movie name to search.")
         return
     query = query[1]
-    search_results = await message.reply_text("Searching results...", quote=True)
+    search_results = await message.reply_text("Searching results...")
     movies_list = search_movies(query)
     if movies_list:
         keyboards = []
@@ -26,7 +26,7 @@ async def skymovies(client, message):
         reply_markup = InlineKeyboardMarkup(keyboards)
         await search_results.edit_text('Search Results...', reply_markup=reply_markup)
     else:
-        await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.', quote=True)
+        await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
 # Callback query handler for movie selection
 @Client.on_callback_query(filters.regex('^len'))
