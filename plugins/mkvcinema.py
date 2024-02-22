@@ -58,12 +58,13 @@ async def open_link_and_extract(client, callback_query):
     logger.info(f"Searching for: {finale_list}")
     keyboards = []
     for link in finale_list:
-        keyboard = [InlineKeyboardButton(link, url=link)]
+        domain = link.split("//")[-1].split("/")[0]
+        keyboard = [InlineKeyboardButton(domain, url=link)]
         keyboards.append(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboards)
     await msg.delete()
     await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
-
+    
 
 def search_movies(query):
     logger.info(f"Searching for movies with query: {query}")
