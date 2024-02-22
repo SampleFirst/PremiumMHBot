@@ -45,8 +45,8 @@ async def movie_result(client, callback_query):
 @Client.on_callback_query(filters.regex('^ddl'))
 async def open_link_and_extract(client, callback_query):
     query = callback_query
-    download_link = query.data
-    extracted_links = final_link_page(ddl_links[download_link])
+    download_id = query.data
+    extracted_links = final_link_page(ddl_links[download_id])
     keyboards = []
     for extracted_link in extracted_links:
         keyboard = [InlineKeyboardButton(extracted_link, url=extracted_link)]
