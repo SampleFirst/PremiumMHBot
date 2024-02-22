@@ -55,6 +55,7 @@ async def open_link_and_extract(client, callback_query):
     download_id = query.data
     msg = await query.message.reply_text("Processing...")
     finale_list = final_link_page(ddl_links[download_id])
+    logger.info(f"Searching for: {finale_list}")
     keyboards = []
     for link in finale_list:
         keyboard = [InlineKeyboardButton(link, url=link)]
@@ -87,6 +88,7 @@ def get_movie(movie_page_url):
     download_list = []
     movie_page = "https://skymovieshd.ngo" + movie_page_url
     movie_page_link = requests.get(movie_page)
+    logger.info(f"Searching first download link groups: {movie_page}")
     if movie_page_link.status_code == 200:
         movie_page_link = movie_page_link.text
         movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
@@ -106,6 +108,7 @@ def final_link_page(download_page_url):
     finale_list = []
     download_page = download_page_url
     webpage = requests.get(download_page)
+    logger.info(f"Searching final download link: {download_page}")
     if webpage.status_code == 200:
         webpage = webpage.text
         webpage = BeautifulSoup(webpage, "html.parser")
@@ -115,3 +118,5 @@ def final_link_page(download_page_url):
             if href.startswith("https://"):
                 finale_list.append(href)
     return finale_list
+    
+    
