@@ -11,8 +11,8 @@ def extract_links(url):
     links = []
     for link in soup.find_all('a', href=True):
         links.append(link['href'])
-    return links[:3]  # Update to only retrieve the first three links
-
+    return links  
+    
 
 # Command handler
 @Client.on_message(filters.command(["getlinks"]))
@@ -26,7 +26,7 @@ def get_links(client, message):
             print(f"Attempting to add button with URL: {link}")
             try:
                 button = InlineKeyboardButton(domain, url=link)
-                buttons.append(button)
+                buttons.append([button])  # Append each button as a separate list
             except Exception as e:
                 print(f"Error creating button with URL {link}: {e}")
         if buttons:
