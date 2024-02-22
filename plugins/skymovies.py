@@ -24,7 +24,7 @@ async def skymovies(client, message):
             keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await search_results.edit_text('Search Results...', reply_markup=reply_markup, quote=True)
+        await search_results.edit_text('Search Results...', reply_markup=reply_markup)
     else:
         await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.', quote=True)
 
