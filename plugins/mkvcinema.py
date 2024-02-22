@@ -109,6 +109,7 @@ def final_link_page(download_page_url):
     finale_list = []
     download_page = download_page_url
     webpage = requests.get(download_page)
+    logger.info(f"Extracting final links from download page: {download_page}")
     if webpage.status_code == 200:
         webpage = webpage.text
         webpage = BeautifulSoup(webpage, "html.parser")
