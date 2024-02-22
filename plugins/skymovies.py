@@ -16,7 +16,7 @@ async def skymovies(client, message):
         await message.reply_text("Please provide a movie name to search.", quote=True)
         return
     query = query[1]
-    search_results = await message.reply_text("Searching results...")
+    search_results = await message.reply_text("Searching results...", quote=True)
     movies_list = search_movies(query)
     if movies_list:
         keyboards = []
