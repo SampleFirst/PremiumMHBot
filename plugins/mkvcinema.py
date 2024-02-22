@@ -49,7 +49,7 @@ async def open_link_and_extract(client, callback_query):
     extracted_links = extract_links_from_page(link)
     keyboards = []
     for extracted_link in extracted_links:
-        keyboard = [InlineKeyboardButton(extracted_link, callback_data=extracted_link)]
+        keyboard = [InlineKeyboardButton(extracted_link, url=extracted_link)]
         keyboards.append(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboards)
     await query.answer("Extracted download links")
@@ -101,9 +101,10 @@ def extract_links_from_page(url):
     if webpage.status_code == 200:
         webpage = webpage.text
         webpage = BeautifulSoup(webpage, "html.parser")
-        links = webpage.find_all("a", href=True)
+        links = webpage.find_all("a", href=True, rel="external", target="_blank")
         for link in links:
             href = link['href']
-            if re.match(r'^https?://', href):
+            if href.startswith("https://"):
                 extracted_links.append(href)
     return extracted_links
+    
