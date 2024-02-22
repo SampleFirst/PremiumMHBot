@@ -31,11 +31,11 @@ async def skymovies(client, message):
 async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
-    s = get_movie(movie_links[movie_id])
-    if s:
+    download_list = get_movie(movie_links[movie_id])
+    if download_list:
         keyboards = []
-        for download_id, download_link in ddl_links.items():  # Fix: Unpack tuple into key and value
-            keyboard = [InlineKeyboardButton(download_link["title"], callback_data=download_id)]  # Fix: Use download_id as the callback_data
+        for download in download_list:
+            keyboard = [InlineKeyboardButton(download["title"], callback_data=download["id"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
         await query.answer("Sent movie download links")
@@ -74,6 +74,7 @@ def search_movies(query):
     return movies_list
 
 def get_movie(movie_page_url):
+    download_list = []
     movie_details = {}
     movie_page = "https://skymovieshd.ngo" + movie_page_url
     movie_page_link = requests.get(movie_page)
@@ -89,7 +90,8 @@ def get_movie(movie_page_url):
                 movie_details["id"] = f"ddl{download_links.index(download)}"
                 movie_details["title"] = download.text.strip()
                 ddl_links[movie_details["id"]] = download['href']
-    return movie_details
+                download_list.append(movie_details)
+    return download_list
 
 def extract_links_from_page(url):
     extracted_links = []
