@@ -23,10 +23,16 @@ def get_links(client, message):
         buttons = []
         for link in links:
             domain = urlparse(link).netloc
-            button = InlineKeyboardButton(domain, url=link)
-            buttons.append(button)
-        reply_markup = InlineKeyboardMarkup([buttons])
-        message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
+            print(f"Attempting to add button with URL: {link}")
+            try:
+                button = InlineKeyboardButton(domain, url=link)
+                buttons.append(button)
+            except Exception as e:
+                print(f"Error creating button with URL {link}: {e}")
+        if buttons:
+            reply_markup = InlineKeyboardMarkup([buttons])
+            message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
+        else:
+            message.reply_text("No valid links found on the website.")
     else:
         message.reply_text("Please provide a valid URL.")
-
