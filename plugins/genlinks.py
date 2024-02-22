@@ -1,4 +1,4 @@
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bs4 import BeautifulSoup
 import requests
