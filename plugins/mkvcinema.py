@@ -37,7 +37,7 @@ async def movie_result(client, callback_query):
             keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await query.answer("Sent movie download links")
+        await query.answer(download_list[0]["link"])  # Update here to show the first link
         await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
     else:
         await query.answer("No download links available for this movie.")
