@@ -2,7 +2,6 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
-from io import BytesIO
 
 len_list = {}
 
@@ -32,14 +31,17 @@ async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
     s = get_movie(len_list[movie_id])
-    link = ""
-    download_links = s["download_links"]
-    for i in download_links:
-        link += "🎬" + i + "\n" + download_links[i] + "\n\n"
-    caption = f"⚡ Download Links :-\n\n{link}"
-    await query.answer("Sent movie download_links")
-    await query.message.reply_text(text=caption)
-    
+    if "Download Links" in s:
+        link = ""
+        links = s["Download Links"]
+        for title, download_link in links.items():
+            link += f"🎬 {title}\n{download_link}\n\n"
+        caption = f"⚡ Download Links :-\n\n{link}"
+        await query.answer("Sent movie links")
+        await query.message.reply_text(text=caption)
+    else:
+        await query.answer("No download links available for this movie.")
+
 
 def search_movies(query):
     movies_list = []
@@ -73,11 +75,13 @@ def get_movie(movie_page_url):
             movie_details["Watch Online"] = watch_online_link['href']
         
         # Extracting Download links
-        download_links = movie_page_link.find("div", {'class': 'Bolly'}).find_all("a", href=True)
-        final_links = {}
-        for download in download_links:
-            final_links[download.text.strip()] = download['href']
-        movie_details["Download Links"] = final_links
+        download_links = movie_page_link.find("div", {'class': 'Bolly'})
+        if download_links:
+            download_links = download_links.find_all("a", href=True)
+            final_links = {}
+            for download in download_links:
+                final_links[download.text.strip()] = download['href']
+            movie_details["Download Links"] = final_links
     return movie_details
 
 
