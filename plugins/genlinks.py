@@ -11,7 +11,7 @@ def extract_links(url):
     links = []
     for link in soup.find_all('a', href=True):
         links.append(link['href'])
-    return links
+    return links[:3]  # Update to only retrieve the first three links
 
 
 # Command handler
