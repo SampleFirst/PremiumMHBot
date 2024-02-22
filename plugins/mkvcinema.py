@@ -39,7 +39,7 @@ async def movie_result(client, callback_query):
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
         await query.answer("Sent movie download links")
-        await query.message.reply_text(text="Choose Download Link:", reply_markup=reply_markup)
+        await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
     else:
         await query.answer("No download links available for this movie.")
 
@@ -54,7 +54,7 @@ async def open_link_and_extract(client, callback_query):
         keyboards.append(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboards)
     await query.answer("Extracted download links")
-    await query.message.reply_text(text="Extracted Links:", reply_markup=reply_markup)
+    await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
 
 def search_movies(query):
     movies_list = []
@@ -106,5 +106,7 @@ def extract_links_from_page(download_page_url):
             if href.startswith("https://"):
                 extracted_links.append(href)
     return extracted_links
+    
+    
     
     
