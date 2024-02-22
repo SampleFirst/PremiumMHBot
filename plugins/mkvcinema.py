@@ -43,7 +43,7 @@ async def movie_result(client, callback_query):
     else:
         await query.answer("No download links available for this movie.")
 
-@Client.on_callback_query(filters.regex('^download'))
+@Client.on_callback_query(filters.regex('^ddl'))
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     link = query.data
