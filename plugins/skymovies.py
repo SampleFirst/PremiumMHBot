@@ -7,15 +7,14 @@ movie_links = {}
 ddl_links = {}
 
 
-# Command to search for movies on skymovies
 @Client.on_message(filters.command("skymovies"))
-async def skymovies(client, message):
+async def skymovieshd(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
         await message.reply_text("Please provide a movie name to search.")
         return
     query = query[1]
-    results = await message.reply_text("Searching...")
+    msg = await message.reply_text("Searching...")
     movies_list = search_movies(query)
     if movies_list:
         keyboards = []
@@ -23,12 +22,11 @@ async def skymovies(client, message):
             keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await results.edit_text('Found Search Results:', reply_markup=reply_markup)
+        await query.answer("Sent Search Results...")
+        await msg.edit_text('Found Search Results:', reply_markup=reply_markup)
     else:
-        await results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+        await msg.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
 
-
-# Callback query handler for movie selection
 @Client.on_callback_query(filters.regex('^len'))
 async def movie_result(client, callback_query):
     query = callback_query
@@ -40,13 +38,11 @@ async def movie_result(client, callback_query):
             keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
+        await query.answer("Sent download links..")
         await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
-        await query.answer("Send download links..")
     else:
         await query.answer("No download links available for this movie.")
 
-
-# Callback query handler for download link selection
 @Client.on_callback_query(filters.regex('^ddl'))
 async def open_link_and_extract(client, callback_query):
     query = callback_query
@@ -58,13 +54,11 @@ async def open_link_and_extract(client, callback_query):
             keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
+        await query.answer("Sent final download links..")
         await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
-        await query.answer("Send Final Download links..")
     else:
         await query.answer("No download links available for this movie.")
 
-
-# Function to search movies on skymovies
 def search_movies(query):
     movies_list = []
     website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
@@ -82,8 +76,6 @@ def search_movies(query):
                 movies_list.append(movie_details)
     return movies_list
 
-
-# Function to get movie download links
 def get_movie(movie_page_url):
     download_list = []
     movie_page = "https://skymovieshd.ngo" + movie_page_url
@@ -101,9 +93,7 @@ def get_movie(movie_page_url):
                 ddl_links[load_details["link"]] = download['href']
                 download_list.append(load_details)
     return download_list
-
-
-# Function to extract final download links
+    
 def final_link_page(download_page_url):
     finale_list = []
     download_page = download_page_url
