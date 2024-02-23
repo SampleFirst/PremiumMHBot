@@ -7,7 +7,6 @@ movie_links = {}
 ddl_links = {}
 
 
-
 # Command to search for movies on skymovies
 @Client.on_message(filters.command("skymovies"))
 async def skymovies(client, message):
@@ -24,16 +23,17 @@ async def skymovies(client, message):
             keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await search_results.edit_text('Here Found Search Results...', reply_markup=reply_markup)
+        await search_results.edit_text('Found Search Results:', reply_markup=reply_markup)
     else:
         await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+
 
 # Callback query handler for movie selection
 @Client.on_callback_query(filters.regex('^len'))
 async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
-    msg = await query.message.reply_text("Searching download link group...")
+    await query.message.reply_text("Searching download link group...")
     download_list = get_movie(movie_links[movie_id])
     if download_list:
         keyboards = []
@@ -41,27 +41,27 @@ async def movie_result(client, callback_query):
             keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await msg.delete()
-        await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
+        await query.message.edit_text("Choose Download Link:", reply_markup=reply_markup)
         await query.answer("Send download links..")
     else:
         await query.answer("No download links available for this movie.")
+
 
 # Callback query handler for download link selection
 @Client.on_callback_query(filters.regex('^ddl'))
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     download_id = query.data
-    msg = await query.message.reply_text("Searching finale Download links...")
+    await query.message.reply_text("Searching final Download links...")
     finale_list = final_link_page(ddl_links[download_id])
     keyboards = []
     for link in finale_list:
         keyboard = [InlineKeyboardButton(link['cap'], url=link['url'])]
         keyboards.append(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboards)
-    await msg.delete()
-    await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
+    await query.message.edit_text("Extracted Links:", reply_markup=reply_markup)
     await query.answer("Send Final Download links..")
+
 
 # Function to search movies on skymovies
 def search_movies(query):
@@ -80,6 +80,7 @@ def search_movies(query):
                 movie_links[movie_details["id"]] = movie_link['href']
                 movies_list.append(movie_details)
     return movies_list
+
 
 # Function to get movie download links
 def get_movie(movie_page_url):
@@ -100,6 +101,7 @@ def get_movie(movie_page_url):
                 download_list.append(load_details)
     return download_list
 
+
 # Function to extract final download links
 def final_link_page(download_page_url):
     finale_list = []
@@ -110,9 +112,9 @@ def final_link_page(download_page_url):
         webpage = BeautifulSoup(webpage, "html.parser")
         links = webpage.find_all("a", href=True, rel="external", target="_blank")
         for link in links:
+            finale_details = {}  # Create a dictionary for each link
             href = link['href']
             if href.startswith("https://"):
-                finale_details = {}  # Create a dictionary for each link
                 finale_details["url"] = href
                 finale_details["cap"] = href.split("//")[-1].split("/")[0]
                 finale_list.append(finale_details)
