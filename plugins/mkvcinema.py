@@ -4,6 +4,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
 from info import ADMINS, LOG_CHANNEL 
+from urllib.parse import urlparse
 
 movie_links = {}
 group_links = {}
@@ -134,10 +135,10 @@ def final_page(final_page_url):
             for final in finals:
                 finale_details = {}
                 finale_details["id"] = final['href']
-                finale_details["title"] = final.text.strip()
+                parsed_url = urlparse(final['href'])
+                finale_details["title"] = parsed_url.netloc
                 finale_list.append(finale_details)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return finale_list
-    
-    
+
