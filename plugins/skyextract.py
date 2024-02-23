@@ -31,25 +31,25 @@ async def skymovieshd(client, message):
         await message.reply_text(f"An error occurred: {str(e)}")
 
 
-@Client.on_callback_query(filters.regex('^app\d+$'))
-async def movie_result(client, callback_query):
+@Client.on_callback_query(filters.regex('^pay\d+$'))
+async def final_movies_result(client, callback_query):
     try:
         query = callback_query
-        movie_id = query.data
-        download_list = get_movie(movie_links[movie_id])
-        if download_list:
+        download_id = query.data
+        finale_list = final_link_page(ddl_links[download_id])
+        if finale_list:
             keyboards = []
-            for download in download_list:
-                keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
+            for link in finale_list:
+                keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await query.answer("Sent download links..")
-            await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
+            await query.answer("Sent finale download links..")
+            await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
         else:
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-
+ 
 
 @Client.on_callback_query(filters.regex('^pay\d+$'))
 async def final_movies_result(client, callback_query):
