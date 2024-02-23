@@ -106,7 +106,7 @@ def get_movie(movie_page_url):
                 for group in groups:
                     group_details = {}
                     group_details["id"] = f"pay{groups.index(group)}"
-                    group_details["text"] = group.text.strip()
+                    group_details["title"] = group.text.strip()
                     group_links[group_details["id"]] = group['href']
                     group_list.append(group_details)
     except Exception as e:
