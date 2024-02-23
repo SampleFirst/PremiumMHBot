@@ -58,9 +58,15 @@ async def final_movies_result(client, callback_query):
         finale_list = final_link_page(ddl_links[download_id])
         if finale_list:
             keyboards = []
+            row = []  # Initialize a row for buttons
             for link in finale_list:
-                keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
-                keyboards.append(keyboard)
+                keyboard = InlineKeyboardButton(link["cap"], url=link["url"])
+                row.append(keyboard)
+                if len(row) == 1:
+                    keyboards.append(row)
+                    row = []  # Reset the row for the next set of buttons
+            if row:
+                keyboards.append(row)
             reply_markup = InlineKeyboardMarkup(keyboards)
             await query.answer("Sent finale download links..")
             await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
@@ -68,7 +74,6 @@ async def final_movies_result(client, callback_query):
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-
 
 def search_movies(query):
     movies_list = []
