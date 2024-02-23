@@ -33,7 +33,6 @@ async def skymovies(client, message):
 async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
-    await query.message.reply_text("Searching download link group...")
     download_list = get_movie(movie_links[movie_id])
     if download_list:
         keyboards = []
@@ -41,7 +40,7 @@ async def movie_result(client, callback_query):
             keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
             keyboards.append(keyboard)
         reply_markup = InlineKeyboardMarkup(keyboards)
-        await query.message.edit_text("Choose Download Link:", reply_markup=reply_markup)
+        await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
         await query.answer("Send download links..")
     else:
         await query.answer("No download links available for this movie.")
@@ -52,15 +51,17 @@ async def movie_result(client, callback_query):
 async def open_link_and_extract(client, callback_query):
     query = callback_query
     download_id = query.data
-    await query.message.reply_text("Searching final Download links...")
     finale_list = final_link_page(ddl_links[download_id])
-    keyboards = []
-    for link in finale_list:
-        keyboard = [InlineKeyboardButton(link['cap'], url=link['url'])]
-        keyboards.append(keyboard)
-    reply_markup = InlineKeyboardMarkup(keyboards)
-    await query.message.edit_text("Extracted Links:", reply_markup=reply_markup)
-    await query.answer("Send Final Download links..")
+    if finale_list:
+        keyboards = []
+        for link in finale_list:
+            keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
+            keyboards.append(keyboard)
+        reply_markup = InlineKeyboardMarkup(keyboards)
+        await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
+        await query.answer("Send Final Download links..")
+    else:
+        await query.answer("No download links available for this movie.")
 
 
 # Function to search movies on skymovies
