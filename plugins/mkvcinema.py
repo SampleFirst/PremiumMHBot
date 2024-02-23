@@ -50,7 +50,7 @@ async def movie_result(client, callback_query):
         await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
-@Client.on_callback_query(filters.regex('^^pay\d+$'))
+@Client.on_callback_query(filters.regex('^pay\d+$'))
 async def final_movies_result(client, callback_query):
     try:
         query = callback_query
