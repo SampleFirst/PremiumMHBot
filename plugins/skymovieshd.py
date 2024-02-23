@@ -15,102 +15,118 @@ async def skymovieshd(client, message):
         return
     query = query[1]
     msg = await message.reply_text("Searching...")
-    movies_list = search_movies(query)
-    if movies_list:
-        keyboards = []
-        for movie in movies_list:
-            keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
-            keyboards.append(keyboard)
-        reply_markup = InlineKeyboardMarkup(keyboards)
-        await message.reply("Found Search Results:", reply_markup=reply_markup)
-    else:
-        await message.reply('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+    try:
+        movies_list = search_movies(query)
+        if movies_list:
+            keyboards = []
+            for movie in movies_list:
+                keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
+                keyboards.append(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboards)
+            await message.reply("Found Search Results:", reply_markup=reply_markup)
+        else:
+            await message.reply('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+    except Exception as e:
+        await message.reply(f"An error occurred: {str(e)}")
 
 
 @Client.on_callback_query(filters.regex('^len'))
 async def movie_result(client, callback_query):
-    movie_id = callback_query.data
-    download_list = get_movie(movie_links[movie_id])
-    if download_list:
-        keyboards = []
-        for download in download_list:
-            keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
-            keyboards.append(keyboard)
-        reply_markup = InlineKeyboardMarkup(keyboards)
-        await callback_query.answer("Sent download links..")
-        await callback_query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
-    else:
-        await callback_query.answer("No download links available for this movie.")
+    try:
+        movie_id = callback_query.data
+        download_list = get_movie(movie_links[movie_id])
+        if download_list:
+            keyboards = []
+            for download in download_list:
+                keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
+                keyboards.append(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboards)
+            await callback_query.answer("Sent download links..")
+            await callback_query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
+        else:
+            await callback_query.answer("No download links available for this movie.")
+    except Exception as e:
+        await callback_query.answer(f"An error occurred: {str(e)}")
 
 
 @Client.on_callback_query(filters.regex('^ddl'))
 async def open_link_and_extract(client, callback_query):
-    download_id = callback_query.data
-    finale_list = final_link_page(ddl_links[download_id])
-    if finale_list:
-        keyboards = []
-        for link in finale_list:
-            keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
-            keyboards.append(keyboard)
-        reply_markup = InlineKeyboardMarkup(keyboards)
-        await callback_query.answer("Sent final download links..")
-        await callback_query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
-    else:
-        await callback_query.answer("No download links available for this movie.")
+    try:
+        download_id = callback_query.data
+        finale_list = final_link_page(ddl_links[download_id])
+        if finale_list:
+            keyboards = []
+            for link in finale_list:
+                keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
+                keyboards.append(keyboard)
+            reply_markup = InlineKeyboardMarkup(keyboards)
+            await callback_query.answer("Sent final download links..")
+            await callback_query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
+        else:
+            await callback_query.answer("No download links available for this movie.")
+    except Exception as e:
+        await callback_query.answer(f"An error occurred: {str(e)}")
 
 
 def search_movies(query):
     movies_list = []
-    website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
-    if website.status_code == 200:
-        website = website.text
-        website = BeautifulSoup(website, "html.parser")
-        movies = website.find_all("div", {'class': 'L'})
-        for movie in movies:
-            movie_details = {}
-            movie_link = movie.find("a", href=True)
-            if movie_link:
-                movie_details["id"] = f"len{movies.index(movie)}"
-                movie_details["title"] = movie_link.text.strip()
-                movie_links[movie_details["id"]] = movie_link['href']
-                movies_list.append(movie_details)
+    try:
+        website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
+        if website.status_code == 200:
+            website = website.text
+            website = BeautifulSoup(website, "html.parser")
+            movies = website.find_all("div", {'class': 'L'})
+            for movie in movies:
+                movie_details = {}
+                movie_link = movie.find("a", href=True)
+                if movie_link:
+                    movie_details["id"] = f"len{movies.index(movie)}"
+                    movie_details["title"] = movie_link.text.strip()
+                    movie_links[movie_details["id"]] = movie_link['href']
+                    movies_list.append(movie_details)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
     return movies_list
 
 
 def get_movie(movie_page_url):
     download_list = []
-    movie_page = "https://skymovieshd.ngo" + movie_page_url
-    movie_page_link = requests.get(movie_page)
-    if movie_page_link.status_code == 200:
-        movie_page_link = movie_page_link.text
-        movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
-        download_links = movie_page_link.find("div", {'class': 'Bolly'})
-        if download_links:
-            download_links = download_links.find_all("a", href=True)
-            for download in download_links:
-                load_details = {}
-                load_details["link"] = f"ddl{download_links.index(download)}"
-                load_details["text"] = download.text.strip()
-                ddl_links[load_details["link"]] = download['href']
-                download_list.append(load_details)
+    try:
+        movie_page = "https://skymovieshd.ngo" + movie_page_url
+        movie_page_link = requests.get(movie_page)
+        if movie_page_link.status_code == 200:
+            movie_page_link = movie_page_link.text
+            movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
+            download_links = movie_page_link.find("div", {'class': 'Bolly'})
+            if download_links:
+                download_links = download_links.find_all("a", href=True)
+                for download in download_links:
+                    load_details = {}
+                    load_details["link"] = f"ddl{download_links.index(download)}"
+                    load_details["text"] = download.text.strip()
+                    ddl_links[load_details["link"]] = download['href']
+                    download_list.append(load_details)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
     return download_list
 
 
 def final_link_page(download_page_url):
     finale_list = []
-    download_page = download_page_url
-    webpage = requests.get(download_page)
-    if webpage.status_code == 200:
-        webpage = webpage.text
-        webpage = BeautifulSoup(webpage, "html.parser")
-        links = webpage.find_all("a", href=True, rel="external", target="_blank")
-        for link in links:
-            finale_details = {}  
-            href = link['href']
-            if href.startswith("https://"):
-                finale_details["url"] = href
-                finale_details["cap"] = href.split("//")[-1].split("/")[0]
-                finale_list.append(finale_details)
+    try:
+        download_page = download_page_url
+        webpage = requests.get(download_page)
+        if webpage.status_code == 200:
+            webpage = webpage.text
+            webpage = BeautifulSoup(webpage, "html.parser")
+            links = webpage.find_all("a", href=True, rel="external", target="_blank")
+            for link in links:
+                finale_details = {}
+                href = link['href']
+                if href.startswith("https://"):
+                    finale_details["url"] = href
+                    finale_details["cap"] = href.split("//")[-1].split("/")[0]
+                    finale_list.append(finale_details)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
     return finale_list
-
-
