@@ -6,7 +6,6 @@ import pytz
 
 from info import ADMINS, LOG_CHANNEL, SUPPORT_CHAT, MELCOW_NEW_USERS, MELCOW_IMG, CHNL_LNK, GRP_LNK
 from database.users_chats_db import db
-from database.ia_filterdb import Media
 from utils import get_size, temp, get_settings
 from Script import script
 from pyrogram.errors import ChatAdminRequired
@@ -212,7 +211,6 @@ async def get_stats(bot, message):
     rju = await message.reply('Fetching stats...')
     total_users = await db.total_users_count()
     total_chats = await db.total_chat_count()
-    files = await Media.count_documents()
     size = await db.get_db_size()
     free = 536870912 - size
     size = get_size(size)
