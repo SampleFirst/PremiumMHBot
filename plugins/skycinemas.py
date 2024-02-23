@@ -64,7 +64,7 @@ async def final_movies_result(client, callback_query):
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
             await query.answer("Sent finale download links..")
-            await query.message.reply_text("Extracted Links:", reply_markup=reply_markup, reply_markup=reply_markup.resize_keyboard(True))
+            await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
         else:
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
