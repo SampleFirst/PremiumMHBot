@@ -56,7 +56,7 @@ async def open_link_and_extract(client, callback_query):
     finale_list = final_link_page(ddl_links[download_id])
     keyboards = []
     for link in finale_list:
-        keyboard = [InlineKeyboardButton(link['text'], url=link['link'])]
+        keyboard = [InlineKeyboardButton(link['cap'], url=link['url'])]
         keyboards.append(keyboard)
     reply_markup = InlineKeyboardMarkup(keyboards)
     await msg.delete()
@@ -112,7 +112,8 @@ def final_link_page(download_page_url):
         for link in links:
             href = link['href']
             if href.startswith("https://"):
-                domain = href.split("//")[-1].split("/")[0]
-                finale_list.append({'link': href, 'text': domain})
+                finale_details = {}  # Create a dictionary for each link
+                finale_details["url"] = href
+                finale_details["cap"] = href.split("//")[-1].split("/")[0]
+                finale_list.append(finale_details)
     return finale_list
-
