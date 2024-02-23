@@ -1,3 +1,4 @@
+# skymovies.py
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
@@ -50,7 +51,7 @@ async def movie_result(client, callback_query):
         await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
-@Client.on_callback_query(filters.regex('^^pay\d+$'))
+@Client.on_callback_query(filters.regex('^pay\d+$'))
 async def final_movies_result(client, callback_query):
     try:
         query = callback_query
@@ -63,12 +64,12 @@ async def final_movies_result(client, callback_query):
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
             await query.answer("Sent finale download links..")
-            await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
+            await query.message.reply_text("Extracted Links:", reply_markup=reply_markup, reply_markup=reply_markup.resize_keyboard(True))
         else:
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-
+ 
 
 def search_movies(query):
     movies_list = []
@@ -124,9 +125,10 @@ def final_link_page(download_page_url):
             links = webpage.find_all("a", href=True, rel="external", target="_blank")
             for link in links:
                 finale_details = {}
-                finale_details["url"] = link
-                finale_details["cap"] = link.split("//")[-1].split("/")[0]
+                finale_details["url"] = link['href']
+                finale_details["cap"] = link.text.strip()
                 finale_list.append(finale_details)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return finale_list
+
