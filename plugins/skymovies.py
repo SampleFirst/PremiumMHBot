@@ -14,7 +14,7 @@ async def skymovieshd(client, message):
         await message.reply_text("Please provide a movie name to search.")
         return
     query = query[1]
-    msg = await message.reply_text("Searching...")
+    search_results = await message.reply_text("Processing...")
     try:
         movies_list = search_movies(query)
         if movies_list:
@@ -23,17 +23,18 @@ async def skymovieshd(client, message):
                 keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await message.reply("Found Search Results:", reply_markup=reply_markup)
+            await search_results.edit_text('Search Results...', reply_markup=reply_markup)
         else:
-            await message.reply('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+            await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
     except Exception as e:
-        await message.reply(f"An error occurred: {str(e)}")
+        await message.reply_text(f"An error occurred: {str(e)}")
 
 
-@Client.on_callback_query(filters.regex('^len'))
+@Client.on_callback_query(filters.regex('^app'))
 async def movie_result(client, callback_query):
     try:
-        movie_id = callback_query.data
+        query = callback_query
+        movie_id = query.data
         download_list = get_movie(movie_links[movie_id])
         if download_list:
             keyboards = []
@@ -41,18 +42,19 @@ async def movie_result(client, callback_query):
                 keyboard = [InlineKeyboardButton(download["text"], callback_data=download["link"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await callback_query.answer("Sent download links..")
-            await callback_query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
+            await query.answer("Sent download links..")
+            await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
         else:
-            await callback_query.answer("No download links available for this movie.")
+            await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
-        await callback_query.answer(f"An error occurred: {str(e)}")
+        await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
 @Client.on_callback_query(filters.regex('^ddl'))
-async def open_link_and_extract(client, callback_query):
+async def final_movies_result(client, callback_query):
     try:
-        download_id = callback_query.data
+        query = callback_query
+        download_id = query.data
         finale_list = final_link_page(ddl_links[download_id])
         if finale_list:
             keyboards = []
@@ -60,12 +62,12 @@ async def open_link_and_extract(client, callback_query):
                 keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await callback_query.answer("Sent final download links..")
-            await callback_query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
+            await query.answer("Sent finale download links..")
+            await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
         else:
-            await callback_query.answer("No download links available for this movie.")
+            await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
-        await callback_query.answer(f"An error occurred: {str(e)}")
+        await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
 def search_movies(query):
@@ -80,7 +82,7 @@ def search_movies(query):
                 movie_details = {}
                 movie_link = movie.find("a", href=True)
                 if movie_link:
-                    movie_details["id"] = f"len{movies.index(movie)}"
+                    movie_details["id"] = f"app{movies.index(movie)}"
                     movie_details["title"] = movie_link.text.strip()
                     movie_links[movie_details["id"]] = movie_link['href']
                     movies_list.append(movie_details)
