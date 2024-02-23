@@ -60,8 +60,8 @@ async def final_movies_result(client, callback_query):
         if finale_list:
             keyboards = []
             for final in finale_list:
-                keyboard = [InlineKeyboardButton(final["title"], url=final["id"])]
-                keyboards.append([keyboard])  # Each button in a separate list for vertical display
+                keyboard = [InlineKeyboardButton(final["title"], url=final["id"])]  # Create a separate list for each button
+                keyboards.extend(keyboard)  # Extend the keyboards list with the new list
             reply_markup = InlineKeyboardMarkup(keyboards)
             await query.answer("Sent finale group finals..")
             await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
