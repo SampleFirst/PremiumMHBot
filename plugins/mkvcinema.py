@@ -3,6 +3,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
+from info import ADMINS, LOG_CHANNEL 
 
 movie_links = {}
 group_links = {}
