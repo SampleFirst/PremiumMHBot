@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 movie_links = {}
-ddl_links = {}
+group_links = {}
 
 
 @Client.on_message(filters.command("skymovies"))
@@ -31,22 +31,22 @@ async def skymovieshd(client, message):
         await message.reply_text(f"An error occurred: {str(e)}")
 
 
-@Client.on_callback_query(filters.regex('^pay\d+$'))
-async def final_movies_result(client, callback_query):
+@Client.on_callback_query(filters.regex('^app\d+$'))
+async def movie_result(client, callback_query):
     try:
         query = callback_query
-        download_id = query.data
-        finale_list = final_link_page(ddl_links[download_id])
-        if finale_list:
+        movie_id = query.data
+        group_list = get_movie(movie_links[movie_id])
+        if group_list:
             keyboards = []
-            for link in finale_list:
-                keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
+            for group in group_list:
+                keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await query.answer("Sent finale download links..")
-            await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
+            await query.answer("Sent group finals..")
+            await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
         else:
-            await query.message.reply_text("No download links available for this movie.")
+            await query.message.reply_text("No group finals available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
  
@@ -55,18 +55,18 @@ async def final_movies_result(client, callback_query):
 async def final_movies_result(client, callback_query):
     try:
         query = callback_query
-        download_id = query.data
-        finale_list = final_link_page(ddl_links[download_id])
+        group_id = query.data
+        finale_list = final_page(group_links[group_id])
         if finale_list:
             keyboards = []
-            for link in finale_list:
-                keyboard = [InlineKeyboardButton(link["cap"], url=link["url"])]
+            for final in finale_list:
+                keyboard = [InlineKeyboardButton(final["title"], url=final["id"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await query.answer("Sent finale download links..")
+            await query.answer("Sent finale group finals..")
             await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
         else:
-            await query.message.reply_text("No download links available for this movie.")
+            await query.message.reply_text("No group finals available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
  
@@ -93,42 +93,43 @@ def search_movies(query):
 
 
 def get_movie(movie_page_url):
-    download_list = []
+    group_list = []
     try:
         movie_page = "https://skymovieshd.ngo" + movie_page_url
-        movie_page_link = requests.get(movie_page)
-        if movie_page_link.status_code == 200:
-            movie_page_link = movie_page_link.text
-            movie_page_link = BeautifulSoup(movie_page_link, "html.parser")
-            download_links = movie_page_link.find("div", {'class': 'Bolly'})
-            if download_links:
-                download_links = download_links.find_all("a", href=True)
-                for download in download_links:
-                    load_details = {}
-                    load_details["link"] = f"pay{download_links.index(download)}"
-                    load_details["text"] = download.text.strip()
-                    ddl_links[load_details["link"]] = download['href']
-                    download_list.append(load_details)
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-    return download_list
-
-
-def final_link_page(download_page_url):
-    finale_list = []
-    try:
-        download_page = download_page_url
-        webpage = requests.get(download_page)
+        webpage = requests.get(movie_page)
         if webpage.status_code == 200:
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, "html.parser")
-            links = webpage.find_all("a", href=True, rel="external", target="_blank")
-            for link in links:
+            groups = webpage.find("div", {'class': 'Bolly'})
+            if groups:
+                groups = groups.find_all("a", href=True)
+                for group in groups:
+                    group_details = {}
+                    group_details["id"] = f"pay{groups.index(group)}"
+                    group_details["text"] = group.text.strip()
+                    group_links[group_details["id"]] = group['href']
+                    group_list.append(group_details)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+    return group_list
+
+
+def final_page(final_page_url):
+    finale_list = []
+    try:
+        final_page = final_page_url
+        webpage = requests.get(final_page)
+        if webpage.status_code == 200:
+            webpage = webpage.text
+            webpage = BeautifulSoup(webpage, "html.parser")
+            finals = webpage.find_all("a", href=True, rel="external", target="_blank")
+            for final in finals:
                 finale_details = {}
-                finale_details["url"] = link['href']
-                finale_details["cap"] = link.text.strip()
+                finale_details["id"] = final['href']
+                finale_details["title"] = final.text.strip()
                 finale_list.append(finale_details)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return finale_list
-
+    
+    
