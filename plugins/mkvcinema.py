@@ -58,11 +58,13 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
-            keyboards = []
-            for final in finale_list:
-                keyboard = [[InlineKeyboardButton(final["title"], url=final["id"])]]
-                keyboards.append(keyboard)
-            reply_markup = InlineKeyboardMarkup(keyboards)
+            keyboard = [
+                [
+                    InlineKeyboardButton(final["title"], url=final["id"])
+                ]
+                for final in finale_list
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             await query.answer("Sent finale group finals..")
             await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
         else:
