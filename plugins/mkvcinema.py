@@ -65,12 +65,11 @@ async def final_movies_result(client, callback_query):
                 log_message += "Title: {}\nID: {}\n\n".format(final["title"], final["id"])
             await client.send_message(LOG_CHANNEL, log_message)
             
-            keyboard = [
-                [
-                    InlineKeyboardButton(final["title"], url=final["id"])
-                ]
-                for final in finale_list
-            ]
+            keyboard = []
+            for final in finale_list:
+                keyboard.append([InlineKeyboardButton(final["title"], url=final["id"])])
+            keyboard.append([InlineKeyboardButton('Info', callback_data='info')])
+            
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.answer("Sent finale group finals..")
             await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
@@ -78,7 +77,7 @@ async def final_movies_result(client, callback_query):
             await query.message.reply_text("No group finals available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-
+        
 
 def search_movies(query):
     movies_list = []
