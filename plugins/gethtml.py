@@ -4,6 +4,10 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import logging
 from info import ADMINS, LOG_CHANNEL
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -24,9 +28,23 @@ async def get_html(client, message):
 
         msg = await message.reply_text(f"Fetching HTML code for {webpage}...")
 
-        response = requests.get(webpage)
-        response.raise_for_status()  # Raise an exception if the request fails
-        html_code = response.text
+        # Initialize Chrome webdriver
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        driver = webdriver.Chrome(options=options)
+
+        # Get the webpage
+        driver.get(webpage)
+
+        # Wait for human verification elements to appear (you need to adjust this according to the website)
+        WebDriverWait(driver, 60).until(
+            EC.presence_of_element_located((By.ID, 'verification-element-id'))
+        )
+
+        # Handle human verification (you need to implement the logic for solving the verification challenge)
+
+        # Once human verification is solved, proceed to get HTML code
+        html_code = driver.page_source
 
         domain_name = get_domain(webpage)
         file_path = f"{domain_name}.html"
@@ -54,6 +72,9 @@ async def get_html(client, message):
         # Delete the temporary file
         os.remove(file_path)
 
+        # Quit the webdriver
+        driver.quit()
+
     except Exception as e:
         await message.reply_text(f"Error fetching HTML code: {e}")
-
+        
