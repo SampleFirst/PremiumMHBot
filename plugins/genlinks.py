@@ -4,15 +4,19 @@ from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse
 
-# Function to extract links from a webpage
+
 def extract_links(url):
-    response = requests.get(url)
+    usr_agent = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+        'Chrome/61.0.3163.100 Safari/537.36'
+    }
+    response = requests.get(url, headers=usr_agent)
+    response.raise_for_status()
     soup = BeautifulSoup(response.content, 'html.parser')
     links = []
     for link in soup.find_all('a', href=True):
         links.append(link['href'])
     return links  
-    
 
 # Command handler
 @Client.on_message(filters.command(["getlinks"]))
