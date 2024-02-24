@@ -60,14 +60,10 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
-            log_message = "Final movies for group ID: {}\n".format(group_id)
-            for final in finale_list:
-                log_message += "Title: {}\nID: {}\n\n".format(final["title"], final["id"])
-            await client.send_message(LOG_CHANNEL, log_message)
-            
             keyboard = [
                 [
-                    InlineKeyboardButton(final["title"], url=final["id"])
+                    InlineKeyboardButton(final["title"], url=final["id"]
+                    ),
                 ]
                 for final in finale_list
             ]
@@ -77,13 +73,13 @@ async def final_movies_result(client, callback_query):
                 ]
             )
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.answer("Sent finale group finals..")
+            await query.answer("Sent finale download links..")
             await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
         else:
-            await query.message.reply_text("No group finals available for this movie.")
+            await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-        
+ 
 
 def search_movies(query):
     movies_list = []
