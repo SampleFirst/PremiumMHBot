@@ -61,8 +61,8 @@ async def final_movies_result(client, callback_query):
         finale_list = final_page(group_links[group_id])
         if finale_list:
             keyboards = []
-            for final in finale_list:
-                keyboard = InlineKeyboardButton(final["title"], url=final["id"])
+            for name, link in finale_list.items():
+                keyboard = InlineKeyboardButton(name, url=link)
                 keyboards.append([keyboard])
             reply_markup = InlineKeyboardMarkup(keyboards)
             await query.answer("Sent finale download links..")
@@ -71,7 +71,7 @@ async def final_movies_result(client, callback_query):
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
- 
+
 
 def search_movies(query):
     movies_list = []
@@ -126,12 +126,7 @@ def final_page(final_page_url):
             webpage = BeautifulSoup(webpage, "html.parser")
             finals = webpage.find_all("a", href=True, rel="external", target="_blank")
             for final in finals:
-                finale_details = {}
-                finale_details["id"] = final['href']
-                parsed_url = urlparse(final['href'])
-                finale_details["title"] = parsed_url.netloc
-                finale_list.append(finale_details)
+                finale_list[final.text.strip()] = final['href']
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return finale_list
-
