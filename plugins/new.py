@@ -6,7 +6,7 @@ from cloudscraper import create_scraper
 import requests  
 from aiohttp import ClientSession 
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 class DDLException(Exception):
