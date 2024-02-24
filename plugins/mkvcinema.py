@@ -60,9 +60,10 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
+            links = finale_list["links"]
             keyboards = []
-            for text, link in finale_list.items():
-                keyboard = InlineKeyboardButton(text, url=link)
+            for name, link in links.items():
+                keyboard = InlineKeyboardButton(name, url=link)
                 keyboards.append([keyboard])
             reply_markup = InlineKeyboardMarkup(keyboards)
             await query.answer("Sent finale download links..")
@@ -124,11 +125,10 @@ def final_page(final_page_url):
         if webpage.status_code == 200:
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, "html.parser")
-            finals = webpage.find_all("a", href=True, rel="external", target="_blank")
+            links = webpage.find_all("a", href=True, rel="external", target="_blank")
             final_links = {}
-            for final in finals:
-                final_links[f"{final.text}"] = final['href']
-                finale_details["text"] = urlparse(final['href'])
+            for i in links:
+                final_links[f"{i.text}"] = i['href']
                 finale_details["links"] = final_links
                 finale_list.append(finale_details)
     except Exception as e:
