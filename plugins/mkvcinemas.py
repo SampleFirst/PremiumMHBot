@@ -32,15 +32,16 @@ async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
     s = get_movie(url_list[movie_id])
-    response = requests.get(s["img"])
-    img = BytesIO(response.content)
-    await query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
-    link = ""
+    link_buttons = []
     links = s["links"]
-    for i in links:
-        link += "🎬" + i + "\n" + links[i] + "\n\n"
-    caption = f"⚡ Download Links :-\n\n{link}"
-    await query.message.reply_text(text=caption)
+    for name, link in links.items():
+        button = InlineKeyboardButton(name, url=link)
+        link_buttons.append([button])
+
+    caption = f"🎥 {s['title']}\n\n⚡ Download Links:"
+    reply_markup = InlineKeyboardMarkup(link_buttons)
+    
+    await query.message.reply_text(caption, reply_markup=reply_markup)
     await query.answer("Sent movie links")
 
 
