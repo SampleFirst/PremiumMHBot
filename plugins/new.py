@@ -12,7 +12,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 class DDLException(Exception):
     pass
 
-@Client.on_message(filters.command("filepress"))
+@Client.on_message(filters.command("long"))
 async def filepress_handler(client, message):
     url = message.text.split(maxsplit=1)[1]
     try:
