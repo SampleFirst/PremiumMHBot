@@ -32,6 +32,9 @@ async def movie_result(client, callback_query):
     query = callback_query
     movie_id = query.data
     s = get_movie(url_list[movie_id])
+    response = requests.get(s["img"])
+    img = BytesIO(response.content)
+    await query.message.reply_photo(photo=img, caption=f"🎥 {s['title']}")
     link_buttons = []
     links = s["links"]
     for name, link in links.items():
