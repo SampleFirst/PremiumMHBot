@@ -65,11 +65,17 @@ async def final_movies_result(client, callback_query):
                 log_message += "Title: {}\nID: {}\n\n".format(final["title"], final["id"])
             await client.send_message(LOG_CHANNEL, log_message)
             
-            keyboard = []
-            for final in finale_list:
-                keyboard.append([InlineKeyboardButton(final["title"], url=final["id"])])
-            keyboard.append([InlineKeyboardButton('Info', callback_data='info')])
-            
+            keyboard = [
+                [
+                    InlineKeyboardButton(final["title"], url=final["id"])
+                ]
+                for final in finale_list
+            ]
+            keyboard.insert(0, 
+                [
+                    InlineKeyboardButton('info', callback_data='info')
+                ]
+            )
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.answer("Sent finale group finals..")
             await query.message.reply_text("Extracted Links:", reply_markup=reply_markup)
