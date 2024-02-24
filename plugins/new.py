@@ -3,7 +3,7 @@ from re import findall
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
-from requests  
+import requests  
 from aiohttp import ClientSession 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InKeyboardMarkup
