@@ -5,10 +5,11 @@ import requests
 from urllib.parse import urlparse
 
 def extract_links(url):
-    usr_agent = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
+    proxies = {
+        'http': 'http://10.10.1.10:3128',
+        'https': 'http://10.10.1.10:1080'
     }
-    response = requests.get(url, headers=usr_agent)
+    response = requests.get(url, proxies=proxies)
     response.raise_for_status()
     soup = BeautifulSoup(response.content, 'html.parser')
     links = []
@@ -38,3 +39,5 @@ def get_links(client, message):
             message.reply_text("No valid links found on the website.")
     else:
         message.reply_text("Please provide a valid URL.")
+
+
