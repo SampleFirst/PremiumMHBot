@@ -4,11 +4,9 @@ from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse
 
-
 def extract_links(url):
     usr_agent = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-        'Chrome/61.0.3163.100 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
     }
     response = requests.get(url, headers=usr_agent)
     response.raise_for_status()
@@ -30,7 +28,7 @@ def get_links(client, message):
             print(f"Attempting to add button with URL: {link}")
             try:
                 button = InlineKeyboardButton(domain, url=link)
-                buttons.append([button])  # Append each button as a separate list
+                buttons.append(button)  # Append each button directly
             except Exception as e:
                 print(f"Error creating button with URL {link}: {e}")
         if buttons:
