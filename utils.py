@@ -31,7 +31,7 @@ VERIFIED = {}
 BANNED = {}
 
 # Temp DB for banned
-class Temp:
+class temp(object):
     BANNED_USERS = []
     BANNED_CHATS = []
     VERIFIED_CHATS = []
