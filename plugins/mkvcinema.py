@@ -64,7 +64,7 @@ async def final_movies_result(client, callback_query):
             caption = "⚡ Download Links:\n\n"
             for name, link in links.items():
                 caption += f"[{name}]({link})\n"
-            await query.message.reply_text(caption, parse_mode="Markdown")
+            await query.message.reply_text(caption)
             await query.answer("Sent movie links")
         else:
             await query.message.reply_text("No download links available for this movie.")
