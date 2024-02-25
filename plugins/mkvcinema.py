@@ -52,7 +52,6 @@ async def movie_result(client, callback_query):
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
  
-
 @Client.on_callback_query(filters.regex('^pay\d+$'))
 async def final_movies_result(client, callback_query):
     try:
@@ -60,16 +59,38 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
+            keyboards = []
             links = finale_list["links"]
-            caption = "⚡ Download Links:\n\n"
             for name, link in links.items():
-                caption += f"[{name}]({link})\n"
-            await query.message.reply_text(caption)
+                keyboard = InlineKeyboardButton(name, url=link)
+                keyboards.append([keyboard])
+            caption = "⚡ Download Links:"
+            reply_markup = InlineKeyboardMarkup(keyboards)
+            await query.message.reply_text(caption, reply_markup=reply_markup)
             await query.answer("Sent movie links")
         else:
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
+
+# @Client.on_callback_query(filters.regex('^pay\d+$'))
+# async def final_movies_result(client, callback_query):
+    # try:
+        # query = callback_query
+        # group_id = query.data
+        # finale_list = final_page(group_links[group_id])
+        # if finale_list:
+            # links = finale_list["links"]
+            # caption = "⚡ Download Links:\n\n"
+            # for name, link in links.items():
+                # caption += f"[{name}]({link})\n"
+            # await query.message.reply_text(caption)
+            # await query.answer("Sent movie links")
+        # else:
+            # await query.message.reply_text("No download links available for this movie.")
+    # except Exception as e:
+        # await query.message.reply_text(f"An error occurred: {str(e)}")
+
 
 def search_movies(query):
     movies_list = []
@@ -122,7 +143,7 @@ def final_page(final_page_url):
         if webpage.status_code == 200:
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, "html.parser")
-            links = webpage.find_all("a", href=True, rel="external", target="_blank")
+            links = webpage.find_all("a", {'rel': 'external', 'target': '_blank'})
             final_links = {}
             for i in links:
                 final_links[f"{i.text}"] = i['href']
@@ -131,3 +152,4 @@ def final_page(final_page_url):
         print(f"An error occurred: {str(e)}")
     return finale_list
     
+
