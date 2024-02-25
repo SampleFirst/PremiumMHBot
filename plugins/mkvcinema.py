@@ -3,6 +3,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
+from io import BytesIO
 from info import ADMINS, LOG_CHANNEL 
 from urllib.parse import urlparse
 
@@ -39,6 +40,9 @@ async def movie_result(client, callback_query):
         query = callback_query
         movie_id = query.data
         group_list = get_movie(movie_links[movie_id])
+        response = requests.get(group_list["img"])
+        img = BytesIO(response.content)
+        await query.message.reply_photo(photo=img, caption=f"🎥 {group_list['title']}")    
         if group_list:
             keyboards = []
             for group in group_list:
