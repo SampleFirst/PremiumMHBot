@@ -60,21 +60,16 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
-            keyboards = []
             links = finale_list["links"]
+            caption = "⚡ Download Links:\n\n"
             for name, link in links.items():
-                keyboard = InlineKeyboardButton(name, url=link)
-                keyboards.append([keyboard])
-                
-            caption = "⚡ Download Links:"
-            reply_markup = InlineKeyboardMarkup(keyboards)
-            await query.message.reply_text(caption, reply_markup=reply_markup)
+                caption += f"[{name}]({link})\n"
+            await query.message.reply_text(caption, parse_mode="Markdown")
             await query.answer("Sent movie links")
         else:
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-
 
 def search_movies(query):
     movies_list = []
