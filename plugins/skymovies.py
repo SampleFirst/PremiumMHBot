@@ -3,7 +3,6 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
-from io import BytesIO
 from info import ADMINS, LOG_CHANNEL 
 from urllib.parse import urlparse
 
@@ -40,9 +39,6 @@ async def movie_result(client, callback_query):
         query = callback_query
         movie_id = query.data
         group_list = get_movie(movie_links[movie_id])
-        response = requests.get(group_list["img"])
-        img = BytesIO(response.content)
-        await query.message.reply_photo(photo=img, caption=f"🎥 {group_list['title']}")    
         if group_list:
             keyboards = []
             for group in group_list:
@@ -119,28 +115,25 @@ def search_movies(query):
 
 def get_movie(movie_page_url):
     group_list = []
-    group_details = {}
     try:
         movie_page = "https://skymovieshd.ngo" + movie_page_url
         webpage = requests.get(movie_page)
         if webpage.status_code == 200:
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, "html.parser")
-            title = webpage.find("div", class_="Robiul").text.strip()
-            group_details["title"] = title
-            img = webpage.find("div", class_="movielist").find("img")["src"]
-            group_details["img"] = img
             groups = webpage.find("div", {'class': 'Bolly'})
             if groups:
                 groups = groups.find_all("a", href=True)
                 for group in groups:
+                    group_details = {}
                     group_details["id"] = f"pay{groups.index(group)}"
-                    group_details["text"] = group.text.strip()
+                    group_details["title"] = group.text.strip()
                     group_links[group_details["id"]] = group['href']
                     group_list.append(group_details)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return group_list
+
 
 def final_page(final_page_url):
     finale_list = {}
