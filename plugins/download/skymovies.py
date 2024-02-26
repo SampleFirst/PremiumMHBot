@@ -59,10 +59,9 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
-            links = finale_list["links"]
             buttons = []
-            for name, link in links.items():
-                button = InlineKeyboardButton(text=name, url="https://" + link)
+            for finale in finale_list:
+                button = InlineKeyboardButton(text=final_links["text"], url=final_links["link"])
                 buttons.append([button])
             reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.reply_text("Click on the below buttons to download:", reply_markup=reply_markup)
@@ -72,24 +71,6 @@ async def final_movies_result(client, callback_query):
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
 
-
-# @Client.on_callback_query(filters.regex('^pay\d+$'))
-# async def final_movies_result(client, callback_query):
-    # try:
-        # query = callback_query
-        # group_id = query.data
-        # finale_list = final_page(group_links[group_id])
-        # if finale_list:
-            # links = finale_list["links"]
-            # caption = "⚡ Download Links:\n\n"
-            # for name, link in links.items():
-                # caption += f"[{name}]({link})\n"
-            # await query.message.reply_text(caption)
-            # await query.answer("Sent movie links")
-        # else:
-            # await query.message.reply_text("No download links available for this movie.")
-    # except Exception as e:
-        # await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
 def search_movies(query):
@@ -145,8 +126,9 @@ def final_page(final_page_url):
             webpage = BeautifulSoup(webpage, 'html.parser')
             links = webpage.find_all("a", {'rel': 'external', 'target': '_blank'})
             final_links = {}
-            for link in links:
-                final_links[link.text.strip()] = link['href']
+            for finale in finales:
+                final_links["link"] = finale['href']
+                final_links["text"] = finale.text.strip()
             finale_list["links"] = final_links
     except Exception as e:
         print(f"An error occurred: {str(e)}")
