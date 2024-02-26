@@ -59,17 +59,11 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
-            links = finale_list["links"]
             buttons = []
-            count = 0
-            temp_buttons = []
-            for domain, link in links.items():
-                button = InlineKeyboardButton(text=domain, url=link)
-                temp_buttons.append(button)
-                count += 1
-                if count % 2 == 0 or count == len(links):
-                    buttons.append(temp_buttons)
-                    temp_buttons = []
+            links = finale_list["links"]
+            for name, link in links.items():
+                button = InlineKeyboardButton(name, url=link)
+                link_buttons.append([button])
             reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.reply_text("Click on the below buttons to download:", reply_markup=reply_markup)
             await query.answer("Sent movie links")
@@ -130,11 +124,10 @@ def final_page(final_page_url):
         if webpage.status_code == 200:
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, 'html.parser')
-            links = webpage.find_all("a", {'rel': 'external', 'target': '_blank'})
+            links = webpage.find_all("a", {'rel': 'external'})
             final_links = {}
             for link in links:
-                domain = urlparse(link['href']).netloc
-                final_links[domain] = link['href']
+                final_links[f"{link.text}"] = link['href']
             finale_list["links"] = final_links
     except Exception as e:
         print(f"An error occurred: {str(e)}")
