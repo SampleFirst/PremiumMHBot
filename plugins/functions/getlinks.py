@@ -1,10 +1,11 @@
-# genlinks.py
+# getlinks.py
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse
-
+import traceback
+from info import ADMINS, LOG_CHANNEL 
 
 def extract_links(url):
     usr_agent = {
@@ -25,20 +26,29 @@ def get_links(client, message):
     if len(message.command) > 1:
         url = message.command[1]
         links = extract_links(url)
-        buttons = []
+        valid_buttons = []
+        invalid_urls = []
         for link in links:
             domain = urlparse(link).netloc
             print(f"Attempting to add button with URL: {link}")
             try:
                 button = InlineKeyboardButton(domain, url=link)
-                buttons.append(button)
+                valid_buttons.append(button)
             except Exception as e:
                 print(f"Error creating button with URL {link}: {e}")
-        if buttons:
-            reply_markup = InlineKeyboardMarkup([buttons])
+                invalid_urls.append(link)
+                traceback.print_exc()
+        if valid_buttons:
+            reply_markup = InlineKeyboardMarkup([valid_buttons])
             message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
         else:
             message.reply_text("No valid links found on the website.")
+
+        # Log invalid URLs
+        if invalid_urls:
+            log_message = f"Invalid URLs found:\n"
+            for invalid_url in invalid_urls:
+                log_message += f"- {invalid_url}\n"
+            client.send_message(LOG_CHANNEL, log_message)
     else:
         message.reply_text("Please provide a valid URL.")
-
