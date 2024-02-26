@@ -15,9 +15,10 @@ def extract_links(url):
     response.raise_for_status()
     soup = BeautifulSoup(response.content, 'html.parser')
     links = []
-    for link in soup.find_all('a', href=True):
+    for link in soup.find_all('a', {'rel': 'external'}):
         links.append(link['href'])
-    return links  
+    return links
+    
 
 # Command handler
 @Client.on_message(filters.command(["getlinks"]))
