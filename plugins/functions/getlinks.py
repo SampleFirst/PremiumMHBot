@@ -16,7 +16,9 @@ def extract_links(url):
     soup = BeautifulSoup(response.content, 'html.parser')
     links = []
     for link in soup.find_all('a', {'rel': 'external'}):
-        links.append(link['href'])
+        href = link.get('href')
+        if href.startswith("https://"):
+            links.append(href)
     return links
     
 
