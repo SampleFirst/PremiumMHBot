@@ -61,10 +61,14 @@ async def final_movies_result(client, callback_query):
         if finale_list:
             link_buttons = []
             links = finale_list["links"]
-            for name, link in links.items():
-                button = InlineKeyboardButton(name, url=link)
-                link_buttons.append([button])
-            reply_markup = InlineKeyboardMarkup(link_buttons)
+            buttons = [
+                [
+                    InlineKeyboardButton(link, url=link)
+                    for link in links[i:i+2]
+                ]
+                for i in range(0, len(links), 2)
+            ]
+            reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.reply_text("Click on the below link_buttons to download:", reply_markup=reply_markup)
             await query.answer("Sent movie links")
         else:
