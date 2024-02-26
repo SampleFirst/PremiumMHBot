@@ -61,9 +61,15 @@ async def final_movies_result(client, callback_query):
         if finale_list:
             links = finale_list["links"]
             buttons = []
+            count = 0
+            temp_buttons = []
             for domain, link in links.items():
-                button = [InlineKeyboardButton(text=domain, url=link)]
-                buttons.append(button)
+                button = InlineKeyboardButton(text=domain, url=link)
+                temp_buttons.append(button)
+                count += 1
+                if count % 2 == 0 or count == len(links):
+                    buttons.append(temp_buttons)
+                    temp_buttons = []
             reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.reply_text("Click on the below buttons to download:", reply_markup=reply_markup)
             await query.answer("Sent movie links")
@@ -71,7 +77,6 @@ async def final_movies_result(client, callback_query):
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-
 
 
 def search_movies(query):
