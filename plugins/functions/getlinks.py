@@ -34,7 +34,7 @@ def get_links(client, message):
             if buttons:
                 reply_markup = InlineKeyboardMarkup(buttons)
                 message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
-            if links_list:
+            elif links_list:
                 message.reply_text("Here are the links from the website:\n" + "\n".join(links_list))
             else:
                 message.reply_text("No valid links found on the website.")
