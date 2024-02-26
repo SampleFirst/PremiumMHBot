@@ -62,8 +62,8 @@ async def final_movies_result(client, callback_query):
             links = finale_list["links"]
             buttons = []
             for domain, link in links.items():
-                button = InlineKeyboardButton(text=domain, url=link)
-                buttons.append([button])
+                button = [InlineKeyboardButton(text=domain, url=link)]
+                buttons.append(button)
             reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.reply_text("Click on the below buttons to download:", reply_markup=reply_markup)
             await query.answer("Sent movie links")
