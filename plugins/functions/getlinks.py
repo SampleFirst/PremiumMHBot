@@ -24,21 +24,24 @@ def extract_links(url):
 def get_links(client, message):
     if len(message.command) > 1:
         url = message.command[1]
-        links = extract_links(url)
-        buttons = []
-        for link in links:
-            domain = urlparse(link).netloc
-            print(f"Attempting to add button with URL: {link}")
-            try:
-                button = InlineKeyboardButton(domain, url="link")
-                buttons.append([button])
-            except Exception as e:
-                print(f"Error creating button with URL {link}: {e}")
-        if buttons:
-            reply_markup = InlineKeyboardMarkup(buttons)
-            message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
-        else:
-            message.reply_text("No valid links found on the website.")
+        try:
+            links = extract_links(url)
+            buttons = []
+            for link in links:
+                domain = urlparse(link).netloc
+                print(f"Attempting to add button with URL: {link}")
+                try:
+                    button = InlineKeyboardButton(domain, url=link)
+                    buttons.append([button])
+                except Exception as e:
+                    print(f"Error creating button with URL {link}: {e}")
+            if buttons:
+                reply_markup = InlineKeyboardMarkup(buttons)
+                message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
+            else:
+                message.reply_text("No valid links found on the website.")
+        except Exception as e:
+            print(f"Error processing URL {url}: {e}")
+            message.reply_text("Error processing the URL. Please try again later.")
     else:
         message.reply_text("Please provide a valid URL.")
-
