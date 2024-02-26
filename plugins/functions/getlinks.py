@@ -31,11 +31,11 @@ def get_links(client, message):
             print(f"Attempting to add button with URL: {link}")
             try:
                 button = InlineKeyboardButton(domain, url="link")
-                buttons.append(button)
+                buttons.append([button])
             except Exception as e:
                 print(f"Error creating button with URL {link}: {e}")
         if buttons:
-            reply_markup = InlineKeyboardMarkup([buttons])
+            reply_markup = InlineKeyboardMarkup(buttons)
             message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
         else:
             message.reply_text("No valid links found on the website.")
