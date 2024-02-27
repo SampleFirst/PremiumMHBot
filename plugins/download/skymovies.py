@@ -64,17 +64,16 @@ async def final_movies_result(client, callback_query):
             links = finale_list["links"]
             response_text = ""
             for title, url in links.items():
-                dname = urlparse(url).netloc
-                dname = re.sub(r'^http?://', '', dname)  # Fixing missing argument
-                domain = dname
-                response_text += f"Title: {domain}\nUrl: {url}\n\n"
+                if title.startswith("http://") or title.startswith("https://"):
+                    title = "//".join(title.split("//")[1:])  # Extract domain from URL
+                response_text += f"Title: {title}\nUrl: {url}\n\n"
             await query.message.reply_text(response_text)
             await query.answer("Sent movie links")
         else:
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-
+        
 
 # @Client.on_callback_query(filters.regex('^pay\d+$'))
 # async def final_movies_result(client, callback_query):
