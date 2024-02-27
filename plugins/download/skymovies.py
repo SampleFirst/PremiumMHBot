@@ -147,10 +147,11 @@ def final_page(final_page_url):
             webpage = BeautifulSoup(webpage, 'html.parser')
             links = webpage.find_all("a", {'rel': 'external'})
             for link in links:
-                links_details = {}
-                links_details["text"] = link.text.strip()
-                links_details["url"] = link['href']
-                link_list.append(links_details)
+                link_details = {}
+                link_details["url"] = link['href']
+                link_details["text"] = link.text.strip()
+                link_list.append(link_details)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return link_list
+    
