@@ -67,9 +67,9 @@ async def final_movies_result(client, callback_query):
                 x = urlparse(url).netloc
                 if x.startswith("http://") or x.startswith("https://"):
                     a = "//".join(x.split("//")[1:])
-                    domain = a
+                    domain = f"<code>{a}</code>"
                 else:
-                    domain = x
+                    domain = f"<code>{x}</code>"
                 
                 response_text += f"Title: {domain}\nUrl: {url}\n\n"
             await query.message.reply_text(response_text)
