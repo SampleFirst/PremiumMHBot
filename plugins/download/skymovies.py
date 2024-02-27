@@ -64,9 +64,14 @@ async def final_movies_result(client, callback_query):
             links = finale_list["links"]
             response_text = ""
             for title, url in links.items():
-                if title.startswith("http://") or title.startswith("https://"):
-                    title = "//".join(title.split("//")[1:])  # Extract domain from URL
-                response_text += f"Title: {title}\nUrl: {url}\n\n"
+                x = urlparse(url).netloc
+                if x.startswith("http://") or x.startswith("https://"):
+                    a = "//".join(x.split("//")[1:])
+                    domain = a
+                else:
+                    domain = x
+                
+                response_text += f"Title: {domain}\nUrl: {url}\n\n"
             await query.message.reply_text(response_text)
             await query.answer("Sent movie links")
         else:
