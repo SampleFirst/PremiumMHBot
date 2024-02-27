@@ -54,32 +54,6 @@ async def movie_result(client, callback_query):
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
  
-@Client.on_callback_query(filters.regex('^pay\d+$'))
-async def final_movies_result(client, callback_query):
-    try:
-        query = callback_query
-        group_id = query.data
-        finale_list = final_page(group_links[group_id])
-        if finale_list:
-            links = finale_list["links"]
-            response_text = ""
-            for title, url in links.items():
-                x = urlparse(url).netloc
-                if x.startswith("http://") or x.startswith("https://"):
-                    a = "//".join(x.split("//")[1:])
-                    domain = f"<code>{a}</code>"
-                else:
-                    domain = f"<code>{x}</code>"
-                
-                response_text += f"Title: {domain}\nUrl: {url}\n\n"
-            await query.message.reply_text(response_text)
-            await query.answer("Sent movie links")
-        else:
-            await query.message.reply_text("No download links available for this movie.")
-    except Exception as e:
-        await query.message.reply_text(f"An error occurred: {str(e)}")
-        
-
 # @Client.on_callback_query(filters.regex('^pay\d+$'))
 # async def final_movies_result(client, callback_query):
     # try:
@@ -87,18 +61,41 @@ async def final_movies_result(client, callback_query):
         # group_id = query.data
         # finale_list = final_page(group_links[group_id])
         # if finale_list:
-            # link_buttons = []
             # links = finale_list["links"]
-            # for name, link in links.items():
-                # button = InlineKeyboardButton(name, url=link)
-                # link_buttons.append([button])
-            # reply_markup = InlineKeyboardMarkup(link_buttons)
-            # await query.message.reply_text("Click on the below link_buttons to download:", reply_markup=reply_markup)
+            # response_text = ""
+            # for title, url in links.items():
+                # x = urlparse(url).netloc
+                # domain = f"<code>{x}</code>"
+                # response_text += f"Title: {domain}\nUrl: {url}\n\n"
+            # await query.message.reply_text(response_text)
             # await query.answer("Sent movie links")
         # else:
             # await query.message.reply_text("No download links available for this movie.")
     # except Exception as e:
         # await query.message.reply_text(f"An error occurred: {str(e)}")
+        
+
+@Client.on_callback_query(filters.regex('^pay\d+$'))
+async def final_movies_result(client, callback_query):
+    try:
+        query = callback_query
+        group_id = query.data
+        finale_list = final_page(group_links[group_id])
+        if finale_list:
+            link_buttons = []
+            links = finale_list["links"]
+            for title, url in links.items():
+                x = urlparse(url).netloc
+                domain = f"<code>{x}</code>"
+                button = InlineKeyboardButton(domain, url=url)
+                link_buttons.append([button])
+            reply_markup = InlineKeyboardMarkup(link_buttons)
+            await query.message.reply_text("Click on the below link_buttons to download:", reply_markup=reply_markup)
+            await query.answer("Sent movie links")
+        else:
+            await query.message.reply_text("No download links available for this movie.")
+    except Exception as e:
+        await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
 def search_movies(query):
