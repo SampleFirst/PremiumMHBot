@@ -5,7 +5,6 @@ import requests
 from bs4 import BeautifulSoup
 from info import ADMINS, LOG_CHANNEL 
 from urllib.parse import urlparse
-import re
 
 
 movie_links = {}
@@ -80,16 +79,13 @@ async def final_movies_result(client, callback_query):
     try:
         query = callback_query
         group_id = query.data
-        finale_list = final_page(group_links[group_id])
-        if finale_list:
-            link_buttons = []
-            links = finale_list["links"]
-            for title, url in links.items():
-                x = urlparse(url).netloc
-                domain = f"<code>{x}</code>"
-                button = InlineKeyboardButton(domain, url=url)
-                link_buttons.append([button])
-            reply_markup = InlineKeyboardMarkup(link_buttons)
+        link_list = final_page(group_links[group_id])
+        if link_list:
+            keyboards = []
+            for link in link_list:
+                keyboard = InlineKeyboardButton(link["text"], url=link["url"])
+                keyboards.append([keyboard])
+            reply_markup = InlineKeyboardMarkup(keyboards)
             await query.message.reply_text("Click on the below link_buttons to download:", reply_markup=reply_markup)
             await query.answer("Sent movie links")
         else:
@@ -142,18 +138,23 @@ def get_movie(movie_page_url):
 
 
 def final_page(final_page_url):
-    finale_list = {}
+    link_list = {}
     try:
         final_page = final_page_url
         webpage = requests.get(final_page)
         if webpage.status_code == 200:
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, 'html.parser')
-            links = webpage.find_all("a", {'rel': 'external'})
-            final_links = {}
-            for link in links:
-                final_links[f"{link.text}"] = link['href']
-            finale_list["links"] = final_links
+            links = webpage.find({'rel': 'external'})
+            if links:
+                links = links.find_all("a", href=True)
+                for link in links:
+                    links_details = {}
+                    links_details["text"] = link.text.strip()
+                    links_details["url"] = link['href']
+                    link_list.append(links_details)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-    return finale_list
+    return link_list
+    
+    
