@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from info import ADMINS, LOG_CHANNEL 
 from urllib.parse import urlparse
-from tld import get_fld
+import re
 
 
 movie_links = {}
