@@ -7,8 +7,6 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 def show_urls(client, message):
     # URLs and their corresponding titles
     urls = [
-        {"title": "media.cm", "url": "https://media.cm/d/1gu75kdd3bmf"},
-        {"title": "dropgalaxy.vip", "url": "https://dropgalaxy.vip/2eskccw4s222"},
         {"title": "new.gdflix.cfd", "url": "https://new.gdflix.cfd/file/Ocx6YdzBIt"},
         {"title": "hubdrive.lat", "url": "https://hubdrive.lat/file/1706522970"},
         {"title": "new3.gdtot.zip", "url": "https://new3.gdtot.zip/file/661661345"},
