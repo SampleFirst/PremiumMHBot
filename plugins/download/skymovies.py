@@ -145,16 +145,12 @@ def final_page(final_page_url):
         if webpage.status_code == 200:
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, 'html.parser')
-            links = webpage.find({'rel': 'external'})
-            if links:
-                links = links.find_all("a", href=True)
-                for link in links:
-                    links_details = {}
-                    links_details["text"] = link.text.strip()
-                    links_details["url"] = link['href']
-                    link_list.append(links_details)
+            links = webpage.find_all("a", href=True, {'rel': 'external'})
+            for link in links:
+                links_details = {}
+                links_details["text"] = link.text.strip()
+                links_details["url"] = link['href']
+                link_list.append(links_details)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return link_list
-    
-    
