@@ -64,7 +64,10 @@ async def final_movies_result(client, callback_query):
             links = finale_list["links"]
             response_text = ""
             for title, url in links.items():
-                response_text += f"Title: {urlparse(url).netloc}\nUrl: {url}\n\n"
+                dname = urlparse(url).netloc
+                dname = re.sub(r'^http?://', '', dname)  # Fixing missing argument
+                domain = dname
+                response_text += f"Title: {domain}\nUrl: {url}\n\n"
             await query.message.reply_text(response_text)
             await query.answer("Sent movie links")
         else:
