@@ -53,6 +53,27 @@ async def movie_result(client, callback_query):
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
  
+@Client.on_callback_query(filters.regex('^pay\d+$'))
+async def final_movies_result(client, callback_query):
+    try:
+        query = callback_query
+        group_id = query.data
+        finale_list = final_page(group_links[group_id])
+        if finale_list:
+            links = finale_list["links"]
+            response_text = ""
+            for title, url in links.items():
+                x = urlparse(url).netloc
+                domain = f"<code>{x}</code>"
+                response_text += f"Title: {domain}\nUrl: {url}\n\n"
+            await query.message.reply_text(response_text)
+            await query.answer("Sent movie links")
+        else:
+            await query.message.reply_text("No download links available for this movie.")
+    except Exception as e:
+        await query.message.reply_text(f"An error occurred: {str(e)}")
+        
+
 # @Client.on_callback_query(filters.regex('^pay\d+$'))
 # async def final_movies_result(client, callback_query):
     # try:
@@ -60,38 +81,18 @@ async def movie_result(client, callback_query):
         # group_id = query.data
         # finale_list = final_page(group_links[group_id])
         # if finale_list:
+            # link_buttons = []
             # links = finale_list["links"]
-            # response_text = ""
-            # for title, url in links.items():
-                # x = urlparse(url).netloc
-                # domain = f"<code>{x}</code>"
-                # response_text += f"Title: {domain}\nUrl: {url}\n\n"
-            # await query.message.reply_text(response_text)
+            # for name, link in links.items():
+                # button = InlineKeyboardButton(name, url=link)
+                # link_buttons.append([button])
+            # reply_markup = InlineKeyboardMarkup(link_buttons)
+            # await query.message.reply_text("Click on the below link_buttons to download:", reply_markup=reply_markup)
             # await query.answer("Sent movie links")
         # else:
             # await query.message.reply_text("No download links available for this movie.")
     # except Exception as e:
         # await query.message.reply_text(f"An error occurred: {str(e)}")
-        
-
-@Client.on_callback_query(filters.regex('^pay\d+$'))
-async def final_movies_result(client, callback_query):
-    try:
-        query = callback_query
-        group_id = query.data
-        link_list = final_page(group_links[group_id])
-        if link_list:
-            keyboards = []
-            for link in link_list:
-                keyboard = InlineKeyboardButton(link["text"], url=link["url"])
-                keyboards.append([keyboard])
-            reply_markup = InlineKeyboardMarkup(keyboards)
-            await query.message.reply_text("Click on the below link_buttons to download:", reply_markup=reply_markup)
-            await query.answer("Sent movie links")
-        else:
-            await query.message.reply_text("No download links available for this movie.")
-    except Exception as e:
-        await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
 def search_movies(query):
@@ -138,7 +139,7 @@ def get_movie(movie_page_url):
 
 
 def final_page(final_page_url):
-    link_list = {}
+    finale_list = {}
     try:
         final_page = final_page_url
         webpage = requests.get(final_page)
@@ -146,12 +147,10 @@ def final_page(final_page_url):
             webpage = webpage.text
             webpage = BeautifulSoup(webpage, 'html.parser')
             links = webpage.find_all("a", {'rel': 'external'})
+            final_links = {}
             for link in links:
-                link_details = {}
-                link_details["url"] = link['href']
-                link_details["text"] = link.text.strip()
-                link_list.append(link_details)
+                final_links[f"{link.text}"] = link['href']
+            finale_list["links"] = final_links
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-    return link_list
-    
+    return finale_list
