@@ -8,6 +8,7 @@ requests
 bs4
 cloudscraper
 cfscrape
+tldextract
 tld==0.12.6
 urllib3==1.26
 git+https://github.com/Joelkb/cinemagoer
