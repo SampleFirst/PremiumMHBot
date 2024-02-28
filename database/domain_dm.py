@@ -9,7 +9,7 @@ class Database:
     def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.dm = self._client[database_name]
-        self.dm = self.db.domain
+        self.dm = self.dm.domain
 
     async def add_domain(self, domain):
         tz = pytz.timezone('Asia/Kolkata')
