@@ -130,16 +130,21 @@ async def delete_confirmation(client, message):
 @Client.on_callback_query(filters.regex("^yes_delete$"))
 async def yes_delete(client, callback_query):
     try:
+        msg = await callback_query.message.edit_text("Deleting domains...", quote=True)
         await dm.delete_all_domains()
+        await msg.delete()
         await callback_query.message.edit_text("All data deleted successfully!")
+        await callback_query.answer("Not deleting now.")
     except Exception as e:
         await callback_query.message.edit_text(f"An error occurred: {str(e)}")
+        await callback_query.answer("Not deleting now.")
 
 @Client.on_callback_query(filters.regex("^nope_now$"))
 async def nope_now(client, callback_query):
+    await callback_query.message.edit_text("Not deleting now...")
     await callback_query.answer("Not deleting now.")
 
 @Client.on_callback_query(filters.regex("^not_now$"))
 async def not_now(client, callback_query):
+    await callback_query.message.edit_text("Okay, not deleting...")
     await callback_query.answer("Okay, not deleting.")
-
