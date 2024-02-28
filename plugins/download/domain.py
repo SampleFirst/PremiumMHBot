@@ -24,7 +24,7 @@ async def get_domain(client, message):
             await msg.delete()
             button = [
                 [
-                    InlineKeyboardButton(text="Update Domain", callback_data="update_domain")
+                    InlineKeyboardButton(text="Show Domain", callback_data="show_domain")
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(button)
