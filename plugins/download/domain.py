@@ -31,7 +31,7 @@ async def get_domain(client, message):
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(button)
-            caption = f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>\n\nAnd Latest Store Domain is:\n<code>{latest_domain}</code>\n\nNew Domain and Latest Store domain are Match ✅ Select 'Show Domain' Button to Show all Updated Domains..."
+            caption = f"**Domain get from**\n<code>{website}</code>\n\n- **Website:**\n<code>{site}</code>\n\n- **Latest Webpage Domain:**\n<code>{new_domain}</code>\n\n- **Latest Store Domain:**\n<code>{latest_domain}</code>\n\n**Note:** ✅ The new domain and the latest store domain are match. Select the 'Show Domain' button to Show all store domains..."
             main = await message.reply_text(
                 text=caption,
                 reply_markup=reply_markup,
@@ -51,7 +51,7 @@ async def get_domain(client, message):
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(button)
-            caption = f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>\n\nAnd Latest Store Domain is:\n<code>{latest_domain}</code>\n\nNew Domain and Latest Store domain are not Match ❎ Select 'Domain Update' Button to Update the new Domain..."
+            caption = f"**Domain get from**\n<code>{website}</code>\n\n- **Website:**\n<code>{site}</code>\n\n- **Latest Webpage Domain:**\n<code>{new_domain}</code>\n\n- **Latest Store Domain:**\n<code>{latest_domain}</code>\n\n**Note:** ❌ The new domain and the latest store domain do not match. Please select the 'Domain Update' button to update the new domain..."
             main = await message.reply_text(
                 text=caption,
                 reply_markup=reply_markup,
