@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from info import ADMINS, LOG_CHANNEL
-from database.domain_dm import dm 
+from database.domain_db import dm 
 import random
 
 
