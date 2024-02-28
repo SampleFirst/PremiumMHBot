@@ -29,9 +29,9 @@ async def skymovieshd(client, message):
                 keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await search_results.edit_text(f'Search Results found: {count}\n\nChoose a movie from *{query}*:', reply_markup=reply_markup, parse_mode="markdown")
+            await search_results.edit_text(f'Search Results found: {count}\n\nChoose a movie from *{query}*:', reply_markup=reply_markup)
         else:
-            await search_results.edit_text(f'Sorry 🙏, No results found for *{query}*.\nCheck if you have misspelled the movie name.', parse_mode="markdown")
+            await search_results.edit_text(f'Sorry 🙏, No results found for *{query}*.\nCheck if you have misspelled the movie name.')
     except Exception as e:
         await message.reply_text(f"An error occurred: {str(e)}")
 
@@ -50,7 +50,7 @@ async def movie_result(client, callback_query):
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
             await query.answer("Showing groups...")
-            await query.message.reply_text(f"Choose a group for *{movie_links[movie_id]}*:", reply_markup=reply_markup, parse_mode="markdown")
+            await query.message.reply_text(f"Choose a group for *{movie_links[movie_id]}*:", reply_markup=reply_markup)
         else:
             await query.message.reply_text("No group finals available for this movie.")
     except Exception as e:
