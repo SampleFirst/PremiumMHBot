@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from info import ADMINS, LOG_CHANNEL 
 from urllib.parse import urlparse
-
+from database.domain_db import dm  
 
 movie_links = {}
 group_links = {}
@@ -101,7 +101,8 @@ async def final_movies_result(client, callback_query):
 def search_movies(query):
     movies_list = []
     try:
-        website = requests.get(f"https://skymovieshd.ngo/search.php?search={query.replace(' ', '+')}&cat=All")
+        latest_domain = await dm.get_latest_domain()
+        website = requests.get(f"https://{latest_domain}/search.php?search={query.replace(' ', '+')}&cat=All")
         if website.status_code == 200:
             website = website.text
             website = BeautifulSoup(website, "html.parser")
@@ -122,7 +123,8 @@ def search_movies(query):
 def get_movie(movie_page_url):
     group_list = []
     try:
-        movie_page = "https://skymovieshd.ngo" + movie_page_url
+        latest_domain = await dm.get_latest_domain()
+        movie_page = "https://{latest_domain}" + movie_page_url
         webpage = requests.get(movie_page)
         if webpage.status_code == 200:
             webpage = webpage.text
