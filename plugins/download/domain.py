@@ -1,3 +1,4 @@
+# domain.py 
 import asyncio
 import requests
 from bs4 import BeautifulSoup
@@ -7,6 +8,7 @@ from info import ADMINS, LOG_CHANNEL
 from database.domain_db import dm 
 import random
 import re
+import tldextract
 
 @Client.on_message(filters.command("domain") & filters.user(ADMINS))
 async def get_domain(client, message):
@@ -19,53 +21,51 @@ async def get_domain(client, message):
 
     if new_domain:
         new_domain = new_domain.text.strip()
-        match = re.search(r'(?<=://)(.*?)(?=\.)', new_domain)
-        if match:
-            site = match.group(0)
-            latest_domain = await dm.get_latest_domain(site)
+        extracted_domain = tldextract.extract(new_domain)
+        site = extracted_domain.domain
+        
+        latest_domain = await dm.get_latest_domain(site)
 
-            if latest_domain == new_domain:
-                await msg.delete()
-                button = [
-                    [
-                        InlineKeyboardButton(text="📃 Show Store Domains", callback_data="show_domain")
-                    ]
+        if latest_domain == new_domain:
+            await msg.delete()
+            button = [
+                [
+                    InlineKeyboardButton(text="📃 Show Store Domains", callback_data="show_domain")
                 ]
-                reply_markup = InlineKeyboardMarkup(button)
-                caption = f"**Domain get from**\n<code>{website}</code>\n\n- **Website:**\n<code>{site}</code>\n\n- **Latest Webpage Domain:**\n<code>{new_domain}</code>\n\n- **Latest Store Domain:**\n<code>{latest_domain}</code>\n\n**Note:** ✅ The new domain and the latest store domain are match. Select the 'Show Domain' button to Show all store domains..."
-                main = await message.reply_text(
-                    text=caption,
-                    reply_markup=reply_markup,
-                    quote=True
-                )
-                await client.send_message(
-                    chat_id=LOG_CHANNEL,
-                    text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>"
-                )
-                await asyncio.sleep(15)
-                await main.delete()
-            else:
-                await msg.delete()
-                button = [
-                    [
-                        InlineKeyboardButton(text="🔄 Domain Update", callback_data="update_domain")
-                    ]
-                ]
-                reply_markup = InlineKeyboardMarkup(button)
-                caption = f"**Domain get from**\n<code>{website}</code>\n\n- **Website:**\n<code>{site}</code>\n\n- **Latest Webpage Domain:**\n<code>{new_domain}</code>\n\n- **Latest Store Domain:**\n<code>{latest_domain}</code>\n\n**Note:** ❌ The new domain and the latest store domain do not match. Please select the 'Domain Update' button to update the new domain..."
-                main = await message.reply_text(
-                    text=caption,
-                    reply_markup=reply_markup,
-                    quote=True
-                )
-                await client.send_message(
-                    chat_id=LOG_CHANNEL,
-                    text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>"
-                )
-                await asyncio.sleep(15)
-                await main.delete()
+            ]
+            reply_markup = InlineKeyboardMarkup(button)
+            caption = f"**Domain get from**\n<code>{website}</code>\n\n- **Website:**\n<code>{site}</code>\n\n- **Latest Webpage Domain:**\n<code>{new_domain}</code>\n\n- **Latest Store Domain:**\n<code>{latest_domain}</code>\n\n**Note:** ✅ The new domain and the latest store domain are match. Select the 'Show Domain' button to Show all store domains..."
+            main = await message.reply_text(
+                text=caption,
+                reply_markup=reply_markup,
+                quote=True
+            )
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>"
+            )
+            await asyncio.sleep(15)
+            await main.delete()
         else:
-            await message.reply_text("Failed to extract site from domain.")
+            await msg.delete()
+            button = [
+                [
+                    InlineKeyboardButton(text="🔄 Domain Update", callback_data="update_domain")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(button)
+            caption = f"**Domain get from**\n<code>{website}</code>\n\n- **Website:**\n<code>{site}</code>\n\n- **Latest Webpage Domain:**\n<code>{new_domain}</code>\n\n- **Latest Store Domain:**\n<code>{latest_domain}</code>\n\n**Note:** ❌ The new domain and the latest store domain do not match. Please select the 'Domain Update' button to update the new domain..."
+            main = await message.reply_text(
+                text=caption,
+                reply_markup=reply_markup,
+                quote=True
+            )
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>"
+            )
+            await asyncio.sleep(15)
+            await main.delete()
     else:
         await message.reply_text("Failed to fetch the new current domain.")
 
@@ -81,33 +81,31 @@ async def update_domain(client, callback_query):
         new_domain = soup.find("span", {"class": "badge"})
 
         new_domain = new_domain.text.strip()
-        match = re.search(r'(?<=://)(.*?)(?=\.)', new_domain)
-        if match:
-            site = match.group(0)
-            await dm.add_domain(site, new_domain)
+        extracted_domain = tldextract.extract(new_domain)
+        site = extracted_domain.domain
+
+        await dm.add_domain(site, new_domain)
         
-            latest_domain = await dm.get_latest_domain(site)
-            if latest_domain == new_domain: 
-                await msg.delete()
-                button = [
-                    [
-                        InlineKeyboardButton(text="📃 Show Store Domains", callback_data="show_domain")
-                    ]
+        latest_domain = await dm.get_latest_domain(site)
+        if latest_domain == new_domain: 
+            await msg.delete()
+            button = [
+                [
+                    InlineKeyboardButton(text="📃 Show Store Domains", callback_data="show_domain")
                 ]
-                reply_markup = InlineKeyboardMarkup(button)
-                caption = f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>\n\nAnd Latest Store Domain is:\n<code>{latest_domain}</code>\n\nNew Domain Update as a Latest domain ✅ Select 'Show Domain' Button to Show all Updated Domains..."
-                main = await callback_query.message.edit_text(
-                    text=caption,
-                    reply_markup=reply_markup
-                )
-                await client.send_message(
-                    chat_id=LOG_CHANNEL,
-                    text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>"
-                )
-                await asyncio.sleep(15)
-                await main.delete()
-        else:
-            await callback_query.message.edit_text("Failed to extract site from domain.")
+            ]
+            reply_markup = InlineKeyboardMarkup(button)
+            caption = f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>\n\nAnd Latest Store Domain is:\n<code>{latest_domain}</code>\n\nNew Domain Update as a Latest domain ✅ Select 'Show Domain' Button to Show all Updated Domains..."
+            main = await callback_query.message.edit_text(
+                text=caption,
+                reply_markup=reply_markup
+            )
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>"
+            )
+            await asyncio.sleep(15)
+            await main.delete()
     except Exception as e:
         await callback_query.message.edit_text(f"An error occurred: {str(e)}")
  
@@ -171,3 +169,4 @@ async def not_now(client, callback_query):
     await callback_query.answer("Okay, not deleting.")
     await asyncio.sleep(30)
     await note.delete()
+
