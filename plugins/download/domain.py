@@ -7,7 +7,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from info import ADMINS, LOG_CHANNEL
 from database.domain_db import dm 
 import random
-
+import re
 
 @Client.on_message(filters.command("domain") & filters.user(ADMINS))
 async def get_domain(client, message):
@@ -20,7 +20,8 @@ async def get_domain(client, message):
 
     if new_domain:
         new_domain = new_domain.text.strip()
-        latest_domain = await dm.get_latest_domain()
+        site = re.search(r'(?<=://)(.*?)(?=\.)', new_domain).group(0)
+        latest_domain = await dm.get_latest_domain(site)
 
         if latest_domain == new_domain:
             await msg.delete()
@@ -77,7 +78,8 @@ async def update_domain(client, callback_query):
         new_domain = soup.find("span", {"class": "badge"})
 
         new_domain = new_domain.text.strip()
-        await dm.add_domain(new_domain)
+        site = re.search(r'(?<=://)(.*?)(?=\.)', new_domain).group(0)
+        await dm.add_domain(site, new_domain)
         
         latest_domain = await dm.get_latest_domain()
         if latest_domain == new_domain: 
@@ -132,7 +134,8 @@ async def delete_confirmation(client, message):
 async def yes_delete(client, callback_query):
     try:
         msg = await callback_query.message.edit_text("Deleting domains...")
-        await dm.delete_all_domains()
+        site = "SkymoviesHD"
+        await dm.delete_all_domains(site)
         await msg.delete()
         main = await callback_query.message.edit_text("All data deleted successfully!")
         await client.send_message(LOG_CHANNEL, "All data deleted successfully!")
