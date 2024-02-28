@@ -1,4 +1,4 @@
-# database.domain_dm.py
+# database.domain_db.py
 import pytz
 import motor.motor_asyncio
 from datetime import datetime
@@ -29,5 +29,8 @@ class Database:
         async for domain_data in self.dm.find({}, {'_id': 0}):
             all_domains.append(domain_data)
         return all_domains
+
+    async def dm.delete_all_domains(self):
+        await self.dm.delete_many({})
 
 dm = Database(DATABASE_URI, DATABASE_NAME)
