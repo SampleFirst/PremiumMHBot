@@ -6,6 +6,8 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from info import ADMINS, LOG_CHANNEL
 from database.domain_dm import dm 
+import random
+
 
 @Client.on_message(filters.command("domain") & filters.user(ADMINS))
 async def get_domain(client, message):
@@ -112,4 +114,32 @@ async def show_domain(client, callback_query):
             await callback_query.message.edit_text("No domains found in the database.")
     except Exception as e:
         await callback_query.message.edit_text(f"An error occurred: {str(e)}")
- 
+
+
+@Client.on_message(filters.command("delete_domains"))
+async def delete_confirmation(client, message):
+    buttons = [
+        InlineKeyboardButton("Yes Delete", callback_data="yes_delete"),
+        InlineKeyboardButton("Nope Now", callback_data="nope_now"),
+        InlineKeyboardButton("Not Now", callback_data="not_now")
+    ]
+    random.shuffle(buttons)
+    reply_markup = InlineKeyboardMarkup([buttons])
+    await message.reply_text("Do you want to delete?", reply_markup=reply_markup)
+
+@Client.on_callback_query(filters.regex("^yes_delete$"))
+async def yes_delete(client, callback_query):
+    try:
+        await dm.delete_all_domains()
+        await callback_query.message.edit_text("All data deleted successfully!")
+    except Exception as e:
+        await callback_query.message.edit_text(f"An error occurred: {str(e)}")
+
+@Client.on_callback_query(filters.regex("^nope_now$"))
+async def nope_now(client, callback_query):
+    await callback_query.answer("Not deleting now.")
+
+@Client.on_callback_query(filters.regex("^not_now$"))
+async def not_now(client, callback_query):
+    await callback_query.answer("Okay, not deleting.")
+
