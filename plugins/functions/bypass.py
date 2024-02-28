@@ -1,7 +1,7 @@
+# bypass.py
 from urllib.parse import urlparse
 from cfscrape import create_scraper
 from pyrogram import Client, filters
-
 
 # Command handler
 @Client.on_message(filters.command("bypass"))
@@ -15,24 +15,27 @@ async def bypass_command(client, message):
 
 # Filepress function
 async def filepress(url):
-    cget = create_scraper().request
+    cget = create_scraper().get
     try:
-        url = cget('GET', url).url
+        res = cget(url)
+        url = res.url
         raw = urlparse(url)
 
         gd_data = {
             'id': raw.path.split('/')[-1],
-            'method': 'publicDownlaod',
+            'method': 'publicDownload',
         }
         tg_data = {
             'id': raw.path.split('/')[-1],
             'method': 'telegramDownload',
         }
         
-        api = f'{raw.scheme}://{raw.hostname}/api/file/downlaod/'
+        api = f'{raw.scheme}://{raw.hostname}/api/file/download/'
         
-        gd_res = cget('POST', api, headers={'Referer': f'{raw.scheme}://{raw.hostname}'}, json=gd_data).json()
-        tg_res = cget('POST', api, headers={'Referer': f'{raw.scheme}://{raw.hostname}'}, json=tg_data).json()
+        headers = {'Referer': f'{raw.scheme}://{raw.hostname}'}
+
+        gd_res = cget(api, headers=headers, json=gd_data).json()
+        tg_res = cget(api, headers=headers, json=tg_data).json()
         
     except Exception as e:
         gd_result = f'ERROR: {e.__class__.__name__}' 
@@ -42,4 +45,3 @@ async def filepress(url):
         tg_result = f'https://tghub.xyz/?start={tg_res["data"]}' if 'data' in tg_res else "No Telegram file available"
     
     return gd_result, tg_result
-
