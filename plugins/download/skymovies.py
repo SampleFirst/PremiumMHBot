@@ -1,4 +1,4 @@
-# skymovies.py
+# skymovies.py 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
@@ -10,7 +10,6 @@ from database.domain_db import dm
 movie_links = {}
 group_links = {}
 
-
 @Client.on_message(filters.command("skymovies"))
 async def skymovieshd(client, message):
     query = message.text.split(maxsplit=1)
@@ -18,43 +17,45 @@ async def skymovieshd(client, message):
         await message.reply_text("Please provide a movie name to search.")
         return
     query = query[1]
-    search_results = await message.reply_text("Processing...")
+    search_results = await message.reply_text(f"Searching for *{query}*...")
     try:
-        latest_domain = await dm.get_latest_domain()  # Fetching the latest domain
-        movies_list = search_movies(query, latest_domain)  # Passing latest domain to search function
+        site = "SkymoviesHD"
+        latest_domain = await dm.get_latest_domain(site)
+        movies_list = search_movies(query, latest_domain)
         if movies_list:
+            count = len(movies_list)
             keyboards = []
             for movie in movies_list:
                 keyboard = [InlineKeyboardButton(movie["title"], callback_data=movie["id"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await search_results.edit_text('Search Results...', reply_markup=reply_markup)
+            await search_results.edit_text(f'Search Results found: {count}\n\nChoose a movie from *{query}*:', reply_markup=reply_markup, parse_mode="markdown")
         else:
-            await search_results.edit_text('Sorry 🙏, No Result Found!\nCheck If You Have Misspelled The Movie Name.')
+            await search_results.edit_text(f'Sorry 🙏, No results found for *{query}*.\nCheck if you have misspelled the movie name.', parse_mode="markdown")
     except Exception as e:
         await message.reply_text(f"An error occurred: {str(e)}")
-
 
 @Client.on_callback_query(filters.regex('^app\d+$'))
 async def movie_result(client, callback_query):
     try:
         query = callback_query
         movie_id = query.data
-        latest_domain = await dm.get_latest_domain()  # Fetching the latest domain
-        group_list = get_movie(movie_links[movie_id], latest_domain)  # Passing latest domain to get_movie function
+        site = "SkymoviesHD"
+        latest_domain = await dm.get_latest_domain(site)
+        group_list = get_movie(movie_links[movie_id], latest_domain)
         if group_list:
             keyboards = []
             for group in group_list:
                 keyboard = [InlineKeyboardButton(group["title"], callback_data=group["id"])]
                 keyboards.append(keyboard)
             reply_markup = InlineKeyboardMarkup(keyboards)
-            await query.answer("Sent group finals..")
-            await query.message.reply_text("Choose Download Link:", reply_markup=reply_markup)
+            await query.answer("Showing groups...")
+            await query.message.reply_text(f"Choose a group for *{movie_links[movie_id]}*:", reply_markup=reply_markup, parse_mode="markdown")
         else:
             await query.message.reply_text("No group finals available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
- 
+
 @Client.on_callback_query(filters.regex('^pay\d+$'))
 async def final_movies_result(client, callback_query):
     try:
@@ -67,6 +68,7 @@ async def final_movies_result(client, callback_query):
             for title, url in links.items():
                 x = urlparse(url).netloc
                 domain = f"<code>{x}</code>"
+                response_text += f"Choose a link..."
                 response_text += f"Title: {domain}\nUrl: {url}\n\n"
             await query.message.reply_text(
                 text=response_text,
@@ -77,7 +79,6 @@ async def final_movies_result(client, callback_query):
             await query.message.reply_text("No download links available for this movie.")
     except Exception as e:
         await query.message.reply_text(f"An error occurred: {str(e)}")
-        
 
 # @Client.on_callback_query(filters.regex('^pay\d+$'))
 # async def final_movies_result(client, callback_query):
@@ -99,7 +100,6 @@ async def final_movies_result(client, callback_query):
     # except Exception as e:
         # await query.message.reply_text(f"An error occurred: {str(e)}")
 
-
 def search_movies(query, latest_domain):
     movies_list = []
     try:
@@ -119,7 +119,6 @@ def search_movies(query, latest_domain):
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return movies_list
-
 
 def get_movie(movie_page_url, latest_domain):
     group_list = []
@@ -141,8 +140,6 @@ def get_movie(movie_page_url, latest_domain):
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return group_list
-
-
 
 def final_page(final_page_url):
     finale_list = {}
