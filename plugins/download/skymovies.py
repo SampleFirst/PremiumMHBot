@@ -20,7 +20,8 @@ async def skymovieshd(client, message):
     query = query[1]
     search_results = await message.reply_text("Processing...")
     try:
-        movies_list = search_movies(query)
+        latest_domain = await dm.get_latest_domain()  # Fetching the latest domain
+        movies_list = search_movies(query, latest_domain)  # Passing latest domain to search function
         if movies_list:
             keyboards = []
             for movie in movies_list:
@@ -39,7 +40,8 @@ async def movie_result(client, callback_query):
     try:
         query = callback_query
         movie_id = query.data
-        group_list = get_movie(movie_links[movie_id])
+        latest_domain = await dm.get_latest_domain()  # Fetching the latest domain
+        group_list = get_movie(movie_links[movie_id], latest_domain)  # Passing latest domain to get_movie function
         if group_list:
             keyboards = []
             for group in group_list:
@@ -98,10 +100,9 @@ async def final_movies_result(client, callback_query):
         # await query.message.reply_text(f"An error occurred: {str(e)}")
 
 
-def search_movies(query):
+def search_movies(query, latest_domain):
     movies_list = []
     try:
-        latest_domain = await dm.get_latest_domain()
         website = requests.get(f"https://{latest_domain}/search.php?search={query.replace(' ', '+')}&cat=All")
         if website.status_code == 200:
             website = website.text
@@ -120,10 +121,9 @@ def search_movies(query):
     return movies_list
 
 
-def get_movie(movie_page_url):
+def get_movie(movie_page_url, latest_domain):
     group_list = []
     try:
-        latest_domain = await dm.get_latest_domain()
         movie_page = "https://{latest_domain}" + movie_page_url
         webpage = requests.get(movie_page)
         if webpage.status_code == 200:
@@ -141,6 +141,7 @@ def get_movie(movie_page_url):
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return group_list
+
 
 
 def final_page(final_page_url):
