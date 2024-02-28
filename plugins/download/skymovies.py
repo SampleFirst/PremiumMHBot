@@ -66,7 +66,10 @@ async def final_movies_result(client, callback_query):
                 x = urlparse(url).netloc
                 domain = f"<code>{x}</code>"
                 response_text += f"Title: {domain}\nUrl: {url}\n\n"
-            await query.message.reply_text(response_text)
+            await query.message.reply_text(
+                text=response_text,
+                disable_web_page_preview=True
+            )
             await query.answer("Sent movie links")
         else:
             await query.message.reply_text("No download links available for this movie.")
