@@ -124,7 +124,7 @@ def search_movies(query, latest_domain):
 def get_movie(movie_page_url, latest_domain):
     group_list = []
     try:
-        movie_page = "https://{latest_domain}" + movie_page_url
+        movie_page = f"https://{latest_domain}" + movie_page_url
         webpage = requests.get(movie_page)
         if webpage.status_code == 200:
             webpage = webpage.text
