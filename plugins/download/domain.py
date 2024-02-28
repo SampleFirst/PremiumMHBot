@@ -125,13 +125,14 @@ async def delete_confirmation(client, message):
     ]
     random.shuffle(buttons)
     reply_markup = InlineKeyboardMarkup(buttons)
-    await message.reply_text("Do you want to delete?", reply_markup=reply_markup)
-
+    main = await message.reply_text("Do you want to delete?", reply_markup=reply_markup)
+    await asyncio.sleep(30)
+    await main.delete()
 
 @Client.on_callback_query(filters.regex("^yes_delete$"))
 async def yes_delete(client, callback_query):
     try:
-        msg = await callback_query.message.edit_text("Deleting domains...", quote=True)
+        msg = await callback_query.message.edit_text("Deleting domains...")
         await dm.delete_all_domains()
         await msg.delete()
         main = await callback_query.message.edit_text("All data deleted successfully!")
