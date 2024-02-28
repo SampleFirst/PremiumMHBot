@@ -91,8 +91,7 @@ async def update_domain(client, callback_query):
             caption = f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>\n\nAnd Latest Store Domain is:\n<code>{latest_domain}</code>\n\nNew Domain Update as a Latest domain ✅ Select 'Show Domain' Button to Show all Updated Domains..."
             main = await callback_query.message.edit_text(
                 text=caption,
-                reply_markup=reply_markup,
-                quote=True
+                reply_markup=reply_markup
             )
             await client.send_message(
                 chat_id=LOG_CHANNEL,
