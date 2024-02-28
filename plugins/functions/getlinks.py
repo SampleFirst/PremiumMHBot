@@ -1,41 +1,39 @@
-# getlinks.py
+# getlinks_fixed.py
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bs4 import BeautifulSoup
-import requests
+from requests_html import HTMLSession
 from urllib.parse import urlparse
 
-
+# Function to extract links from a website
 def extract_links(url):
-    response = requests.get(url)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.content, 'html.parser')
-    links = []
-    for link in soup.find_all('a', href=True):
-        href = link.get('href')
-        if href.startswith("https://"):
-            links.append(href)
-    return links
-    
+    try:
+        session = HTMLSession()
+        response = session.get(url)
+        response.html.render()
+        soup = BeautifulSoup(response.html.raw_html, 'html.parser')
+        links = [a.get('href') for a in soup.find_all('a', href=True)]
+        return links
+    except Exception as e:
+        return []
 
 # Command handler
 @Client.on_message(filters.command(["getlinks"]))
 def get_links(client, message):
     if len(message.command) > 1:
         url = message.command[1]
+        if not url.startswith(("http://", "https://")):
+            url = "http://" + url
         try:
             links = extract_links(url)
-            buttons = []
-            links_list = []
-            for link in links:
-                domain = urlparse(link).netloc
-                buttons.append([InlineKeyboardButton(domain, url=link)])
-                links_list.append(link)
-            if buttons:
-                reply_markup = InlineKeyboardMarkup(buttons)
-                message.reply_text("Here are the links from the website:", reply_markup=reply_markup)
-            elif links_list:
-                message.reply_text("Here are the links from the website:\n" + "\n".join(links_list))
+            if links:
+                links_list = []
+                buttons = []
+                for link in links:
+                    domain = urlparse(link).netloc
+                    buttons.append([InlineKeyboardButton(domain, url=link)])
+                    links_list.append(link)
+                message.reply_text("Here are the links from the website:\n" + "\n".join(links_list), reply_markup=InlineKeyboardMarkup(buttons))
             else:
                 message.reply_text("No valid links found on the website.")
         except Exception as e:
