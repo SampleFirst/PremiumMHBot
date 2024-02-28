@@ -68,10 +68,16 @@ async def get_domain(client, message):
 async def update_domain(client, callback_query):
     try:  # Corrected syntax
         msg = await callback_query.message.reply_text("Updating...")
+    
+        website = "https://skybap.com/"
+        response = requests.get(website)
+        soup = BeautifulSoup(response.text, "html.parser")
+        new_domain = soup.find("span", {"class": "badge"})
 
-        new_domain = await dm.get_latest_domain()  # Corrected variable name
+        new_domain = new_domain.text.strip()
         await dm.add_domain(new_domain)
         
+        latest_domain = await dm.get_latest_domain()
         if latest_domain == new_domain:  # Corrected variable name
             await msg.delete()
             button = [
