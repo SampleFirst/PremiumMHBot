@@ -116,16 +116,17 @@ async def show_domain(client, callback_query):
         await callback_query.message.edit_text(f"An error occurred: {str(e)}")
 
 
-@Client.on_message(filters.command("delete_domains"))
+@Client.on_message(filters.command("delete_domains") & filters.user(ADMINS))
 async def delete_confirmation(client, message):
     buttons = [
-        InlineKeyboardButton("Yes Delete", callback_data="yes_delete"),
-        InlineKeyboardButton("Nope Now", callback_data="nope_now"),
-        InlineKeyboardButton("Not Now", callback_data="not_now")
+        [InlineKeyboardButton("Yes Delete", callback_data="yes_delete")],
+        [InlineKeyboardButton("Nope Now", callback_data="nope_now")],
+        [InlineKeyboardButton("Not Now", callback_data="not_now")]
     ]
     random.shuffle(buttons)
-    reply_markup = InlineKeyboardMarkup([buttons])
+    reply_markup = InlineKeyboardMarkup(buttons)
     await message.reply_text("Do you want to delete?", reply_markup=reply_markup)
+
 
 @Client.on_callback_query(filters.regex("^yes_delete$"))
 async def yes_delete(client, callback_query):
@@ -133,18 +134,29 @@ async def yes_delete(client, callback_query):
         msg = await callback_query.message.edit_text("Deleting domains...", quote=True)
         await dm.delete_all_domains()
         await msg.delete()
-        await callback_query.message.edit_text("All data deleted successfully!")
+        main = await callback_query.message.edit_text("All data deleted successfully!")
+        await client.send_message(LOG_CHANNEL, "All data deleted successfully!")
         await callback_query.answer("Not deleting now.")
+        await asyncio.sleep(30)
+        await main.delete()
     except Exception as e:
-        await callback_query.message.edit_text(f"An error occurred: {str(e)}")
+        main = await callback_query.message.edit_text(f"An error occurred: {str(e)}")
         await callback_query.answer("Not deleting now.")
+        await asyncio.sleep(30)
+        await main.delete()
+        
 
 @Client.on_callback_query(filters.regex("^nope_now$"))
 async def nope_now(client, callback_query):
-    await callback_query.message.edit_text("Not deleting now...")
+    note = await callback_query.message.edit_text("Not deleting now...")
     await callback_query.answer("Not deleting now.")
+    await asyncio.sleep(30)
+    await note.delete()
+
 
 @Client.on_callback_query(filters.regex("^not_now$"))
 async def not_now(client, callback_query):
-    await callback_query.message.edit_text("Okay, not deleting...")
+    note = await callback_query.message.edit_text("Okay, not deleting...")
     await callback_query.answer("Okay, not deleting.")
+    await asyncio.sleep(30)
+    await note.delete()
