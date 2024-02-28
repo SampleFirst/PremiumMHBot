@@ -66,7 +66,7 @@ async def get_domain(client, message):
 
 @Client.on_callback_query(filters.regex("^update_domain$"))
 async def update_domain(client, callback_query):
-    try:  # Corrected syntax
+    try:
         msg = await callback_query.message.reply_text("Updating...")
     
         website = "https://skybap.com/"
@@ -78,16 +78,16 @@ async def update_domain(client, callback_query):
         await dm.add_domain(new_domain)
         
         latest_domain = await dm.get_latest_domain()
-        if latest_domain == new_domain:  # Corrected variable name
+        if latest_domain == new_domain: 
             await msg.delete()
             button = [
                 [
-                    InlineKeyboardButton(text="Update Domain", callback_data="update_domain")
+                    InlineKeyboardButton(text="Show Domain", callback_data="show_domain")
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(button)
             caption = f"Domain get from\n<code>{website}</code>\n\nThe **SkymoviesHD** latest domain is:\n<code>{new_domain}</code>\n\nAnd Latest Store Domain is:\n<code>{latest_domain}</code>\n\nNew Domain Update as a Latest domain ✅ Select 'Show Domain' Button to Show all Updated Domains..."
-            main = await callback_query.message.reply_text(
+            main = await callback_query.message.edit_text(
                 text=caption,
                 reply_markup=reply_markup,
                 quote=True
@@ -99,17 +99,17 @@ async def update_domain(client, callback_query):
             await asyncio.sleep(15)
             await main.delete()
     except Exception as e:
-        await callback_query.message.reply_text(f"An error occurred: {str(e)}")
+        await callback_query.message.edit_text(f"An error occurred: {str(e)}")
  
 @Client.on_callback_query(filters.regex("^show_domain$"))
 async def show_domain(client, callback_query):
     try:
-        all_domains = await dm.get_all_domains()
-        if all_domains:
-            domain_list = "\n".join([f"{domain['domain']} - {domain['timestamp']}" for domain in all_domains])
-            await callback_query.message.reply_text(f"All updated domains:\n{domain_list}")
+        domains = await dm.get_all_domains()
+        if domains:
+            domain_list = "\n".join([f"{domain['domain']} - {domain['timestamp']}" for domain in domains])
+            await callback_query.message.edit_text(f"All updated domains:\n{domain_list}")
         else:
-            await callback_query.message.reply_text("No domains found in the database.")
+            await callback_query.message.edit_text("No domains found in the database.")
     except Exception as e:
-        await callback_query.message.reply_text(f"An error occurred: {str(e)}")
+        await callback_query.message.edit_text(f"An error occurred: {str(e)}")
  
