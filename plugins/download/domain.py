@@ -47,7 +47,7 @@ async def get_domain(client, message):
             await msg.delete()
             button = [
                 [
-                    InlineKeyboardButton(text="Domain Update", callback_data="update_domain")
+                    InlineKeyboardButton(text="🔄 Domain Update", callback_data="update_domain")
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(button)
@@ -86,7 +86,7 @@ async def update_domain(client, callback_query):
             await msg.delete()
             button = [
                 [
-                    InlineKeyboardButton(text="Show Domain", callback_data="show_domain")
+                    InlineKeyboardButton(text="📃 Show Domains", callback_data="show_domain")
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(button)
@@ -109,7 +109,7 @@ async def show_domain(client, callback_query):
     try:
         domains = await dm.get_all_domains()
         if domains:
-            domain_list = "\n".join([f"{domain['domain']} - {domain['timestamp']}" for domain in domains])
+            domain_list = "\n\n".join([f"{domain['site']}\n{domain['domain']}\n{domain['timestamp']}" for domain in domains])
             await callback_query.message.edit_text(f"All updated domains:\n{domain_list}")
         else:
             await callback_query.message.edit_text("No domains found in the database.")
