@@ -1,7 +1,7 @@
-# bypass.py
 from urllib.parse import urlparse
 from cfscrape import create_scraper
 from pyrogram import Client, filters
+import json
 
 # Command handler
 @Client.on_message(filters.command("bypass"))
@@ -34,14 +34,17 @@ async def filepress(url):
         
         headers = {'Referer': f'{raw.scheme}://{raw.hostname}'}
 
-        gd_res = cget(api, headers=headers, json=gd_data).json()
-        tg_res = cget(api, headers=headers, json=tg_data).json()
+        gd_res = cget(api, headers=headers, json=gd_data)
+        tg_res = cget(api, headers=headers, json=tg_data)
         
+        gd_json = gd_res.json()
+        tg_json = tg_res.json()
+        
+        gd_result = f'https://drive.google.com/uc?id={gd_json.get("data")}' if 'data' in gd_json else f'ERROR: {gd_json.get("statusText", "Unknown Error")}'
+        tg_result = f'https://tghub.xyz/?start={tg_json.get("data")}' if 'data' in tg_json else "No Telegram file available"
+    
     except Exception as e:
         gd_result = f'ERROR: {e.__class__.__name__}' 
         tg_result = f'ERROR: {e.__class__.__name__}'
-    else:
-        gd_result = f'https://drive.google.com/uc?id={gd_res["data"]}' if 'data' in gd_res else f'ERROR: {gd_res["statusText"]}'
-        tg_result = f'https://tghub.xyz/?start={tg_res["data"]}' if 'data' in tg_res else "No Telegram file available"
     
     return gd_result, tg_result
