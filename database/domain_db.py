@@ -25,9 +25,9 @@ class Database:
         latest_domain = await self.dm.find_one({'site': site}, sort=[('timestamp', -1)])
         return latest_domain['domain'] if latest_domain else None
 
-    async def get_all_domains(self, site):
+    async def get_all_domains(self):
         all_domains = []
-        async for domain_data in self.dm.find({'site': site}, {'_id': 0}):
+        async for domain_data in self.dm.find({}, {'_id': 0}):
             all_domains.append(domain_data)
         return all_domains
     
