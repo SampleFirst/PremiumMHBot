@@ -24,30 +24,6 @@ USER_STATS = {}
 USER_SELECTED = {}
 VERIFIED_ONLY = True
 
-@Client.on_message(filters.group & filters.text & filters.incoming)
-async def give_filter(client, message):
-    if VERIFIED_ONLY:
-        try:
-            chat_id = message.chat.id
-            verified_chat = await db.get_chat(int(chat_id))
-            if verified_chat['is_verified']:
-                k = await manual_filters(client, message)
-        except Exception as e:
-            logger.error(f"Chat not verifeid : {e}") 
-    
-        if k == False:
-            try:
-                chat_id = message.chat.id
-                verified_chat = await db.get_chat(int(chat_id))
-                if verified_chat['is_verified']:
-                    await auto_filter(client, message)
-            except Exception as e:
-                logger.error(f"Chat Not verified : {e}") 
-    else:
-        k = await manual_filters(client, message)
-        if k == False:
-            await auto_filter(client, message)
-    
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
