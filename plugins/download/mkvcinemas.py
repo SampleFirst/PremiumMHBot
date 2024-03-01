@@ -3,11 +3,12 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 from bs4 import BeautifulSoup
 from io import BytesIO
+from info import ADMINS 
 
 url_list = {}
 
 
-@Client.on_message(filters.command("mkvcinemas"))
+@Client.on_message(filters.command("mkvcinemas") & filters.user(ADMINS))
 async def mkvcinemas(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
