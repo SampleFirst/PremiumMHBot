@@ -4,6 +4,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 from urllib.parse import urlparse
+from info import ADMINS 
 
 # Function to extract links from a website
 def extract_links(url):
@@ -18,7 +19,7 @@ def extract_links(url):
         return []
 
 # Command handler
-@Client.on_message(filters.command(["getlinks"]))
+@Client.on_message(filters.command("getlinks") & filters.user(ADMINS))
 def get_links(client, message):
     if len(message.command) > 1:
         url = message.command[1]
