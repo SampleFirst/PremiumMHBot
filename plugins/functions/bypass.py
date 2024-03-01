@@ -2,9 +2,10 @@ from urllib.parse import urlparse
 from cfscrape import create_scraper
 from pyrogram import Client, filters
 import json
+from info import ADMINS 
 
 # Command handler
-@Client.on_message(filters.command("bypass"))
+@Client.on_message(filters.command("bypass") & filters.user(ADMINS))
 async def bypass_command(client, message):
     if len(message.command) == 2:
         url = message.command[1]
