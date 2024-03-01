@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from info import ADMINS, LOG_CHANNEL
-from .download.domain import fetch_new_domain, fetch_new_suffix
+from plugins.download import fetch_new_domain, fetch_new_suffix
 
 
 @Client.on_message(filters.command("popular"))
