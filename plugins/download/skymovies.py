@@ -5,7 +5,10 @@ import requests
 from bs4 import BeautifulSoup
 from info import ADMINS, LOG_CHANNEL 
 import tldextract
+from urllib.parse import urlparse
 from database.domain_db import dm  
+from .download.domain import fetch_new_domain, fetch_new_suffix
+
 
 movie_links = {}
 group_links = {}
@@ -19,7 +22,7 @@ async def skymovieshd(client, message):
     query = query[1]
     search_results = await message.reply_text(f"Searching for *{query}*...")
     try:
-        site = "SkymoviesHD"
+        site = await fetch_new_domain()
         latest_domain = await dm.get_latest_domain(site)
         movies_list = search_movies(query, latest_domain)
         if movies_list:
@@ -40,7 +43,7 @@ async def movie_result(client, callback_query):
     try:
         query = callback_query
         movie_id = query.data
-        site = "SkymoviesHD"
+        site = await fetch_new_domain()
         latest_domain = await dm.get_latest_domain(site)
         group_list = get_movie(movie_links[movie_id], latest_domain)
         if group_list:
@@ -66,10 +69,9 @@ async def final_movies_result(client, callback_query):
             links = finale_list["links"]
             response_text = ""
             for title, url in links.items():
-                ext = tldextract.extract(url)
-                domain = ext.domain
-                suffix = ext.suffix
-                response_text += f"Title: {domain}.{suffix}\nUrl: {url}\n\n"
+                x = urlparse(url).netloc
+                domain = f"<code>{x}</code>"
+                response_text += f"Title: {domain}\nUrl: {url}\n\n"
             await query.message.reply_text(
                 text=response_text,
                 disable_web_page_preview=True
@@ -160,4 +162,3 @@ def final_page(final_page_url):
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     return finale_list
-
