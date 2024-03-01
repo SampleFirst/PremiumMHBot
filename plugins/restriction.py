@@ -2,10 +2,11 @@
 import asyncio
 import logging
 from pyrogram import Client, filters, enums
+from pyrogram.enums import MessageEntityType, ChatMemberStatus
 from info import ADMINS, LOG_CHANNEL
 
 # Define allowed entity types (adjust as needed)
-allowed_entity_types = [
+delete_entity_types = [
     MessageEntityType.MENTION,
     MessageEntityType.HASHTAG,
     MessageEntityType.CASHTAG,
@@ -53,10 +54,10 @@ async def restrict_entity(client, message):
         
     deleted_entities = []
     for entity in message.entities:
-        if entity.type in allowed_entity_types:  # Use a defined list
+        if entity.type in delete_entity_types:  # Use a defined list
             deleted_entities.append(entity.type)  # Track deleted entities
         else:
-            return  # Skip processing if message contains entities not in allowed_entity_types
+            return  # Skip processing if message contains entities not in delete_entity_types
 
     if deleted_entities:
         # Construct formatted log message with specific information
