@@ -4,7 +4,11 @@ class script(object):
     BOTS = """Hey {user},\nChoose a Bot Premium category:"""
 
     DATABASE = """Hey {user},\nChoose a Database Premium category:"""
-
+    
+    SELECT_BOT = """Hey {user},\nGood Choice For: {bot_name}..."""
+    
+    SELECT_DB = """Hey {user},\nGood Choice For: {db_name}..."""
+    
     BUY_BOT_PREMIUM = """Hey {user}\n\nThank To Buy A Premium Access For Bot\nMake Patients Admin Review You Request and Sending Confirmation Message soon.."""
 
     BUY_DB_PREMIUM = """Hey {user}\n\nThank To Buy A Premium Access For Database\nMake Patients Admin Review You Request and Sending Confirmation Message soon.."""
