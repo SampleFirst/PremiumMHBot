@@ -4,12 +4,15 @@ import requests
 from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from info import ADMINS, LOG_CHANNEL
+from .download.domain import fetch_new_domain, fetch_new_suffix
 
 
 @Client.on_message(filters.command("popular"))
 async def popular_movies(client, message):
     msg = await message.reply_text("Fetching popular movies...", quote=True)
-    url = "https://skymovieshd.ngo/"
+    domain = await fetch_new_domain()
+    suffix = await fetch_new_suffix()
+    url = f"https://{domain}.{suffix}/"
 
     try:
         response = requests.get(url)
@@ -36,7 +39,9 @@ async def popular_movies(client, message):
 @Client.on_message(filters.command("latest"))
 async def latest_movies(client, message):
     msg = await message.reply_text("Fetching latest movies...", quote=True)
-    url = "https://skymovieshd.ngo/"
+    domain = await fetch_new_domain()
+    suffix = await fetch_new_suffix()
+    url = f"https://{domain}.{suffix}/"
 
     try:
         response = requests.get(url)
