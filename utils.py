@@ -20,7 +20,6 @@ from imdb import Cinemagoer
 from info import (
     AUTH_CHANNEL,
     CHNL_LNK,
-    CUSTOM_FILE_CAPTION,
     GRP_LNK,
     HOW_TO_VERIFY,
     IS_VERIFY,
@@ -68,76 +67,6 @@ class temp(object):
     SEND_ALL_TEMP = {}
     KEYWORD = {}
 
-MONTHLY_ATTEMPTS_COUNT = False
-TOTAL_ATTEMPTS_COUNT = True
-
-# Define variables for attempt limits
-MONTHLY_TOTAL_COUNT = 4
-MONTHLY_SPECIFIC_COUNT = 4
-
-DAILY_TOTAL_COUNT = 4
-DAILY_SPECIFIC_COUNT = 4
-
-
-async def check_limit(bot_name):
-    try:
-        if MONTHLY_ATTEMPTS_COUNT:
-            await monthly_limit(bot_name)
-        else:
-            await daily_limit(bot_name)
-    except Exception as e:
-        logger.exception(e)
-
-
-async def monthly_limit(bot_name):
-    try:
-        if TOTAL_ATTEMPTS_COUNT:
-            total_count = await db.total_attempt()
-            if total_count >= MONTHLY_TOTAL_COUNT:
-                await client.send_message("hii {username} This Monthly Premium limit is exceeded, try next calendar month or contact Admin! send  /help...")
-                await client.send_message(LOG_CHANNEL, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-                await client.send_message(ADMINS, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-        else:
-            bot_count = await db.specific_attempt(bot_name)
-            if bot_count >= MONTHLY_SPECIFIC_COUNT:
-                await client.send_message(f"hii {username} This {bot_name} This Month Premium limit is exceeded, try next calendar month or contact Admin! send  /help...")
-                await client.send_message(LOG_CHANNEL, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-                await client.send_message(ADMINS, text=f"He ADMINS Monthly limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-    except Exception as e:
-        logger.exception(e)
-
-
-async def daily_limit(bot_name):
-    try:
-        if TOTAL_ATTEMPTS_COUNT:
-            total_count = await db.total_attempt()
-            if total_count >= DAILY_TOTAL_COUNT:
-                await client.send_message(f"hii {username} This Today Premium limit is exceeded, try next Tomorrow or contact Admin! send message with /send {{text message}}...")
-                await client.send_message(LOG_CHANNEL, text=f"He ADMINS daily limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-                await client.send_message(ADMINS, text=f"He ADMINS daily limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-        else:
-            bot_count = await db.specific_attempt(bot_name)
-            if bot_count >= DAILY_SPECIFIC_COUNT:
-                await client.send_message(f"hii {username} This {bot_name} Today Premium limit is exceeded, try Tomorrow or contact Admin! send message with /send {{text message}}...")
-                await client.send_message(LOG_CHANNEL, text=f"He ADMINS Today limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-                await client.send_message(ADMINS, text=f"He ADMINS Today  limit is exceeded\n\nuserid = {userid}\n User name = {username} \n\n this user Trying to buy premium")
-    except Exception as e:
-        logger.exception(e)
-
-async def is_subscribed(bot, query=None, userid=None):
-    try:
-        if userid is None and query is not None:
-            user = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
-        else:
-            user = await bot.get_chat_member(AUTH_CHANNEL, int(userid))
-    except UserNotParticipant:
-        pass
-    except Exception as e:
-        logger.exception(e)
-    else:
-        if user.status != enums.ChatMemberStatus.BANNED:
-            return True
-    return False
 
 
 async def get_poster(query, bulk=False, id=False, file=None):
@@ -645,92 +574,6 @@ async def get_token(bot, userid, link, fileid):
     return str(shortened_verify_url)
     
 
-async def send_all(bot, userid, files, ident):
-    if AUTH_CHANNEL and not await is_subscribed(bot=bot, userid=userid):
-        try:
-            invite_link = await bot.create_chat_invite_link(int(AUTH_CHANNEL))
-        except ChatAdminRequired:
-            logger.error("Make sure Bot is admin in Backup Channel")
-            return
-        if ident == 'filep' or 'checksubp':
-            pre = 'checksubp'
-        else:
-            pre = 'checksub'
-        btn = [
-            [
-                InlineKeyboardButton("Join Our Backup Channel", url=invite_link.invite_link)
-            ],
-            [
-                InlineKeyboardButton("Try Again", callback_data=f"{pre}#send_all")
-            ]
-        ]
-        await bot.send_message(
-            chat_id=userid,
-            text="**You are not in our Backup Channel!**\n\nTo receive the movie files, click on the 'Join Our Backup Channel' button below and join our Backup Channel. Then click on the '↻ Try Again' button below.\n\nAfter that, you will get the movie files...",
-            reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.MARKDOWN
-        )
-        return 'fsub'
-
-    if IS_VERIFY and not await check_verification(bot, userid):
-        btn = [
-            [
-                InlineKeyboardButton("🔒 Verify", url=await get_token(bot, userid, f"https://telegram.me/{temp.U_NAME}?start=", 'send_all')),
-                InlineKeyboardButton("🔍 How To Verify", url=HOW_TO_VERIFY)
-            ]
-        ]
-        await bot.send_message(
-            chat_id=userid,
-            text="<b>❌ You are not verified!\n\nKindly verify to continue so that you can get access to unlimited movies until 12 hours from now!</b>",
-            protect_content=True if PROTECT_CONTENT else False,
-            reply_markup=InlineKeyboardMarkup(btn)
-        )
-        return 'verify'
-
-    for file in files:
-        f_caption = file.caption
-        title = file.file_name
-        size = get_size(file.file_size)
-        if CUSTOM_FILE_CAPTION:
-            try:
-                f_caption = CUSTOM_FILE_CAPTION.format(
-                    file_name='' if title is None else title,
-                    file_size='' if size is None else size,
-                    file_caption='' if f_caption is None else f_caption
-                )
-            except Exception as e:
-                print(e)
-                f_caption = f_caption
-        if f_caption is None:
-            f_caption = f"{title}"
-        try:
-            await bot.send_cached_media(
-                chat_id=userid,
-                file_id=file.file_id,
-                caption=f_caption,
-                protect_content=True if ident == "filep" else False,
-                reply_markup=InlineKeyboardMarkup(
-                    [
-                        [
-                            InlineKeyboardButton('Support Group', url=GRP_LNK),
-                            InlineKeyboardButton('Updates Channel', url=CHNL_LNK)
-                        ],
-                        [
-                            InlineKeyboardButton("Share And Support", url="http://t.me/share/url?url=Checkout%20%40PremiumMHBot%20for%20searching%20latest%20movies%20and%20series%20in%20multiple%20languages")
-                        ]
-                    ]
-                )
-            )
-        except UserIsBlocked:
-            logger.error(f"The user {userid} blocked the bot. Unblock the bot!")
-            return "User has blocked the bot! Unblock to send files!"
-        except PeerIdInvalid:
-            logger.error("Error: Peer ID invalid!")
-            return "Peer ID invalid!"
-        except Exception as e:
-            logger.error(f"Error: {e}")
-            return f"Error: {e}"
-    return 'done'
 
 
 async def get_verify_status(userid):
