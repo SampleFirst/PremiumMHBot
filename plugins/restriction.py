@@ -44,6 +44,13 @@ async def restrict_entity(client, message):
     title = message.chat.title
     user_id = message.from_user.id
 
+    st = await client.get_chat_member(grp_id, userid)
+    if (
+        st.status != enums.ChatMemberStatus.ADMINISTRATOR
+        and st.status != enums.ChatMemberStatus.OWNER
+        and str(userid) not in ADMINS
+    ):
+        return  # Skip processing for admins or owners
         
     deleted_entities = []
     for entity in message.entities:
