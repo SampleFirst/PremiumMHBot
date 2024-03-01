@@ -10,22 +10,46 @@ import random
 import re
 import tldextract
 
-@Client.on_message(filters.command("domain") & filters.user(ADMINS))
-async def get_domain(client, message):
-    msg = await message.reply_text("Fetching the new current domain...", quote=True)
 
+
+async def fetch_new_domain():
     website = "https://skybap.com/"
     response = requests.get(website)
     soup = BeautifulSoup(response.text, "html.parser")
     new_domain = soup.find("span", {"class": "badge"})
-
+    
     if new_domain:
         new_domain = new_domain.text.strip()
         extracted_domain = tldextract.extract(new_domain)
-        site = extracted_domain.domain
-        
-        latest_domain = await dm.get_latest_domain(site)
+        return extracted_domain.domain
+    else:
+        return None
 
+async def fetch_new_suffix():
+    website = "https://skybap.com/"
+    response = requests.get(website)
+    soup = BeautifulSoup(response.text, "html.parser")
+    new_domain = soup.find("span", {"class": "badge"})
+    
+    if new_domain:
+        new_domain = new_domain.text.strip()
+        extracted_domain = tldextract.extract(new_domain)
+        return extracted_domain.suffix
+    else:
+        return None
+
+
+@Client.on_message(filters.command("domain") & filters.user(ADMINS))
+async def get_domain(client, message):
+    msg = await message.reply_text("Fetching the new current domain...", quote=True)
+
+    domain = await fetch_new_domain()
+    suffix = await fetch_new_suffix()
+    new_domain = domain + "." + suffix
+
+    if new_domain:
+        site = domain        
+        latest_domain = await dm.get_latest_domain(site)
         if latest_domain == new_domain:
             await msg.delete()
             button = [
@@ -75,14 +99,11 @@ async def update_domain(client, callback_query):
     try:
         msg = await callback_query.message.reply_text("Updating...")
     
-        website = "https://skybap.com/"
-        response = requests.get(website)
-        soup = BeautifulSoup(response.text, "html.parser")
-        new_domain = soup.find("span", {"class": "badge"})
+        domain = await fetch_new_domain()
+        suffix = await fetch_new_suffix()
+        new_domain = domain + "." + suffix
 
-        new_domain = new_domain.text.strip()
-        extracted_domain = tldextract.extract(new_domain)
-        site = extracted_domain.domain
+        site = domain
 
         await dm.add_domain(site, new_domain)
         
@@ -140,7 +161,8 @@ async def delete_confirmation(client, message):
 async def yes_delete(client, callback_query):
     try:
         msg = await callback_query.message.edit_text("Deleting domains...")
-        site = "SkymoviesHD"
+        domain = await fetch_new_domain()
+        site = domain
         await dm.delete_all_domains(site)
         await msg.delete()
         main = await callback_query.message.edit_text("All data deleted successfully!")
@@ -169,4 +191,5 @@ async def not_now(client, callback_query):
     await callback_query.answer("Okay, not deleting.")
     await asyncio.sleep(30)
     await note.delete()
+
 
