@@ -5,12 +5,9 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import logging
 from info import ADMINS, LOG_CHANNEL
+import tldextract
 
 logging.basicConfig(level=logging.ERROR)
-
-
-def get_domain(url):
-    return url.split("//")[1].split("/")[0]
 
 
 
@@ -21,7 +18,7 @@ async def get_html(client, message):
             await message.reply_text("Please provide a URL.")
             return        
         usr_agent = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
                           'Chrome/61.0.3163.100 Safari/537.36'
         }
         url = message.text.split()[1]
@@ -29,9 +26,11 @@ async def get_html(client, message):
         response = requests.get(url, headers=usr_agent)
         response.raise_for_status()
         html = response.text
-        domain = get_domain(url)
-        file_path = f"{domain}.html"
-        caption = f"HTML code sent successfully!\n\nDomain Name: {domain}\n\nWebsite: {url}"
+        ext = tldextract.extract(url)
+        domain = ext.domain
+        suffix = ext.suffix
+        file_path = f"{domain}.{suffix}.html"
+        caption = f"HTML code sent successfully!\n\nDomain Name: {domain}\nSuffix: {suffix}\n\nWebsite: {url}"
         with open(file_path, "w") as f:
             f.write(html)
         await msg.delete()        
@@ -47,4 +46,3 @@ async def get_html(client, message):
         os.remove(file_path)
     except Exception as e:
         await message.reply_text(f"Error fetching HTML code: {e}")
-
