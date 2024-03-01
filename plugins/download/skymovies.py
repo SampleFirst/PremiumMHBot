@@ -63,16 +63,17 @@ async def final_movies_result(client, callback_query):
         group_id = query.data
         finale_list = final_page(group_links[group_id])
         if finale_list:
-            link_buttons = []
             links = finale_list["links"]
-            for name, link in links.items():
-                ext = tldextract.extract(link)
+            response_text = ""
+            for title, url in links.items():
+                ext = tldextract.extract(url)
                 domain = ext.domain
                 suffix = ext.suffix
-                button = InlineKeyboardButton(f"{domain}.{suffix}", url=link)
-                link_buttons.append([button])
-            reply_markup = InlineKeyboardMarkup(link_buttons)
-            await query.message.reply_text("Click on the below buttons to download:", reply_markup=reply_markup)
+                response_text += f"Title: {domain}.{suffix}\nUrl: {url}\n\n"
+            await query.message.reply_text(
+                text=response_text,
+                disable_web_page_preview=True
+            )
             await query.answer("Sent movie links")
         else:
             await query.message.reply_text("No download links available for this movie.")
@@ -86,17 +87,16 @@ async def final_movies_result(client, callback_query):
         # group_id = query.data
         # finale_list = final_page(group_links[group_id])
         # if finale_list:
+            # link_buttons = []
             # links = finale_list["links"]
-            # response_text = ""
-            # for title, url in links.items():
-                # ext = tldextract.extract(url)
+            # for name, link in links.items():
+                # ext = tldextract.extract(link)
                 # domain = ext.domain
                 # suffix = ext.suffix
-                # response_text += f"Title: {domain}.{suffix}\nUrl: {url}\n\n"
-            # await query.message.reply_text(
-                # text=response_text,
-                # disable_web_page_preview=True
-            # )
+                # button = InlineKeyboardButton(f"{domain}.{suffix}", url=link)
+                # link_buttons.append([button])
+            # reply_markup = InlineKeyboardMarkup(link_buttons)
+            # await query.message.reply_text("Click on the below buttons to download:", reply_markup=reply_markup)
             # await query.answer("Sent movie links")
         # else:
             # await query.message.reply_text("No download links available for this movie.")
