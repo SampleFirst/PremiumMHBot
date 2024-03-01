@@ -10,7 +10,7 @@ from database.domain_db import dm
 movie_links = {}
 group_links = {}
 
-@Client.on_message(filters.command("skymovies"))
+@Client.on_message(filters.command("skymovies") & filters.user(ADMINS))
 async def skymovieshd(client, message):
     query = message.text.split(maxsplit=1)
     if len(query) == 1:
