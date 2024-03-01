@@ -3,7 +3,7 @@ from pyrogram.errors import UserNotParticipant
 from pyrogram.types import ChatPrivileges
 from info import ADMINS
 
-@Client.on_message(filters.command("addadmin") & filters.private)
+@Client.on_message(filters.command("addadmin") & filters.user(ADMINS))
 async def add_admin(client, message):
     if message.from_user.id not in ADMINS:
         await message.reply("You must be an admin to use this command.")
