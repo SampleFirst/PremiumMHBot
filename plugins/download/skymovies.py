@@ -7,7 +7,7 @@ from info import ADMINS, LOG_CHANNEL
 import tldextract
 from urllib.parse import urlparse
 from database.domain_db import dm  
-from .download.domain import fetch_new_domain, fetch_new_suffix
+from plugins.download import fetch_new_domain, fetch_new_suffix
 
 
 movie_links = {}
