@@ -3,8 +3,8 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
-from urllib.parse import urlparse
 from info import ADMINS 
+import tldextract
 
 # Function to extract links from a website
 def extract_links(url):
@@ -28,11 +28,12 @@ def get_links(client, message):
         try:
             links = extract_links(url)
             if links:
-                links_list = []
                 buttons = []
                 for link in links:
-                    domain = urlparse(link).netloc
-                    buttons.append([InlineKeyboardButton(domain, url=link)])
+                    ext = tldextract.extract(link)
+                    domain = ext.domain
+                    suffix = ext.suffix
+                    buttons.append([InlineKeyboardButton(f"{domain}.{suffix}", url=link)])
                     links_list.append(link)
                 message.reply_text("Here are the links from the website:\n" + "\n".join(links_list), reply_markup=InlineKeyboardMarkup(buttons))
             else:
