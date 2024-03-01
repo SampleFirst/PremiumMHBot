@@ -14,7 +14,7 @@ def get_domain(url):
 
 
 
-@Client.on_message(filters.command("gethtml") & filters.private)
+@Client.on_message(filters.command("gethtml") & filters.user(ADMINS))
 async def get_html(client, message):
     try:
         if len(message.command) != 2:
