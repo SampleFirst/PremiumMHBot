@@ -1,4 +1,3 @@
-# addadmin.py 
 from pyrogram import Client, filters
 from pyrogram.errors import UserNotParticipant
 from pyrogram.types import ChatPrivileges
@@ -10,14 +9,14 @@ async def add_admin(client, message):
         await message.reply("You must be an admin to use this command.")
         return
 
-    if len(message.command) != 3:
-        await message.reply("Usage: /addadmin user_id chat_id")
+    if len(message.command) != 2:
+        await message.reply("Usage: /addadmin user_id")
         return
 
     user_id = int(message.command[1])
-    chat_id = int(message.command[2])
 
     try:
+        chat_id = message.chat.id
         chat_info = await client.get_chat(chat_id)
     except Exception as e:
         await message.reply(f"Error: {str(e)}")
