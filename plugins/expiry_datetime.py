@@ -1,3 +1,4 @@
+# expiry_datetime.py
 import pytz
 from datetime import datetime, timedelta
 from plugins.format_types import format_types
@@ -40,14 +41,8 @@ def get_expiry_datetime(format_type, base_datetime=None, expiry_option=None):
                 delta_days = option_dict[expiry_option]
                 expiry_datetime = now + timedelta(days=delta_days)
             break  # Break loop once option is found
+    return format_types(expiry_datetime, format_type)
 
-    
-    format_type = format_types(expiry_datetime, format_type)
-
-    expiry_date = expiry_datetime.strftime(format_type) if expiry_datetime else None
-    expiry_time = expiry_datetime.strftime(format_type) if expiry_datetime else None
-
-    return expiry_date, expiry_time
 
 def get_expiry_name(expiry_option):
     """
