@@ -1,4 +1,4 @@
-from pyrogram import Client, filters
+from pyrogram import Client, filters, enums
 from pyrogram.types import Message
 import aiohttp
 from urllib.parse import urlparse
@@ -44,7 +44,7 @@ async def filepress_command(client: Client, message: Message):
     url = message.command[1]
     try:
         result = await filepress(url)
-        await message.reply_text(result, parse_mode='markdownv2')
+        await message.reply_text(result, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
         
