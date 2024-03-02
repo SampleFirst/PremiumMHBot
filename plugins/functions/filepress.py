@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
 from pyrogram import Client, filters, enums
-from pyrogram.types import Message
 
 
 async def filepress(url: str):
@@ -29,20 +28,21 @@ async def filepress(url: str):
     if tg_link == 'Unavailable':
         tg_link_text = 'Unavailable'
     else:
-        tg_link_text = f'<a href="{tg_link}">{tg_link}</a>'
+        tg_link_text = tg_link
 
-    return tg_link_text
+    parse_txt = f'FilePress: {url}\nTelegram: {tg_link_text}'
+    return parse_txt
 
 
 @Client.on_message(filters.command("filepress") & filters.private)
 async def filepress_command(client: Client, message: Message):
     if len(message.command) != 2:
-        await message.reply_text("Usage: /filepress [url]")
+        await message.reply_text("Usage: /filepress url")
         return
     url = message.command[1]
     try:
         result = await filepress(url)
-        await message.reply_text(result, parse_mode=enums.ParseMode.HTML)
+        await message.reply_text(result)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
-
+        
