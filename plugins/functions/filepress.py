@@ -44,6 +44,8 @@ async def filepress_command(client: Client, message: Message):
     url = message.command[1]
     try:
         result = await filepress(url)
-        await message.reply_text(result)
+        await message.reply_text(result, parse_mode='markdownv2')
     except Exception as e:
         await message.reply_text(f"Error: {e}")
+        
+        
