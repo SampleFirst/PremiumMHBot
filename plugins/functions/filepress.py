@@ -18,10 +18,11 @@ async def filepress(url: str):
             }
             async with sess.post(f'{raw.scheme}://{raw.hostname}/api/file/telegram/downlaod/', headers={'Referer': f'{raw.scheme}://{raw.hostname}'}, json=json_data) as resp:
                 tg_id = await resp.json()
-            if tg_id.get('data', False):
-                t_url = f"https://tghub.xyz/?start={tg_id['data']}"
-                bot_name = [bot for bot in BeautifulSoup(await sess.get(t_url)).text if "filepress_[a-zA-Z0-9]+_bot" in bot][0]
-                tg_link = f"https://t.me/{bot_name}/?start={tg_id['data']}"
+            if 'data' in tg_id:
+                tg_id_data = tg_id['data']
+                tg_url = f"https://tghub.xyz/?start={tg_id_data}"
+                bot_name = [bot for bot in BeautifulSoup(await sess.get(tg_url)).text if "filepress_[a-zA-Z0-9]+_bot" in bot][0]
+                tg_link = f"https://t.me/{bot_name}/?start={tg_id_data}"
             else:
                 tg_link = 'Unavailable' if tg_id["statusText"] == "Ok" else tg_id["statusText"]
         except Exception as e:
