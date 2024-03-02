@@ -24,6 +24,8 @@ async def filepress(url: str):
                 tg_link = f"https://t.me/{bot_name}/?start={tg_id['data']}"
             else:
                 tg_link = 'Unavailable' if tg_id["statusText"] == "Ok" else tg_id["statusText"]
+        except aiohttp.ContentTypeError:
+            tg_link = 'Unavailable'
         except Exception as e:
             tg_link = f'ERROR: {e.__class__.__name__}'
     if tg_link == 'Unavailable':
