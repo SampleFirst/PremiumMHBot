@@ -10,10 +10,8 @@ async def filepress(url: str):
     async with aiohttp.ClientSession() as sess:
         scraper = create_scraper()
         try:
-            # Replace this line with the actual URL structure you want to scrape
             url = scraper.get(url).url
             raw = urlparse(url)
-            # Replace this line with the actual data you want to send to the API
             json_data = {
                 'id': raw.path.split('/')[-1],
                 'method': 'publicDownlaod',
