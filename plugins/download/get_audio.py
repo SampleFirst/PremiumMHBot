@@ -20,11 +20,11 @@ async def get_audio(client, message):
         await message.reply("Please provide a book name.")
         return
 
-    url = f"https://www.greatideasgreatlife.com/book/{book_name}/"
+    url = f"https://www.greatideasgreatlife.com/book/{book_name.replace(' ', '-')}/"
     logger.info(f"Fetching webpage: {url}")
 
     try:
-        response = await client.http_client.get(url)
+        response = await client.http.get(url)
     except Exception as e:
         logger.error(f"Error fetching webpage: {str(e)}")
         await message.reply("An error occurred while fetching the webpage.")
@@ -44,7 +44,7 @@ async def get_audio(client, message):
 
     for link in audio_links:
         try:
-            audio_response = await client.http_client.get(link)
+            audio_response = await client.http.get(link)
         except Exception as e:
             logger.error(f"Error fetching audio: {str(e)}")
             continue
@@ -62,3 +62,5 @@ async def get_audio(client, message):
             continue
 
     await message.reply("All audio files sent.")
+    
+    
