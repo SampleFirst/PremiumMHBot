@@ -29,7 +29,7 @@ async def filepress(url: str):
     if tg_link == 'Unavailable':
         tg_link_text = 'Unavailable'
     else:
-        tg_link_text = f'<a href="{tg_link}">Click Here</a>'
+        tg_link_text = f'<a href="{tg_link}">{tg_link}</a>'
 
     return tg_link_text
 
