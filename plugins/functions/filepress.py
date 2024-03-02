@@ -1,3 +1,4 @@
+from pyrogram.types import Message
 import aiohttp
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
