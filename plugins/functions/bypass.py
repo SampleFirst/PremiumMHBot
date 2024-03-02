@@ -38,11 +38,17 @@ async def filepress(url):
         gd_res = cget(api, headers=headers, json=gd_data)
         tg_res = cget(api, headers=headers, json=tg_data)
         
-        gd_json = gd_res.json()
-        tg_json = tg_res.json()
+        if gd_res.status_code != 200:
+            gd_result = f'ERROR: Unexpected status code {gd_res.status_code}'
+        else:
+            gd_json = gd_res.json()
+            gd_result = f'https://drive.google.com/uc?id={gd_json.get("data")}' if 'data' in gd_json else f'ERROR: {gd_json.get("statusText", "Unknown Error")}'
         
-        gd_result = f'https://drive.google.com/uc?id={gd_json.get("data")}' if 'data' in gd_json else f'ERROR: {gd_json.get("statusText", "Unknown Error")}'
-        tg_result = f'https://tghub.xyz/?start={tg_json.get("data")}' if 'data' in tg_json else "No Telegram file available"
+        if tg_res.status_code != 200:
+            tg_result = f'ERROR: Unexpected status code {tg_res.status_code}'
+        else:
+            tg_json = tg_res.json()
+            tg_result = f'https://tghub.xyz/?start={tg_json.get("data")}' if 'data' in tg_json else "No Telegram file available"
     
     except Exception as e:
         gd_result = f'ERROR: {e.__class__.__name__}' 
