@@ -29,11 +29,9 @@ async def filepress(url: str):
     if tg_link == 'Unavailable':
         tg_link_text = 'Unavailable'
     else:
-        tg_link_text = "tg_link"
+        tg_link_text = f'<a href="{tg_link}">Click Here</a>'
 
-    parse_txt = f'''<b>FilePress:</b> <a href="{url}">Click Here</a>
-<b>Telegram:</b> <a href="{tg_link}">Click Tg</a>'''
-    return parse_txt
+    return tg_link_text
 
 
 @Client.on_message(filters.command("filepress") & filters.private)
