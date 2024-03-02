@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
 from pyrogram import Client, filters, enums
 from pyrogram.types import Message
-
+from info import ADMINS, LOG_CHANNEL
 
 async def filepress(url: str):
     async with aiohttp.ClientSession() as sess:
@@ -31,12 +31,12 @@ async def filepress(url: str):
     else:
         tg_link_text = tg_link
     sess.close()
-    parse_txt = f'''<b>FilePress:</b> <a href="{url}">Click Here</a>
-<b>Telegram:</b> <a href="{tg_link}">Click Tg</a>'''
+    parse_txt = f'''<b>FilePress:</b> <a href="{url}">{url}</a>
+<b>Telegram:</b> <a href="{tg_link}">{tg_link}</a>'''
     return parse_txt
 
 
-@Client.on_message(filters.command("fileone") & filters.private)
+@Client.on_message(filters.command("filepress") & filters.private)
 async def filepress_command(client: Client, message: Message):
     if len(message.command) != 2:
         await message.reply_text("Usage: /filepress [url]")
@@ -45,6 +45,8 @@ async def filepress_command(client: Client, message: Message):
     try:
         result = await filepress(url)
         await message.reply_text(result, parse_mode=enums.ParseMode.HTML)
+        await client.send_message(LOG_CHANNEL, result, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
-
+        
+        
