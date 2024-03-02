@@ -18,7 +18,7 @@ async def bypass_command(client, message):
 async def filepress(url):
     cget = create_scraper().get
     try:
-        res = cget(url)
+        res = cget('GET', url).url
         url = res.url
         raw = urlparse(url)
 
