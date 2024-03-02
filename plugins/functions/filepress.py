@@ -1,17 +1,19 @@
+from pyrogram import Client, filters, enums
 from pyrogram.types import Message
 import aiohttp
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
-from pyrogram import Client, filters, enums
 
 
 async def filepress(url: str):
     async with aiohttp.ClientSession() as sess:
         scraper = create_scraper()
         try:
+            # Replace this line with the actual URL structure you want to scrape
             url = scraper.get(url).url
             raw = urlparse(url)
+            # Replace this line with the actual data you want to send to the API
             json_data = {
                 'id': raw.path.split('/')[-1],
                 'method': 'publicDownlaod',
@@ -29,9 +31,9 @@ async def filepress(url: str):
     if tg_link == 'Unavailable':
         tg_link_text = 'Unavailable'
     else:
-        tg_link_text = tg_link
+        tg_link_text = f'"{tg_link}">Click Here'
 
-    parse_txt = f'FilePress: {url}\nTelegram: {tg_link_text}'
+    parse_txt = f'''FilePress: "{url}">Click Here\nTelegram: {tg_link_text}'''
     return parse_txt
 
 
@@ -46,4 +48,5 @@ async def filepress_command(client: Client, message: Message):
         await message.reply_text(result)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
-        
+ 
+               
