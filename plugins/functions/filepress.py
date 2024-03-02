@@ -30,7 +30,7 @@ async def filepress(url: str):
         tg_link_text = 'Unavailable'
     else:
         tg_link_text = f'"{tg_link}">Click Here'
-
+    sess.close()
     parse_txt = f'''FilePress: "{url}">Click Here\nTelegram: {tg_link_text}'''
     return parse_txt
 
