@@ -1,9 +1,9 @@
-from pyrogram import Client, filters, enums
-from pyrogram.types import Message
 import aiohttp
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
+from pyrogram import Client, filters, enums
+from pyrogram.types import Message
 
 
 async def filepress(url: str):
@@ -29,22 +29,22 @@ async def filepress(url: str):
     if tg_link == 'Unavailable':
         tg_link_text = 'Unavailable'
     else:
-        tg_link_text = f'"{tg_link}">Click Here'
+        tg_link_text = tg_link
     sess.close()
-    parse_txt = f'''FilePress: "{url}">Click Here\nTelegram: {tg_link_text}'''
+    parse_txt = f'''<b>FilePress:</b> <a href="{url}">Click Here</a>
+<b>Telegram:</b> <a href="{tg_link}">Click Tg</a>'''
     return parse_txt
 
 
-@Client.on_message(filters.command("filepress") & filters.private)
+@Client.on_message(filters.command("fileone") & filters.private)
 async def filepress_command(client: Client, message: Message):
     if len(message.command) != 2:
-        await message.reply_text("Usage: /filepress url")
+        await message.reply_text("Usage: /filepress [url]")
         return
     url = message.command[1]
     try:
         result = await filepress(url)
-        await message.reply_text(result)
+        await message.reply_text(result, parse_mode=enums.ParseMode.HTML)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
- 
-               
+
