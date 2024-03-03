@@ -15,7 +15,7 @@ class Database:
         return dict(
             id=id,
             name=name,
-            file_id=False,
+            file_id=None,
             ban_status=dict(
                 is_banned=False,
                 ban_reason="",
@@ -185,6 +185,19 @@ class Database:
         count = await self.col.count_documents(query)
         return count
 
+    async def set_payment_img(self, id, file_id):
+        await self.col.update_one({'id': int(id)}, {'$set': {'file_id': file_id}})
+        
+    async def get_payment_img(self, id):
+        try:
+            image = await self.col.find_one({'id': int(id)})
+            if image:
+                return image.get('file_id')
+            else:
+                return None
+        except Exception as e:
+            print(e)
+            
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
 
