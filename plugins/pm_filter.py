@@ -154,7 +154,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             return
         else:
             await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
-            await add_expiry_date_timer(user_id, expiry_date)
+            await add_expiry_date_timer(client, user_id, bot_name, expiry_date)
 
         await client.edit_message_media(
             query.message.chat.id,
@@ -191,7 +191,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             return
         else:
             await db.update_status_db(user_id, db_name, now_status, now_date, expiry_date)
-            await add_expiry_date_timer(user_id, expiry_date)
+            await add_expiry_date_timer(client, user_id, db_name, expiry_date)
 
         await client.edit_message_media(
             query.message.chat.id,
