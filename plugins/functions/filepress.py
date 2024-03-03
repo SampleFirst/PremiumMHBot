@@ -4,9 +4,9 @@ import aiohttp
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
-import json
 
-async def filepress(url: str):
+
+async def filepress(url):
     async with aiohttp.ClientSession() as sess:
         scraper = create_scraper()
         try:
@@ -26,7 +26,10 @@ async def filepress(url: str):
                 tg_link = f"https://t.me/{bot_name}/?start={tg_id_data}"
                 logger.info(f"Fetching telegram: {tg_link}")
             else:
-                tg_link = 'Unavailable' if tg_id["statusText"] == "Ok" else tg_id["statusText"]
+                if 'statusText' in tg_id:
+                    tg_link = tg_id["statusText"]
+                else:
+                    tg_link = 'Unavailable'
         except Exception as e:
             tg_link = f'ERROR: {e.__class__.__name__}'
     if tg_link == 'Unavailable':
@@ -50,4 +53,3 @@ async def filepress_command(client: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"Error: {e}")
  
-            
