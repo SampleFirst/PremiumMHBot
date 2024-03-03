@@ -1,4 +1,4 @@
-from pyrogram import Client, filters
+from pyrogram import Client, filters, enums
 from pyrogram.types import Message
 import aiohttp
 from urllib.parse import urlparse
@@ -7,27 +7,26 @@ from cloudscraper import create_scraper
 import json
 
 async def filepress(url: str):
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession() as sess:
         scraper = create_scraper()
         try:
             url = scraper.get(url).url
             raw = urlparse(url)
             json_data = {
                 'id': raw.path.split('/')[-1],
-                'method': 'publicDownload',
+                'method': 'publicDownlaod',
             }
-            async with session.post(f'{raw.scheme}://{raw.hostname}/api/file/telegram/download/', headers={'Referer': f'{raw.scheme}://{raw.hostname}'}, json=json_data) as response:
-                if response.content_type == 'application/json':
-                    tg_id = await response.json()
-                else:
-                    tg_id = await response.text()
+            async with sess.post(f'{raw.scheme}://{raw.hostname}/api/file/telegram/downlaod/', headers={'Referer': f'{raw.scheme}://{raw.hostname}'}, json=json_data) as resp:
+                tg_id = await resp.json()
             if 'data' in tg_id:
                 tg_id_data = tg_id['data']
                 tg_url = f"https://tghub.xyz/?start={tg_id_data}"
-                bot_name = [bot for bot in BeautifulSoup(await session.get(tg_url).text, 'html.parser').find_all('a', href=True) if "filepress_" in bot['href']][0].text
+                logger.info(f"Fetching tghub: {tg_url}")
+                bot_name = [bot for bot in BeautifulSoup(await sess.get(tg_url)).text if "filepress_[a-zA-Z0-9]+_bot" in bot][0]
                 tg_link = f"https://t.me/{bot_name}/?start={tg_id_data}"
+                logger.info(f"Fetching telegram: {tg_link}")
             else:
-                tg_link = 'Unavailable' if 'statusText' in tg_id and tg_id["statusText"] == "Ok" else tg_id
+                tg_link = 'Unavailable' if tg_id["statusText"] == "Ok" else tg_id["statusText"]
         except Exception as e:
             tg_link = f'ERROR: {e.__class__.__name__}'
     if tg_link == 'Unavailable':
@@ -39,9 +38,8 @@ async def filepress(url: str):
     return parse_txt
 
 
-
 @Client.on_message(filters.command("filepress") & filters.private)
-async def filepress_extracter(client: Client, message: Message):
+async def filepress_command(client: Client, message: Message):
     if len(message.command) != 2:
         await message.reply_text("Usage: /filepress url")
         return
@@ -51,4 +49,5 @@ async def filepress_extracter(client: Client, message: Message):
         await message.reply_text(result)
     except Exception as e:
         await message.reply_text(f"Error: {e}")
-
+ 
+            
