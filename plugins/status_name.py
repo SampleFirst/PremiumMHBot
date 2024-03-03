@@ -1,6 +1,6 @@
 # status_name.py
 
-def status_name(status_num):
+def get_status_name(status_num):
     if status_num == 1:
         return status_text("is Attempt")
     elif status_num == 2:
