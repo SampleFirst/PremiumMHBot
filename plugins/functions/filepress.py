@@ -4,6 +4,7 @@ import aiohttp
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
+import json
 
 async def filepress(url: str):
     async with aiohttp.ClientSession() as session:
@@ -16,14 +17,17 @@ async def filepress(url: str):
                 'method': 'publicDownload',
             }
             async with session.post(f'{raw.scheme}://{raw.hostname}/api/file/telegram/download/', headers={'Referer': f'{raw.scheme}://{raw.hostname}'}, json=json_data) as response:
-                tg_id = await response.json(content_type="text/html")
+                if response.content_type == 'application/json':
+                    tg_id = await response.json()
+                else:
+                    tg_id = await response.text()
             if 'data' in tg_id:
                 tg_id_data = tg_id['data']
                 tg_url = f"https://tghub.xyz/?start={tg_id_data}"
-                bot_name = [bot for bot in BeautifulSoup(await session.get(tg_url).text) if "filepress_[a-zA-Z0-9]+_bot" in bot][0]
+                bot_name = [bot for bot in BeautifulSoup(await session.get(tg_url).text, 'html.parser').find_all('a', href=True) if "filepress_" in bot['href']][0].text
                 tg_link = f"https://t.me/{bot_name}/?start={tg_id_data}"
             else:
-                tg_link = 'Unavailable' if tg_id["statusText"] == "Ok" else tg_id["statusText"]
+                tg_link = 'Unavailable' if 'statusText' in tg_id and tg_id["statusText"] == "Ok" else tg_id
         except Exception as e:
             tg_link = f'ERROR: {e.__class__.__name__}'
     if tg_link == 'Unavailable':
