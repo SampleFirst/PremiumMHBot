@@ -136,7 +136,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         bot_name = get_bot_name(query.data)
         now_status = get_status_name(status_num=1)
         now_date = get_datetime(format_type=19)
-        expiry_date = get_expiry_datetime(format_type=19, expiry_option="today_to_5m")
+        expiry_date = get_expiry_datetime(format_type=19, expiry_option="now_to_5m")
                     
         buttons = [
             [
