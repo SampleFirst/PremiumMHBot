@@ -2,22 +2,22 @@
 
 def get_status_name(status_num):
     if status_num == 1:
-        return status_text("is Attempt")
+        return get_status_name("is Attempt")
     elif status_num == 2:
-        return status_text("is Confirm")
+        return get_status_name("is Confirm")
     elif status_num == 3:
-        return status_text("is Premium")
+        return get_status_name("is Premium")
     elif status_num == 4:
-        return status_text("Attempt Cancel")
+        return get_status_name("Attempt Cancel")
     elif status_num == 5:
-        return status_text("Confirm Cancel")
+        return get_status_name("Confirm Cancel")
     elif status_num == 6:
-        return status_text("Premium Cancel")
+        return get_status_name("Premium Cancel")
     elif status_num == 7:
-        return status_text("Attempt Remove")
+        return get_status_name("Attempt Remove")
     elif status_num == 8:
-        return status_text("Confirm Remove")
+        return get_status_name("Confirm Remove")
     elif status_num == 9:
-        return status_text("Premium Remove")
+        return get_status_name("Premium Remove")
     else:
         raise ValueError("Invalid status_num. Please choose a number between 1 and 9.")
