@@ -40,7 +40,18 @@ def format_types(obj, format_type):
         return obj.isoformat()  # ISO 8601 date and time
     elif format_type == 14:
         return obj.strftime("%d %B %Y %H:%M:%S")  # Day month year hour minute second
+    elif format_type == 15:
+        return obj.strftime("%m-%d-%Y %I:%M:%S %p")  # Month-day-year hour minute second AM/PM
+    elif format_type == 16:
+        return obj.strftime("%d/%m/%Y %I:%M:%S %p")  # Day/month/year hour minute second AM/PM
+    elif format_type == 17:
+        return obj.strftime("%A, %d %B %Y")  # Day of the week, day month year
+    elif format_type == 18:
+        return obj.strftime("%Y-%m-%d %H:%M:%S")  # Year-month-day hour minute second
+    elif format_type == 19:
+        return obj.strftime("%Y-%m-%d %I:%M:%S %p")  # Year-month-day hour minute second AM/PM
+    elif format_type == 20:
+        return obj.strftime("%B %d, %Y %I:%M:%S %p")  # Month day, year hour minute second AM/PM
     else:
-        raise ValueError("Invalid format_type. Please choose a number between 1 and 14.")
-        
+        raise ValueError("Invalid format_type. Please choose a number between 1 and 20.")
         
