@@ -12,11 +12,11 @@ from Script import script
 from plugins.datetime import get_datetime 
 from plugins.expiry_datetime import get_expiry_datetime, get_expiry_name
 from plugins.get_name import get_bot_name, get_db_name
+from plugins.expiry_datetime_timer import add_expiry_date_timer
+from plugins.status_name import get_status_name
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
-
-
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -40,6 +40,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text("Processing...")
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -63,7 +64,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             show_alert=True
         )
 
-    elif query.data == "bots":
+    elif data == "bots":
         buttons = [
             [
                 InlineKeyboardButton('Movies Bot', callback_data='mbot'),
@@ -78,6 +79,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text("Processing...")
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -89,7 +91,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
 
-    elif query.data == "database":
+    elif data == "database":
         buttons = [
             [
                 InlineKeyboardButton('Movies Database', callback_data='mdb'),
@@ -104,6 +106,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text("Processing...")
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -126,20 +129,33 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=script.CONSTRUCTION.format(user=query.from_user.mention),
             show_alert=True
         )
-
+        
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
+        user_id = query.from_user.id
+        user_name = query.from_user.username
         bot_name = get_bot_name(query.data)
+        now_status = get_status_name(status_num=1)
         now_date = get_datetime(format_type=1)
-        now_time = get_datetime(format_type=3)
+        expiry_date = get_expiry_datetime(format_type=1, expiry_option="today_to_5m")
+                    
         buttons = [
             [
-                InlineKeyboardButton('Confirmed Premium', callback_data='botpre'),
+                InlineKeyboardButton('Discription', callback_data='botdis'),
             ],
             [
                 InlineKeyboardButton('Go Back', callback_data='bots')
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text("Processing...")
+
+        if await db.is_status_exist_bot(user_id, bot_name, now_status):
+            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
+            return
+        else:
+            await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
+            await add_expiry_date_timer(user_id, expiry_date)
+
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -150,20 +166,33 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-        
+
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
+        user_id = query.from_user.id
+        user_name = query.from_user.username
         db_name = get_db_name(query.data)
+        now_status = get_status_name(status_num=1)
         now_date = get_datetime(format_type=1)
-        now_time = get_datetime(format_type=3)
+        expiry_date = get_expiry_datetime(format_type=1, expiry_option="now_to_5m")
+        
         buttons = [
             [
-                InlineKeyboardButton('Confirmed Premium', callback_data='dbpre'),
+                InlineKeyboardButton('Discription', callback_data='dbdis'),
             ],
             [
                 InlineKeyboardButton('Go Back', callback_data='database')
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text("Processing...")
+
+        if await db.is_status_exist_db(user_id, db_name, now_status):
+            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {db_name}.", show_alert=True)
+            return
+        else:
+            await db.update_status_db(user_id, db_name, now_status, now_date, expiry_date)
+            await add_expiry_date_timer(user_id, expiry_date)
+
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -174,16 +203,28 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-    
-    elif query.data == "botpre":
+
+    elif data == "botpre":
         await query.message.edit_text(
             text=script.BUY_BOT_PREMIUM.format(user=query.from_user.mention),
             parse_mode=enums.ParseMode.HTML
         )
-        
-    elif query.data == "dbpre":
+
+    elif data == "dbpre":
         await query.message.edit_text(
             text=script.BUY_DB_PREMIUM.format(user=query.from_user.mention),
             parse_mode=enums.ParseMode.HTML
+        )
+
+    elif query.data == "botdis":
+        await query.answer(
+            text=script.CONSTRUCTION.format(user=query.from_user.mention),
+            show_alert=True
+        )
+
+    elif query.data == "dbdis":
+        await query.answer(
+            text=script.CONSTRUCTION.format(user=query.from_user.mention),
+            show_alert=True
         )
         
