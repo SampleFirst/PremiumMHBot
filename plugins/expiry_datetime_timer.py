@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 async def add_expiry_date_timer(client, user_id, bot_name, expiry_date):
-    expiry_date = get_expiry_datetime(format_type=1, expiry_option="today_to_5m")
+    expiry_date = get_expiry_datetime(format_type=21, expiry_option="today_to_5m")
     current_time = get_datetime(format_type=21)
     time_difference = expiry_date - current_time
     await asyncio.sleep(time_difference.total_seconds())
