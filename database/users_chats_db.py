@@ -162,16 +162,16 @@ class Database:
         if last_attempt and 'user_status' in last_attempt:
             for status in last_attempt['user_status']:
                 if isinstance(status, dict) and status.get('bot_name') == bot_name:
-                    return status.get('now_status', now_status)
-        return now_status
-            
+                    return status.get('now_status')
+        return None
+    
     async def is_status_exist_db(self, user_id, db_name, now_status):
         last_attempt = await self.col.find_one({'id': user_id})
         if last_attempt and 'user_status' in last_attempt:
             for status in last_attempt['user_status']:
                 if isinstance(status, dict) and status.get('db_name') == db_name:
-                    return status.get('now_status', now_status)
-        return now_status
+                    return status.get('now_status')
+        return None
         
     async def total_status_bot(self, bot_name=None, now_status=None):
         query = {}
