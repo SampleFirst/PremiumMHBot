@@ -58,6 +58,22 @@ Name: {}
 Date: <code>{}</code>
 Time: <code>{}</code>"""
 
+    LOG_BOT = """🆕️ #new_attempt
+ID: <code>{b}</code>
+Name: {a}
+Bot Name: {c}
+Now Status: {d}
+Datetime: <code>{e}</code>
+Expire on: <code>{f}</code>"""
+
+    LOG_DB = """🆕️ #new_attempt
+ID: <code>{b}</code>
+Name: {a}
+DB Name: {c}
+Now Status: {d}
+Datetime: <code>{e}</code>
+Expire on: <code>{f}</code>"""
+    
     MELCOW_ENG = """<b>Hello {}, and Welcome to {} Group </b> 🌟"""
 
     RESTART_TXT = """
