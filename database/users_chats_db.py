@@ -140,38 +140,38 @@ class Database:
         return self.grp.find({})
 
     async def update_status_bot(self, user_id, bot_name, now_status, now_date, expiry_date):
-        user_status = dict(
-            bot_name=bot_name,
-            now_status=now_status,
-            now_date=now_date,
-            expiry_date=expiry_date,
-        )
-        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}}, upsert=True)
+        user = await self.col.find_one({'id': user_id})
+        if user:
+            user_status = user.get('bot_status', {})
+            user_status[bot_name] = {
+                'now_status': now_status,
+                'now_date': now_date,
+                'expiry_date': expiry_date
+            }
+            await self.col.update_one({'id': user_id}, {'$set': {'bot_status': user_status}})
+        else:
+            raise ValueError("User not found")
     
     async def update_status_db(self, user_id, db_name, now_status, now_date, expiry_date):
-        user_status = dict(
-            db_name=db_name,
-            now_status=now_status,
-            now_date=now_date,
-            expiry_date=expiry_date,
-        )
-        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}}, upsert=True)
+        user = await self.col.find_one({'id': user_id})
+        if user:
+            user_status = user.get('db_status', {})
+            user_status[db_name] = {
+                'now_status': now_status,
+                'now_date': now_date,
+                'expiry_date': expiry_date
+            }
+            await self.col.update_one({'id': user_id}, {'$set': {'db_status': user_status}})
+        else:
+            raise ValueError("User not found")
     
     async def is_status_exist_bot(self, user_id, bot_name, now_status):
-        last_attempt = await self.col.find_one({'id': user_id})
-        if last_attempt and 'user_status' in last_attempt:
-            for status in last_attempt['user_status']:
-                if isinstance(status, dict) and status.get('bot_name') == bot_name:
-                    return status.get('now_status')
-        return None
-    
+        user = await self.col.find_one({'id': user_id, 'user_status.bot_name': bot_name, 'user_status.now_status': now_status})
+        return bool(user)
+
     async def is_status_exist_db(self, user_id, db_name, now_status):
-        last_attempt = await self.col.find_one({'id': user_id})
-        if last_attempt and 'user_status' in last_attempt:
-            for status in last_attempt['user_status']:
-                if isinstance(status, dict) and status.get('db_name') == db_name:
-                    return status.get('now_status')
-        return None
+        user = await self.col.find_one({'id': user_id, 'user_status.db_name': db_name, 'user_status.now_status': now_status})
+        return bool(user)
         
     async def total_status_bot(self, bot_name=None, now_status=None):
         query = {}
