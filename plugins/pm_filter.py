@@ -137,25 +137,43 @@ async def cb_handler(client: Client, query: CallbackQuery):
         now_status = get_status_name(status_num=1)
         now_date = get_datetime(format_type=21)
         expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_5m")
-                    
+        
+        if await db.is_status_exist_bot(user_id, bot_name, now_status):
+            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
+            return
+        else:
+            await query.message.edit_text("Processing...")
+            
         buttons = [
             [
-                InlineKeyboardButton('Discription', callback_data='botdis'),
+                InlineKeyboardButton('Description', callback_data='botdis'),
             ],
             [
                 InlineKeyboardButton('Go Back', callback_data='bots')
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text("Processing...")
-
-        if await db.is_status_exist_bot(user_id, bot_name, now_status):
-            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
-            return
-        else:
-            await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
+        
+        await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
+        try:
             await add_expiry_date_timer(client, user_id, bot_name, expiry_date)
-
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=script.LOG_DB.format(
+                    a=user_name,
+                    b=user_id,
+                    c=bot_name,
+                    d=now_status,
+                    e=now_date,
+                    f=expiry_date
+                )
+            )
+        except Exception as e:
+            print(e)
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=str(e)
+            )
         await client.edit_message_media(
             query.message.chat.id,
             query.message.id,
@@ -166,7 +184,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-
+        
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         user_id = query.from_user.id
         user_name = query.from_user.username
@@ -174,29 +192,47 @@ async def cb_handler(client: Client, query: CallbackQuery):
         now_status = get_status_name(status_num=1)
         now_date = get_datetime(format_type=21)
         expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_5m")
-        
+    
+        if await db.is_status_exist_db(user_id, db_name, now_status):
+            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {db_name}.", show_alert=True)
+            return
+        else:
+            await query.message.edit_text("Processing...")
+            
         buttons = [
             [
-                InlineKeyboardButton('Discription', callback_data='dbdis'),
+                InlineKeyboardButton('Description', callback_data='dbdis'),
             ],
             [
                 InlineKeyboardButton('Go Back', callback_data='database')
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text("Processing...")
-
-        if await db.is_status_exist_db(user_id, db_name, now_status):
-            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {db_name}.", show_alert=True)
-            return
-        else:
-            await db.update_status_db(user_id, db_name, now_status, now_date, expiry_date)
+        
+        await db.update_status_db(user_id, db_name, now_status, now_date, expiry_date)
+        try:
             await add_expiry_date_timer(client, user_id, db_name, expiry_date)
-
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=script.LOG_DB.format(
+                    a=user_name,
+                    b=user_id,
+                    c=db_name,
+                    d=now_status,
+                    e=now_date,
+                    f=expiry_date
+                )
+            )
+        except Exception as e:
+            print(e)
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=str(e)
+            )
         await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
+            chat_id=query.message.chat.id,
+            message_id=query.message.message_id,
+            media=InputMediaPhoto(random.choice(PICS))
         )
         await query.message.edit_text(
             text=script.SELECT_DB.format(user=query.from_user.mention, db_name=db_name),
