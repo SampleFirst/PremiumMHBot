@@ -146,7 +146,7 @@ class Database:
             now_date=now_date,
             expiry_date=expiry_date,
         )
-        await self.col.update_one({'id': user_id, 'bot_name': bot_name}, {'$set': {'user_status': user_status}})
+        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}})
 
     async def update_status_db(self, user_id, db_name, now_status, now_date, expiry_date):
         user_status = dict(
@@ -155,15 +155,19 @@ class Database:
             now_date=now_date,
             expiry_date=expiry_date,
         )
-        await self.col.update_one({'id': user_id, 'db_name': db_name}, {'$set': {'user_status': user_status}})
+        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}})
 
     async def is_status_exist_bot(self, user_id, bot_name, now_status):
-        user = await self.col.find_one({'id': user_id, 'user_status.bot_name': bot_name, 'user_status.now_status': now_status})
-        return bool(user)
-
+        last_attempt = await self.col.find_one({'user_status.bot_name': bot_name}, sort=[('_id', -1)])
+        if last_attempt:
+            return last_attempt.get("user_status.now_status", now_status)
+        return None
+        
     async def is_status_exist_db(self, user_id, db_name, now_status):
-        user = await self.col.find_one({'id': user_id, 'user_status.db_name': db_name, 'user_status.now_status': now_status})
-        return bool(user)
+        last_attempt = await self.col.find_one({'user_status.db_name': db_name}, sort=[('_id', -1)])
+        if last_attempt:
+            return last_attempt.get("user_status.now_status", now_status)
+        return None
 
     async def total_status_bot(self, bot_name=None, now_status=None):
         query = {}
