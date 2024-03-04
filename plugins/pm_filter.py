@@ -143,8 +143,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
                 return
             else:
-                await query.message.edit("Processing...")
-    
+                await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
+                await add_expiry_date_timer(client, user_id, bot_name, expiry_date)
+
             buttons = [
                 [
                     InlineKeyboardButton('Description', callback_data='botdis'),
@@ -154,9 +155,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(buttons)
-    
-            await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
-            await add_expiry_date_timer(client, user_id, bot_name, expiry_date)
     
             await client.edit_message_media(
                 query.message.chat.id,
@@ -181,6 +179,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
         except Exception as e:
             print(f"An error occurred: {e}")
+   
         
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         user_id = query.from_user.id
