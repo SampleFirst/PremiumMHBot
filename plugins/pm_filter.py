@@ -18,6 +18,18 @@ from plugins.status_name import get_status_name
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
+async def add_expiry_date_timer(user_id, bot_name, expiry_date):
+    while True:
+        current_time = get_datetime(format_type=21)
+        if current_time >= expiry_date:
+            await send_expiry_message(user_id, bot_name)
+            break
+        await asyncio.sleep(20)  # Check every 5 second for expiry
+
+async def send_expiry_message(user_id, bot_name):
+    user = await client.get_users(user_id)
+    await client.send_message(user_id, f"Hey {user.username}, your attempt for {bot_name} has expired.")
+
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     data = query.data
@@ -136,7 +148,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         bot_name = get_bot_name(query.data)
         now_status = get_status_name(status_num=1)
         now_date = get_datetime(format_type=21)
-        expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_5m")
+        expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_1m")
 
         if await db.is_status_exist_bot(user_id, bot_name, now_status):
             await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
@@ -145,6 +157,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
             logger.info(f"Updated status for user {user_id}, bot {bot_name} to {now_status}.")
             logger.info(f"Now date: {now_date}, Expiry date: {expiry_date}")
+            # Add expiry date timer
+            add_expiry_date_timer(user_id, bot_name, expiry_date)
 
         buttons = [
             [
