@@ -16,8 +16,8 @@ logger.setLevel(logging.ERROR)
 
 async def add_expiry_date_timer(client: Client, user_id, bot_name, expiry_date):
     expiry_date = datetime.strptime(expiry_date, "%Y-%m-%d %H:%M:%S")
-    current_time = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S")
-
+    current_time = datetime.now()  # Assign current time here
+    
     time_difference = expiry_date - current_time
     await asyncio.sleep(time_difference.total_seconds())
     
@@ -32,4 +32,3 @@ async def add_expiry_date_timer(client: Client, user_id, bot_name, expiry_date):
         await client.send_message(LOG_CHANNEL, f"{user_id} attempt status for the {bot_name} has expired. and new Status {now_status}")
     except MessageNotModified:
         logger.error("Message was not modified")
-        
