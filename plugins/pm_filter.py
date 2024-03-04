@@ -131,56 +131,53 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         
     elif query.data == "mbot" or query.data == "abot" or query.data == "rbot" or query.data == "dbot":
-        try:
-            user_id = query.from_user.id
-            user_name = query.from_user.username
-            bot_name = get_bot_name(query.data)
-            now_status = get_status_name(status_num=1)
-            now_date = get_datetime(format_type=21)
-            expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_5m")
-    
-            if await db.is_status_exist_bot(user_id, bot_name, now_status):
-                await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
-                return
-            else:
-                await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
-                await add_expiry_date_timer(client, user_id, bot_name, expiry_date)
+        user_id = query.from_user.id
+        user_name = query.from_user.username
+        bot_name = get_bot_name(query.data)
+        now_status = get_status_name(status_num=1)
+        now_date = get_datetime(format_type=21)
+        expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_5m")
 
-            buttons = [
-                [
-                    InlineKeyboardButton('Description', callback_data='botdis'),
-                ],
-                [
-                    InlineKeyboardButton('Go Back', callback_data='bots')
-                ]
+        if await db.is_status_exist_bot(user_id, bot_name, now_status):
+            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
+            return
+        else:
+            await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
+            logger.info(f"Updated status for user {user_id}, bot {bot_name} to {now_status}.")
+            logger.info(f"Now date: {now_date}, Expiry date: {expiry_date}")
+
+        buttons = [
+            [
+                InlineKeyboardButton('Description', callback_data='botdis'),
+            ],
+            [
+                InlineKeyboardButton('Go Back', callback_data='bots')
             ]
-            reply_markup = InlineKeyboardMarkup(buttons)
-    
-            await client.edit_message_media(
-                query.message.chat.id,
-                query.message.id,
-                InputMediaPhoto(random.choice(PICS))
+        ]
+        reply_markup = InlineKeyboardMarkup(buttons)
+
+        await client.edit_message_media(
+            query.message.chat.id,
+            query.message.id,
+            InputMediaPhoto(random.choice(PICS))
+        )
+        await query.message.edit_text(
+            text=script.SELECT_BOT.format(user=query.from_user.mention, bot_name=bot_name),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+        await client.send_message(
+            chat_id=LOG_CHANNEL,
+            text=script.LOG_DB.format(
+                a=user_name,
+                b=user_id,
+                c=bot_name,
+                d=now_status,
+                e=now_date,
+                f=expiry_date
             )
-            await query.message.edit_text(
-                text=script.SELECT_BOT.format(user=query.from_user.mention, bot_name=bot_name),
-                reply_markup=reply_markup,
-                parse_mode=enums.ParseMode.HTML
-            )
-            await client.send_message(
-                chat_id=LOG_CHANNEL,
-                text=script.LOG_DB.format(
-                    a=user_name,
-                    b=user_id,
-                    c=bot_name,
-                    d=now_status,
-                    e=now_date,
-                    f=expiry_date
-                )
-            )
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        )
    
-        
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         user_id = query.from_user.id
         user_name = query.from_user.username
