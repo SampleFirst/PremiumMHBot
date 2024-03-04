@@ -146,8 +146,8 @@ class Database:
             now_date=now_date,
             expiry_date=expiry_date,
         )
-        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}})
-
+        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}}, upsert=True)
+    
     async def update_status_db(self, user_id, db_name, now_status, now_date, expiry_date):
         user_status = dict(
             db_name=db_name,
@@ -155,19 +155,23 @@ class Database:
             now_date=now_date,
             expiry_date=expiry_date,
         )
-        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}})
-
+        await self.col.update_one({'id': user_id}, {'$push': {'user_status': user_status}}, upsert=True)
+    
     async def is_status_exist_bot(self, user_id, bot_name, now_status):
-        last_attempt = await self.col.find_one({'user_status.bot_name': bot_name}, sort=[('_id', -1)])
-        if last_attempt:
-            return last_attempt.get("user_status.now_status", now_status)
-        return None
-        
+        last_attempt = await self.col.find_one({'id': user_id})
+        if last_attempt and 'user_status' in last_attempt:
+            for status in last_attempt['user_status']:
+                if status.get('bot_name') == bot_name:
+                    return status.get('now_status', now_status)
+        return now_status
+            
     async def is_status_exist_db(self, user_id, db_name, now_status):
-        last_attempt = await self.col.find_one({'user_status.db_name': db_name}, sort=[('_id', -1)])
-        if last_attempt:
-            return last_attempt.get("user_status.now_status", now_status)
-        return None
+        last_attempt = await self.col.find_one({'id': user_id})
+        if last_attempt and 'user_status' in last_attempt:
+            for status in last_attempt['user_status']:
+                if status.get('db_name') == db_name:
+                    return status.get('now_status', now_status)
+        return now_status
 
     async def total_status_bot(self, bot_name=None, now_status=None):
         query = {}
