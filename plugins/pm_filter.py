@@ -1,6 +1,7 @@
 # pm_filter.py
 import random
 import logging
+import asyncio
 
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
@@ -21,13 +22,14 @@ async def add_expiry_date_timer(user_id, bot_name, expiry_date):
     while True:
         current_time = get_datetime(format_type=21)
         if current_time >= expiry_date:
-            await send_expiry_message(user_id, bot_name)
+            user = await client.get_users(user_id)
+            await client.send_message(user_id, f"Hey {user.username}, your attempt for {bot_name} has expired.")
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=f"Expiry message sent to user {user.username} for bot {bot_name}."
+            )
             break
-        await asyncio.sleep(20)  # Check every 5 second for expiry
-
-async def send_expiry_message(user_id, bot_name):
-    user = await client.get_users(user_id)
-    await client.send_message(user_id, f"Hey {user.username}, your attempt for {bot_name} has expired.")
+        await asyncio.sleep(20)  # Check every 20 seconds for expiry
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
