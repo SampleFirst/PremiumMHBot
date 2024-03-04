@@ -12,7 +12,6 @@ from Script import script
 from plugins.datetime import get_datetime 
 from plugins.expiry_datetime import get_expiry_datetime, get_expiry_name
 from plugins.get_name import get_bot_name, get_db_name
-from plugins.expiry_datetime_timer import add_expiry_date_timer
 from plugins.status_name import get_status_name
 
 logger = logging.getLogger(__name__)
