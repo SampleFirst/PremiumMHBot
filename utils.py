@@ -94,7 +94,6 @@ async def check_status(client, userid, bot_name):
     time_var = status["time"]
     comp_date = datetime.strptime(date_var, '%Y-%m-%d').date()
     comp_time = datetime.strptime(time_var, '%H:%M:%S').time()
-
     if comp_date < today:
         return False
     elif comp_date == today:
