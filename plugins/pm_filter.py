@@ -9,12 +9,13 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from info import ADMINS, PICS, LOG_CHANNEL
 from database.users_chats_db import db
 
+from utils import check_status, update_status
 from Script import script
+
 from plugins.datetime import get_datetime 
 from plugins.expiry_datetime import get_expiry_datetime, get_expiry_name
 from plugins.get_name import get_bot_name, get_db_name
 from plugins.status_name import get_status_name
-from utils import temp, check_status_bot, get_user_status_bot, status_user, update_status
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -137,43 +138,43 @@ async def cb_handler(client: Client, query: CallbackQuery):
         user_name = query.from_user.username
         bot_name = get_bot_name(query.data)
 
-        if await check_status_bot(client, user_id, bot_name):
-            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
+        if await check_status(client, user_id, bot_name):
+            await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {bot_name}.", show_alert=True)
             return
         else:
-            return 
+            await update_status(client, user_id, bot_name)
         
-        buttons = [
-            [
-                InlineKeyboardButton('Description', callback_data='botdis'),
-            ],
-            [
-                InlineKeyboardButton('Go Back', callback_data='bots')
+            buttons = [
+                [
+                    InlineKeyboardButton('Description', callback_data='botdis'),
+                ],
+                [
+                    InlineKeyboardButton('Go Back', callback_data='bots')
+                ]
             ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-
-        await client.edit_message_media(
-            query.message.chat.id,
-            query.message.id,
-            InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.SELECT_BOT.format(user=query.from_user.mention, bot_name=bot_name),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        await client.send_message(
-            chat_id=LOG_CHANNEL,
-            text=script.LOG_DB.format(
-                a=user_name,
-                b=user_id,
-                c=bot_name,
-                d=now_status,
-                e=now_date,
-                f=expiry_date
+            reply_markup = InlineKeyboardMarkup(buttons)
+    
+            await client.edit_message_media(
+                query.message.chat.id,
+                query.message.id,
+                InputMediaPhoto(random.choice(PICS))
             )
-        )
+            await query.message.edit_text(
+                text=script.SELECT_BOT.format(user=query.from_user.mention, bot_name=bot_name),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+            await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text=script.LOG_DB.format(
+                    a=user_name,
+                    b=user_id,
+                    c=bot_name,
+                    d=now_status,
+                    e=now_date,
+                    f=expiry_date
+                )
+            )
    
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         user_id = query.from_user.id
