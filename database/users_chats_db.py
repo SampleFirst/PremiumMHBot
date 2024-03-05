@@ -137,7 +137,6 @@ class Database:
         
     async def get_status_bot(self, id, bot_name):
         default = {
-            'bot_name': bot_name,
             'date': "1999-12-31",
             'time': "23:59:59"
         }
@@ -156,14 +155,12 @@ class Database:
         
     async def get_status_db(self, id, db_name, now_status):
         default = {
-            'db_name': db_name,
-            'now_status': now_status,
             'date': "1999-12-31",
             'time': "23:59:59"
         }
         user = await self.col.find_one({'id': int(id), 'db_name': db_name})
         if user:
-            return user.get("userbot_status", default)
+            return user.get("userdb_status", default)
         return default
         
     async def total_status_bot(self, bot_name=None, now_status=None):
