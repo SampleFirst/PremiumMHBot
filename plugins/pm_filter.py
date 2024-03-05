@@ -137,13 +137,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
         user_id = query.from_user.id
         user_name = query.from_user.username
         bot_name = get_bot_name(query.data)
+        now_status = get_status_name(status_num=1)
+        expire_date = get_expiry_datetime(format_type=7, expiry_option="now_to_2m")
+        expire_time = get_expiry_datetime(format_type=6, expiry_option="now_to_2m")
 
         if await check_status(client, user_id, bot_name):
             await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {bot_name}.", show_alert=True)
             return
         else:
-            await update_status(client, user_id, bot_name)
-        
+            await db.update_status_bot(user_id, bot_name, now_status, expire_date, expire_time)
+
             buttons = [
                 [
                     InlineKeyboardButton('Description', callback_data='botdis'),
@@ -164,18 +167,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML
             )
-            await client.send_message(
-                chat_id=LOG_CHANNEL,
-                text=script.LOG_DB.format(
-                    a=user_name,
-                    b=user_id,
-                    c=bot_name,
-                    d=now_status,
-                    e=now_date,
-                    f=expiry_date
-                )
-            )
-   
+            
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         user_id = query.from_user.id
         user_name = query.from_user.username
