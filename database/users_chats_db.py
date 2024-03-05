@@ -135,10 +135,9 @@ class Database:
         }
         await self.col.update_one({'id': int(id), 'bot_name': bot_name}, {'$set': {'userbot_status': status}})
         
-    async def get_status_bot(self, id, bot_name, now_status):
+    async def get_status_bot(self, id, bot_name):
         default = {
             'bot_name': bot_name,
-            'now_status': now_status,
             'date': "1999-12-31",
             'time': "23:59:59"
         }
