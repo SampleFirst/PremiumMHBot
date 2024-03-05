@@ -19,18 +19,6 @@ from utils import temp, check_status_bot, get_user_status_bot, status_user, upda
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-async def add_expiry_date_timer(user_id, bot_name, expiry_date):
-    while True:
-        current_time = get_datetime(format_type=21)
-        if current_time >= expiry_date:
-            user = await client.get_users(user_id)
-            await client.send_message(user_id, f"Hey {user.username}, your attempt for {bot_name} has expired.")
-            await client.send_message(
-                chat_id=LOG_CHANNEL,
-                text=f"Expiry message sent to user {user.username} for bot {bot_name}."
-            )
-            break
-        await asyncio.sleep(20)  # Check every 20 seconds for expiry
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -148,9 +136,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         user_id = query.from_user.id
         user_name = query.from_user.username
         bot_name = get_bot_name(query.data)
-        now_status = get_status_name(status_num=1)
-        now_date = get_datetime(format_type=21)
-        expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_1m")
 
         if await check_status_bot(client, user_id, bot_name):
             await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
