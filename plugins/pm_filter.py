@@ -151,16 +151,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         now_date = get_datetime(format_type=21)
         expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_1m")
 
-        if await db.is_status_exist_bot(user_id, bot_name, now_status):
+        if await check_status_bot(client, user_id, bot_name):
             await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {bot_name}.", show_alert=True)
             return
         else:
-            await db.update_status_bot(user_id, bot_name, now_status, now_date, expiry_date)
-            logger.info(f"Updated status for user {user_id}, bot {bot_name} to {now_status}.")
-            logger.info(f"Now date: {now_date}, Expiry date: {expiry_date}")
-            # Add expiry date timer
-            add_expiry_date_timer(user_id, bot_name, expiry_date)
-
+            return 
+        
         buttons = [
             [
                 InlineKeyboardButton('Description', callback_data='botdis'),
