@@ -141,12 +141,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         expire_date = get_expiry_datetime(format_type=7, expiry_option="now_to_2m")
         expire_time = get_expiry_datetime(format_type=6, expiry_option="now_to_2m")
 
-        if await check_status(client, user_id, bot_name):
+        user_status = await db.get_status_bot(user_id, bot_name)
+        if user_status and user_status['date'] > get_datetime(format_type=7) and user_status['time'] > get_datetime(format_type=6):
             await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {bot_name}.", show_alert=True)
             return
         else:
             await db.update_status_bot(user_id, bot_name, now_status, expire_date, expire_time)
-
             buttons = [
                 [
                     InlineKeyboardButton('Description', callback_data='botdis'),
@@ -176,13 +176,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         now_date = get_datetime(format_type=21)
         expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_5m")
     
-        if await db.is_status_exist_db(user_id, db_name, now_status):
-            await query.answer(f"Hey {user_name}! Sorry For This But You already have an active request for {db_name}.", show_alert=True)
+        user_status = await db.get_status_db(user_id, db_name)
+        if user_status and user_status['date'] > get_datetime(format_type=7) and user_status['time'] > get_datetime(format_type=6):
+            await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {db_name", show_alert=True)
             return
         else:
-            await query.message.edit_text("Processing...")
-            
-        buttons = [
+            await db.update_status_bot(user_id, bot_name, now_status, expire_date, expire_time)
+            buttons = [
             [
                 InlineKeyboardButton('Description', callback_data='dbdis'),
             ],
