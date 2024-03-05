@@ -178,50 +178,29 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
         user_status = await db.get_status_db(user_id, db_name)
         if user_status and user_status['date'] > get_datetime(format_type=7) and user_status['time'] > get_datetime(format_type=6):
-            await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {db_name", show_alert=True)
+            await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {db_name"}, show_alert=True)
             return
         else:
             await db.update_status_bot(user_id, bot_name, now_status, expire_date, expire_time)
             buttons = [
-            [
-                InlineKeyboardButton('Description', callback_data='dbdis'),
-            ],
-            [
-                InlineKeyboardButton('Go Back', callback_data='database')
+                [
+                    InlineKeyboardButton('Description', callback_data='dbdis'),
+                ],
+                [
+                    InlineKeyboardButton('Go Back', callback_data='database')
+                ]
             ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        
-        await db.update_status_db(user_id, db_name, now_status, now_date, expiry_date)
-        try:
-            await add_expiry_date_timer(client, user_id, db_name, expiry_date)
-            await client.send_message(
-                chat_id=LOG_CHANNEL,
-                text=script.LOG_DB.format(
-                    a=user_name,
-                    b=user_id,
-                    c=db_name,
-                    d=now_status,
-                    e=now_date,
-                    f=expiry_date
-                )
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.message_id,
+                media=InputMediaPhoto(random.choice(PICS))
             )
-        except Exception as e:
-            print(e)
-            await client.send_message(
-                chat_id=LOG_CHANNEL,
-                text=str(e)
+            await query.message.edit_text(
+                text=script.SELECT_DB.format(user=query.from_user.mention, db_name=db_name),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
             )
-        await client.edit_message_media(
-            chat_id=query.message.chat.id,
-            message_id=query.message.message_id,
-            media=InputMediaPhoto(random.choice(PICS))
-        )
-        await query.message.edit_text(
-            text=script.SELECT_DB.format(user=query.from_user.mention, db_name=db_name),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
 
     elif data == "botpre":
         await query.message.edit_text(
