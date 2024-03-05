@@ -171,14 +171,22 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "mdb" or query.data == "adb" or query.data == "sdb" or query.data == "bdb":
         user_id = query.from_user.id
         user_name = query.from_user.username
-        db_name = get_db_name(query.data)
+        bot_name = get_bot_name(query.data)
         now_status = get_status_name(status_num=1)
-        now_date = get_datetime(format_type=21)
-        expiry_date = get_expiry_datetime(format_type=21, expiry_option="now_to_5m")
-    
-        user_status = await db.get_status_db(user_id, db_name)
-        if user_status and user_status['date'] > get_datetime(format_type=7) and user_status['time'] > get_datetime(format_type=6):
-            await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {db_name}.", show_alert=True)
+        expire_date = get_expiry_datetime(format_type=7, expiry_option="now_to_2m")
+        expire_time = get_expiry_datetime(format_type=6, expiry_option="now_to_2m")
+
+        tz = pytz.timezone('Asia/Kolkata')
+        today = datetime.now(tz).date()
+        now = datetime.now(tz).time()
+        status = await db.get_status_bot(userid, bot_name)
+        date_var = status["date"]
+        time_var = status["time"]
+        comp_date = datetime.strptime(date_var, '%Y-%m-%d').date()
+        comp_time = datetime.strptime(time_var, '%H:%M:%S').time()
+
+        if status and comp_date > today and comp_time > now:
+            await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {bot_name}.", show_alert=True)
             return
         else:
             await db.update_status_bot(user_id, bot_name, now_status, expire_date, expire_time)
