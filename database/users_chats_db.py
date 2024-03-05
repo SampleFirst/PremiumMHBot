@@ -20,18 +20,6 @@ class Database:
                 is_banned=False,
                 ban_reason="",
             ),
-            bot_status=dict(
-                bot_name=None,
-                now_status=None,
-                now_date=None,
-                expiry_date=None,
-            ),
-            db_status=dict(
-                db_name=None,
-                now_status=None,
-                now_date=None,
-                expiry_date=None,
-            ),
         )
 
     def new_group(self, id, title):
