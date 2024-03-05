@@ -84,43 +84,17 @@ async def is_subscribed(bot, query=None, userid=None):
             return True
     return False
 
-async def update_status(bot, userid, bot_name, now_status, date_temp, time_temp):
-    status = await get_user_status_bot(userid, bot_name)
-    status["now_status"] = now_status
-    status["bot_name"] = bot_name
-    status["date"] = date_temp
-    status["time"] = time_temp
-    temp.STATUS[(userid, bot_name)] = status
-    await db.update_status_bot(userid, bot_name, now_status, date_temp, time_temp)
-
-async def status_user(bot, userid, bot_name):
-    user = await bot.get_users(int(userid))
-    tz = pytz.timezone('Asia/Kolkata')
-    bot_name = bot_name 
-    now_status = "is attempt"
-    date_var = datetime.now(tz) + timedelta(minutes=5)
-    temp_time = date_var.strftime("%H:%M:%S")
-    date_var, time_var = str(date_var).split(" ")
-    await update_status(bot, user.id, bot_name, now_status, date_var, temp_time)
-
-async def get_user_status_bot(userid, bot_name):
-    status = temp.STATUS.get((userid, bot_name))
-    if not status:
-        status = await db.get_status_bot(userid, bot_name)
-        temp.STATUS[(userid, bot_name)] = status
-    return status
-
-async def check_status_bot(bot, userid, bot_name):
-    user = await bot.get_users(int(userid))
+async def check_status(client, userid, bot_name):
+    user = await client.get_users(int(userid))
     tz = pytz.timezone('Asia/Kolkata')
     today = datetime.now(tz).date()
     now = datetime.now(tz).time()
-    status = await get_user_status_bot(user.id, bot_name)
+    status = await db.get_status_bot(userid, bot_name)
     date_var = status["date"]
     time_var = status["time"]
     comp_date = datetime.strptime(date_var, '%Y-%m-%d').date()
     comp_time = datetime.strptime(time_var, '%H:%M:%S').time()
-    
+
     if comp_date < today:
         return False
     elif comp_date == today:
@@ -130,6 +104,14 @@ async def check_status_bot(bot, userid, bot_name):
             return True
     else:
         return True
+
+
+async def update_status(client, user_id, bot_name):
+    now_status = "is attempt"
+    date = datetime.now().date()
+    time = datetime.now().time()
+    await db.update_status_bot(user_id, bot_name, now_status, date, time)
+
 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
