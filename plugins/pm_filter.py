@@ -143,7 +143,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
         user_status = await db.get_status_bot(user_id, bot_name)
         if user_status and user_status['date'] > get_datetime(format_type=7) and user_status['time'] > get_datetime(format_type=6):
-            await query.answer(f"Hey {user_name}! Sorry, but you already have an active request for {bot_name}.", show_alert=True)
+            await query.message.edit_text(f"Hey {user_name}! Sorry, but you already have an active request for {bot_name}.")
             return
         else:
             await db.update_status_bot(user_id, bot_name, now_status, expire_date, expire_time)
